@@ -1,0 +1,7 @@
+[build]
+  publish = "."
+  command = "npm install"
+  functions = "netlify/functions"
+
+[build.environment]
+  NODE_VERSION = "22"

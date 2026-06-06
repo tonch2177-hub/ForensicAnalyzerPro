@@ -1,0 +1,134 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Fade In Animation -->
+    <Storyboard x:Key="FadeInAnimation">
+        <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="Opacity"
+                                       Duration="0:0:0.4">
+            <EasingDoubleKeyFrame KeyTime="0:0:0" Value="0" />
+            <EasingDoubleKeyFrame KeyTime="0:0:0.4" Value="1">
+                <EasingDoubleKeyFrame.EasingFunction>
+                    <CubicEase EasingMode="EaseOut" />
+                </EasingDoubleKeyFrame.EasingFunction>
+            </EasingDoubleKeyFrame>
+        </DoubleAnimationUsingKeyFrames>
+    </Storyboard>
+
+    <!-- Slide In Left Animation -->
+    <Storyboard x:Key="SlideInLeftAnimation">
+        <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.X)"
+                                       Duration="0:0:0.5">
+            <EasingDoubleKeyFrame KeyTime="0:0:0" Value="-30" />
+            <EasingDoubleKeyFrame KeyTime="0:0:0.5" Value="0">
+                <EasingDoubleKeyFrame.EasingFunction>
+                    <CubicEase EasingMode="EaseOut" />
+                </EasingDoubleKeyFrame.EasingFunction>
+            </EasingDoubleKeyFrame>
+        </DoubleAnimationUsingKeyFrames>
+        <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="Opacity"
+                                       Duration="0:0:0.5">
+            <EasingDoubleKeyFrame KeyTime="0:0:0" Value="0" />
+            <EasingDoubleKeyFrame KeyTime="0:0:0.5" Value="1">
+                <EasingDoubleKeyFrame.EasingFunction>
+                    <CubicEase EasingMode="EaseOut" />
+                </EasingDoubleKeyFrame.EasingFunction>
+            </EasingDoubleKeyFrame>
+        </DoubleAnimationUsingKeyFrames>
+    </Storyboard>
+
+    <!-- Scale In Animation -->
+    <Storyboard x:Key="ScaleInAnimation">
+        <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)"
+                                       Duration="0:0:0.4">
+            <EasingDoubleKeyFrame KeyTime="0:0:0" Value="0.8" />
+            <EasingDoubleKeyFrame KeyTime="0:0:0.4" Value="1">
+                <EasingDoubleKeyFrame.EasingFunction>
+                    <BackEase EasingMode="EaseOut" Amplitude="0.3" />
+                </EasingDoubleKeyFrame.EasingFunction>
+            </EasingDoubleKeyFrame>
+        </DoubleAnimationUsingKeyFrames>
+        <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)"
+                                       Duration="0:0:0.4">
+            <EasingDoubleKeyFrame KeyTime="0:0:0" Value="0.8" />
+            <EasingDoubleKeyFrame KeyTime="0:0:0.4" Value="1">
+                <EasingDoubleKeyFrame.EasingFunction>
+                    <BackEase EasingMode="EaseOut" Amplitude="0.3" />
+                </EasingDoubleKeyFrame.EasingFunction>
+            </EasingDoubleKeyFrame>
+        </DoubleAnimationUsingKeyFrames>
+        <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="Opacity"
+                                       Duration="0:0:0.4">
+            <EasingDoubleKeyFrame KeyTime="0:0:0" Value="0" />
+            <EasingDoubleKeyFrame KeyTime="0:0:0.4" Value="1" />
+        </DoubleAnimationUsingKeyFrames>
+    </Storyboard>
+
+    <!-- Neon Red Glow Pulse Animation -->
+    <Storyboard x:Key="NeonGlowPulseAnimation" RepeatBehavior="Forever" AutoReverse="True">
+        <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Opacity)"
+                                       Duration="0:0:1.5">
+            <EasingDoubleKeyFrame KeyTime="0:0:0" Value="0.6" />
+            <EasingDoubleKeyFrame KeyTime="0:0:0.75" Value="1.0" />
+            <EasingDoubleKeyFrame KeyTime="0:0:1.5" Value="0.6" />
+        </DoubleAnimationUsingKeyFrames>
+    </Storyboard>
+
+    <!-- Neon Border Glow Animation -->
+    <Storyboard x:Key="NeonBorderGlowAnimation" RepeatBehavior="Forever" AutoReverse="True">
+        <ColorAnimationUsingKeyFrames Storyboard.TargetProperty="(Border.BorderBrush).(SolidColorBrush.Color)"
+                                       Duration="0:0:2.0">
+            <EasingColorKeyFrame KeyTime="0:0:0" Value="#552222" />
+            <EasingColorKeyFrame KeyTime="0:0:1.0" Value="#FF003C" />
+            <EasingColorKeyFrame KeyTime="0:0:2.0" Value="#552222" />
+        </ColorAnimationUsingKeyFrames>
+    </Storyboard>
+
+    <!-- Shimmer Animation -->
+    <Storyboard x:Key="ShimmerAnimation" RepeatBehavior="Forever">
+        <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Opacity)"
+                                       Duration="0:0:2.0">
+            <DiscreteDoubleKeyFrame KeyTime="0:0:0" Value="0" />
+            <DiscreteDoubleKeyFrame KeyTime="0:0:1.5" Value="0" />
+            <EasingDoubleKeyFrame KeyTime="0:0:1.8" Value="0.15" />
+            <EasingDoubleKeyFrame KeyTime="0:0:2.0" Value="0" />
+        </DoubleAnimationUsingKeyFrames>
+    </Storyboard>
+
+    <!-- Slide Up Animation -->
+    <Storyboard x:Key="SlideUpAnimation">
+        <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)"
+                                       Duration="0:0:0.5">
+            <EasingDoubleKeyFrame KeyTime="0:0:0" Value="30" />
+            <EasingDoubleKeyFrame KeyTime="0:0:0.5" Value="0">
+                <EasingDoubleKeyFrame.EasingFunction>
+                    <CubicEase EasingMode="EaseOut" />
+                </EasingDoubleKeyFrame.EasingFunction>
+            </EasingDoubleKeyFrame>
+        </DoubleAnimationUsingKeyFrames>
+        <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="Opacity"
+                                       Duration="0:0:0.5">
+            <EasingDoubleKeyFrame KeyTime="0:0:0" Value="0" />
+            <EasingDoubleKeyFrame KeyTime="0:0:0.5" Value="1" />
+        </DoubleAnimationUsingKeyFrames>
+    </Storyboard>
+
+    <!-- Content Fade In Style (trigger-based) -->
+    <Style x:Key="AnimatedPanelStyle" TargetType="FrameworkElement">
+        <Setter Property="Opacity" Value="0" />
+        <Style.Triggers>
+            <EventTrigger RoutedEvent="Loaded">
+                <BeginStoryboard>
+                    <Storyboard>
+                        <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                         From="0" To="1" Duration="0:0:0.4">
+                            <DoubleAnimation.EasingFunction>
+                                <CubicEase EasingMode="EaseOut" />
+                            </DoubleAnimation.EasingFunction>
+                        </DoubleAnimation>
+                    </Storyboard>
+                </BeginStoryboard>
+            </EventTrigger>
+        </Style.Triggers>
+    </Style>
+
+</ResourceDictionary>

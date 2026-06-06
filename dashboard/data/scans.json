@@ -1,0 +1,17 @@
+[
+  {
+    "id": "14454880-c493-4d0b-91de-116b4c0202d8",
+    "sessionId": "MCK-002",
+    "pin": "6627",
+    "scanType": "Full System Scan",
+    "startedAt": "2026-06-06T20:10:51.3374968-03:00",
+    "completedAt": "2026-06-06T23:11:02.6346045Z",
+    "totalItems": 15,
+    "iocsDetected": 0,
+    "status": "Completed",
+    "hostname": "KERNELOS-PC",
+    "username": "Administrator",
+    "createdAt": "2026-06-06T23:11:02.648Z",
+    "results": {}
+  }
+]
