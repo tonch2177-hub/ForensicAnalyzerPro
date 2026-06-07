@@ -36,6 +36,6 @@ pm2 save
 # 5. Setup auto-start on reboot
 pm2 startup | tail -1
 echo ""
-echo "=== Done! Dashboard running on http://localhost:3000 ==="
+echo "=== Done! Dashboard running on https://mickyac.netlify.app ==="
 echo "Use: pm2 logs forensic-dashboard  — to see logs"
 echo "Use: pm2 restart forensic-dashboard — to restart"

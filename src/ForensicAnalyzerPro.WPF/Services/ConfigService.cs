@@ -23,7 +23,7 @@ public class ConfigService
             {
                 var defaultConfig = new AppConfig
                 {
-                    ApiUrl = "http://localhost:3000",
+                    ApiUrl = "https://mickyac.netlify.app",
                     DiscordWebhook = ""
                 };
                 Save(defaultConfig);
