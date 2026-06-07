@@ -4,3 +4,12 @@
 # Dependencies
 node_modules/
 dashboard/node_modules/
+
+# Build artifacts
+src/**/bin/
+src/**/obj/
+tests/**/bin/
+tests/**/obj/
+*.db-shm
+*.db-wal
+*.db
