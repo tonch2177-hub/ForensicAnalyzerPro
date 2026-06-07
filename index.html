@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ForensicAnalyzer — Beta</title>
+<title>ForensicAnalyzer — DFIR Console</title>
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-:root{--bg:#0a0a0a;--bg2:#0f0f0f;--bg3:#141414;--bg4:#1a1a1a;--border:#1f1f1f;--text:#e0e0e0;--text2:#888;--text3:#555;--primary:#b91c1c;--primary-hover:#991b1b;--primary-dim:rgba(185,28,28,0.12);--primary-glow:rgba(185,28,28,0.25);--success:#22c55e;--success-dim:rgba(34,197,94,0.12);--warning:#f59e0b;--warning-dim:rgba(245,158,11,0.12);--danger:#ef4444;--danger-dim:rgba(239,68,68,0.12);--radius:8px;--transition:0.25s cubic-bezier(0.4,0,0.2,1)}
+:root{--bg:#0a0a0a;--bg2:#0f0f0f;--bg3:#141414;--bg4:#1a1a1a;--border:#1f1f1f;--text:#e0e0e0;--text2:#888;--text3:#555;--primary:#b91c1c;--primary-hover:#991b1b;--primary-dim:rgba(185,28,28,0.12);--primary-glow:rgba(185,28,28,0.25);--success:#22c55e;--success-dim:rgba(34,197,94,0.12);--warning:#f59e0b;--warning-dim:rgba(245,158,11,0.12);--danger:#ef4444;--danger-dim:rgba(239,68,68,0.12);--info:#3b82f6;--info-dim:rgba(59,130,246,0.12);--radius:8px;--transition:0.25s cubic-bezier(0.4,0,0.2,1)}
 html{font-size:15px}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;line-height:1.5}
 a{color:var(--primary);text-decoration:none}
@@ -48,6 +48,8 @@ button:active{transform:scale(0.97)}
 .sidebar-header .brand-text{font-size:14px;font-weight:700;white-space:nowrap}
 .sidebar.collapsed .sidebar-header .brand-text{opacity:0;width:0;overflow:hidden}
 .sidebar-nav{flex:1;padding:12px 8px;overflow-y:auto;display:flex;flex-direction:column;gap:2px}
+.sidebar-nav .nav-section{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;padding:8px 12px 4px}
+.sidebar.collapsed .sidebar-nav .nav-section{display:none}
 .nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--radius);color:var(--text2);font-size:13px;font-weight:500;cursor:pointer;transition:all var(--transition);white-space:nowrap;overflow:hidden;text-decoration:none}
 .nav-item:hover{background:var(--bg4);color:var(--text)}
 .nav-item.active{background:var(--primary-dim);color:var(--primary)}
@@ -81,15 +83,16 @@ button:active{transform:scale(0.97)}
 .table-wrap{overflow-x:auto}
 table{width:100%;border-collapse:collapse;font-size:13px}
 thead th{padding:10px 14px;text-align:left;font-weight:600;color:var(--text2);font-size:11px;text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px solid var(--border);white-space:nowrap}
-tbody td{padding:10px 14px;border-bottom:1px solid rgba(31,31,31,0.5)}
+tbody td{padding:10px 14px;border-bottom:1px solid rgba(31,31,31,0.5);font-size:13px}
 tbody tr{transition:background var(--transition)}
 tbody tr:hover{background:var(--bg4)}
 .badge{display:inline-flex;align-items:center;padding:2px 10px;border-radius:99px;font-size:11px;font-weight:600}
-.badge-completed,.badge-active,.badge-ok{background:var(--success-dim);color:var(--success);border:1px solid rgba(34,197,94,0.2)}
-.badge-running,.badge-expired{background:var(--warning-dim);color:var(--warning);border:1px solid rgba(245,158,11,0.2)}
+.badge-completed,.badge-active,.badge-ok,.badge-LOW{background:var(--success-dim);color:var(--success);border:1px solid rgba(34,197,94,0.2)}
+.badge-running,.badge-expired,.badge-MEDIUM{background:var(--warning-dim);color:var(--warning);border:1px solid rgba(245,158,11,0.2)}
 .badge-pending,.badge-info{background:var(--primary-dim);color:var(--primary);border:1px solid rgba(185,28,28,0.2)}
-.badge-failed,.badge-danger,.badge-disabled,.badge-tampered{background:var(--danger-dim);color:var(--danger);border:1px solid rgba(239,68,68,0.2)}
+.badge-failed,.badge-danger,.badge-disabled,.badge-tampered,.badge-HIGH,.badge-CRITICAL{background:var(--danger-dim);color:var(--danger);border:1px solid rgba(239,68,68,0.2)}
 .badge-super{background:var(--warning-dim);color:var(--warning);border:1px solid rgba(245,158,11,0.2);font-size:9px;padding:1px 6px}
+.badge-blue{background:var(--info-dim);color:var(--info);border:1px solid rgba(59,130,246,0.2)}
 .search-bar{position:relative;max-width:320px}
 .search-bar svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--text3)}
 .search-bar input{padding-left:36px}
@@ -135,7 +138,31 @@ tbody tr:hover{background:var(--bg4)}
 .mt-2{margin-top:8px}
 .mb-4{margin-bottom:16px}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.code-block{background:var(--bg4);border:1px solid var(--border);border-radius:var(--radius);padding:16px;font-family:Consolas,monospace;font-size:12px;overflow-x:auto;white-space:pre;max-height:300px}
+.code-block{background:var(--bg4);border:1px solid var(--border);border-radius:var(--radius);padding:16px;font-family:Consolas,monospace;font-size:12px;overflow-x:auto;white-space:pre;max-height:400px}
+.widget-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;margin-bottom:24px}
+.risk-bar{display:flex;gap:4px;align-items:center}
+.risk-bar .bar{height:6px;border-radius:3px;flex:1}
+.risk-bar .bar.critical{background:var(--danger)}
+.risk-bar .bar.high{background:#dc2626}
+.risk-bar .bar.medium{background:var(--warning)}
+.risk-bar .bar.low{background:var(--success)}
+.severity-indicator{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px}
+.severity-indicator.critical{background:var(--danger);box-shadow:0 0 6px var(--danger)}
+.severity-indicator.high{background:#dc2626;box-shadow:0 0 6px #dc2626}
+.severity-indicator.medium{background:var(--warning);box-shadow:0 0 6px var(--warning)}
+.severity-indicator.low{background:var(--success);box-shadow:0 0 6px var(--success)}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;display:none;align-items:center;justify-content:center}
+.modal-overlay.show{display:flex}
+.modal{background:var(--bg3);border:1px solid var(--border);border-radius:12px;width:90%;max-width:900px;max-height:80vh;display:flex;flex-direction:column;animation:fadeIn 0.2s ease-out}
+.modal-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.modal-header h3{font-size:16px;font-weight:600}
+.modal-body{padding:20px;overflow-y:auto;flex:1}
+.modal-close{background:var(--bg4);border:1px solid var(--border);color:var(--text2);width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px}
+.modal-close:hover{background:var(--border);color:var(--text)}
+.path-cell{font-family:Consolas,monospace;font-size:12px;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.key-cell{font-family:Consolas,monospace;font-size:12px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.timestamp-cell{font-family:Consolas,monospace;font-size:11px;color:var(--text2)}
+.hash-cell{font-family:Consolas,monospace;font-size:11px;color:var(--text3)}
 @media(max-width:768px){
 .sidebar{width:240px;transform:translateX(-100%)}
 .sidebar.mobile-open{transform:translateX(0)}
@@ -145,43 +172,41 @@ tbody tr:hover{background:var(--bg4)}
 .main{margin-left:0!important}
 .topbar .menu-btn{display:block}
 .stat-grid{grid-template-columns:1fr 1fr}
+.widget-grid{grid-template-columns:1fr}
 .form-row{grid-template-columns:1fr}
 }
 @media(max-width:480px){.stat-grid{grid-template-columns:1fr}.content{padding:16px}}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-.fade-in{animation:fadeIn 0.3s ease-out}
 </style>
 </head>
 <body>
 
 <div class="toast" id="toast"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg><span id="toastMsg"></span></div>
 
-<!-- AUTH -->
 <div class="auth-screen" id="authScreen">
   <div class="auth-card" id="loginForm">
     <div class="auth-logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
     <h1>ForensicAnalyzer</h1>
-    <p class="sub">Beta — JSON Storage System</p>
+    <p class="sub">DFIR Console — Incident Response Dashboard</p>
     <div class="error" id="loginError"></div>
     <div class="field"><label>Email</label><input type="email" id="loginEmail" placeholder="you@example.com" autocomplete="email"></div>
-    <div class="field"><label>Password</label><input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password"></div>
+    <div class="field"><label>Password</label><input type="password" id="loginPassword" placeholder="password" autocomplete="current-password"></div>
     <button class="btn btn-primary" style="width:100%" onclick="handleLogin()">Sign in</button>
     <div class="foot">Don't have an account? <a onclick="showRegister()">Register</a></div>
   </div>
   <div class="auth-card" id="registerForm" style="display:none">
     <div class="auth-logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
     <h1>Create Account</h1>
-    <p class="sub">Join ForensicAnalyzer Beta</p>
+    <p class="sub">Join ForensicAnalyzer DFIR Console</p>
     <div class="error" id="registerError"></div>
     <div class="field"><label>Username</label><input type="text" id="regUsername" placeholder="johndoe"></div>
     <div class="field"><label>Email</label><input type="email" id="regEmail" placeholder="you@example.com" autocomplete="email"></div>
-    <div class="field"><label>Password</label><input type="password" id="regPassword" placeholder="••••••••" autocomplete="new-password"></div>
+    <div class="field"><label>Password</label><input type="password" id="regPassword" placeholder="password" autocomplete="new-password"></div>
     <button class="btn btn-primary" style="width:100%" onclick="handleRegister()">Create account</button>
     <div class="foot">Already have an account? <a onclick="showLogin()">Sign in</a></div>
   </div>
 </div>
 
-<!-- APP -->
 <div class="app-layout" id="appLayout">
   <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
   <aside class="sidebar" id="sidebar">
@@ -190,10 +215,30 @@ tbody tr:hover{background:var(--bg4)}
       <span class="brand-text">ForensicAnalyzer</span>
     </div>
     <nav class="sidebar-nav" id="sidebarNav">
-      <a class="nav-item active" data-page="dashboard" onclick="navigate('dashboard')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg><span>Dashboard</span></a>
+      <div class="nav-section">General</div>
+      <a class="nav-item active" data-page="overview" onclick="navigate('overview')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg><span>Overview</span></a>
+      <a class="nav-item" data-page="sessions" onclick="navigate('sessions')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><span>Sessions</span></a>
       <a class="nav-item" data-page="scans" onclick="navigate('scans')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><span>Scans</span></a>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><span>Scan Results</span></a>
+      <div class="nav-section">Forensic Artifacts</div>
+      <a class="nav-item" data-page="filesystem" onclick="navigate('filesystem')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><span>File System</span></a>
+      <a class="nav-item" data-page="registry" onclick="navigate('registry')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg><span>Registry</span></a>
+      <a class="nav-item" data-page="eventlogs" onclick="navigate('eventlogs')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg><span>Event Logs</span></a>
+      <a class="nav-item" data-page="processes" onclick="navigate('processes')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg><span>Processes</span></a>
+      <div class="nav-section">Analysis</div>
+      <a class="nav-item" data-page="securitytools" onclick="navigate('securitytools')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg><span>Security Tools</span></a>
+      <a class="nav-item" data-page="artifacts" onclick="navigate('artifacts')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg><span>Artifacts</span></a>
+      <a class="nav-item" data-page="threats" onclick="navigate('threats')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><span>Threat Indicators</span></a>
+      <div class="nav-section">Administration</div>
       <a class="nav-item nav-admin" data-page="admin" onclick="navigate('admin')" style="display:none">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg><span>Admin Panel</span></a>
       <a class="nav-item" data-page="profile" onclick="navigate('profile')">
@@ -208,37 +253,53 @@ tbody tr:hover{background:var(--bg4)}
   <div class="main" id="main">
     <div class="topbar">
       <button class="menu-btn" onclick="toggleSidebar()"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
-      <h2 id="pageTitle">Dashboard</h2>
+      <h2 id="pageTitle">Overview</h2>
       <div class="spacer"></div>
-      <div class="user-badge"><span id="topbarUser"></span><span class="role-badge" id="topbarRole"></span><span class="badge badge-api" id="apiBadge" style="display:none;background:rgba(34,197,94,0.12);color:var(--success);border:1px solid rgba(34,197,94,0.2)">Server</span><div class="avatar" id="topbarAvatar">U</div></div>
+      <div class="user-badge"><span id="topbarUser"></span><span class="role-badge" id="topbarRole"></span><span class="badge badge-api" id="apiBadge" style="display:none">Server</span><div class="avatar" id="topbarAvatar">U</div></div>
     </div>
 
     <div class="content">
-      <!-- DASHBOARD -->
-      <div class="page active" id="pageDashboard">
-        <div style="margin-bottom:24px"><h2 style="font-size:20px;font-weight:700">Dashboard</h2><p class="text-muted text-sm" style="margin-top:2px">Overview of forensic analysis data</p></div>
-        <div class="stat-grid" id="statsGrid">
-          <div class="stat-card"><div class="stat-icon" style="background:var(--primary-dim)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--primary)"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></div><div class="stat-label">Total Scans</div><div class="stat-value" id="statScans">0</div></div>
-          <div class="stat-card"><div class="stat-icon" style="background:rgba(34,197,94,0.12)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--success)"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><div class="stat-label">Evidence Items</div><div class="stat-value" id="statEvidence">0</div></div>
-          <div class="stat-card"><div class="stat-icon" style="background:var(--danger-dim)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--danger)"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div><div class="stat-label">IOCs Detected</div><div class="stat-value" id="statIocs">0</div></div>
-          <div class="stat-card"><div class="stat-icon" style="background:var(--warning-dim)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--warning)"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div class="stat-label">Active PINs</div><div class="stat-value" id="statPins">0</div></div>
+      <!-- OVERVIEW -->
+      <div class="page active" id="pageOverview">
+        <div style="margin-bottom:24px"><h2 style="font-size:20px;font-weight:700">Overview</h2><p class="text-muted text-sm" style="margin-top:2px">Forensic analysis dashboard — incident summary</p></div>
+        <div class="stat-grid" id="overviewStats">
+          <div class="stat-card"><div class="stat-icon" style="background:var(--primary-dim)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--primary)"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></div><div class="stat-label">Total Scans</div><div class="stat-value" id="ovStatScans">0</div></div>
+          <div class="stat-card"><div class="stat-icon" style="background:var(--info-dim)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--info)"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><div class="stat-label">Active Sessions</div><div class="stat-value" id="ovStatSessions">0</div></div>
+          <div class="stat-card"><div class="stat-icon" style="background:var(--success-dim)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--success)"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><div class="stat-label">Total Artifacts</div><div class="stat-value" id="ovStatArtifacts">0</div></div>
+          <div class="stat-card"><div class="stat-icon" style="background:var(--danger-dim)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--danger)"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg></div><div class="stat-label">IOCs Detected</div><div class="stat-value" id="ovStatIocs">0</div></div>
         </div>
-        <div class="card"><div class="card-header"><h3>Recent Activity</h3></div><div class="card-body" id="recentActivity"><div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><h4>No activity yet</h4><p>Generate PINs from Admin Panel and use them in the scanner</p></div></div></div>
+        <div class="widget-grid">
+          <div class="card"><div class="card-header"><h3>Recent Scans</h3></div><div class="card-body" id="ovRecentScans"><div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><h4>No scans yet</h4><p>Results appear after the scanner runs</p></div></div></div>
+          <div class="card"><div class="card-header"><h3>Detection Summary</h3></div><div class="card-body" id="ovDetectionSummary"><div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><h4>No detections</h4></div></div></div>
+          <div class="card"><div class="card-header"><h3>Tools Detected</h3></div><div class="card-body" id="ovToolsDetected"><div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><h4>No tools detected</h4></div></div></div>
+          <div class="card"><div class="card-header"><h3>Risk Distribution</h3></div><div class="card-body" id="ovRiskDist"><div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><h4>No data</h4></div></div></div>
+        </div>
       </div>
 
-      <!-- SCANS -->
+      <!-- SESSIONS -->
+      <div class="page" id="pageSessions">
+        <div style="margin-bottom:24px"><h2 style="font-size:20px;font-weight:700">Sessions</h2><p class="text-muted text-sm" style="margin-top:2px">PIN-based scanning sessions</p></div>
+        <div class="filter-row">
+          <div class="search-bar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input type="text" placeholder="Search session ID, PIN..." id="sessionSearch" oninput="renderSessions()"></div>
+          <select id="sessionFilter" onchange="renderSessions()"><option value="">All</option><option value="active">Active</option><option value="in_use">In Use</option><option value="used">Used</option></select>
+        </div>
+        <div class="card"><div class="card-body" style="padding:0">
+          <div class="table-wrap"><table><thead><tr><th>Session ID</th><th>PIN</th><th>Status</th><th>Created</th><th>Used</th><th>Notes</th><th>Actions</th></tr></thead><tbody id="sessionsTable"></tbody></table></div>
+          <div id="sessionsEmpty" class="empty-state" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><h4>No sessions</h4><p>Generate PINs from Admin Panel to create sessions</p></div>
+        </div></div>
+      </div>
+
+      <!-- SCAN RESULTS -->
       <div class="page" id="pageScans">
-        <div style="margin-bottom:24px"><h2 style="font-size:20px;font-weight:700">Scans</h2><p class="text-muted text-sm" style="margin-top:2px" id="scansSubtitle">Your scan results</p></div>
+        <div style="margin-bottom:24px"><h2 style="font-size:20px;font-weight:700">Scan Results</h2><p class="text-muted text-sm" style="margin-top:2px" id="scansSubtitle">Forensic scan reports</p></div>
         <div class="filter-row">
           <div class="search-bar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input type="text" placeholder="Search session ID, PIN, hostname..." id="scanSearch" oninput="renderScans()"></div>
           <select id="scanFilter" onchange="renderScans()"><option value="">All</option><option value="completed">Completed</option><option value="running">Running</option></select>
-        </div>
-        <div class="card" style="margin-bottom:16px;display:none" id="serverStatus">
-          <div class="card-header"><h3>Dashboard Server</h3><span class="badge" style="background:var(--success-dim);color:var(--success)" id="serverStatusBadge">Connected</span></div>
+          <select id="scanIocFilter" onchange="renderScans()"><option value="">IOC Level</option><option value="0">None</option><option value="1-5">Low (1-5)</option><option value="5-20">Medium (5-20)</option><option value="20+">High (20+)</option></select>
         </div>
         <div class="card"><div class="card-body" style="padding:0">
-          <div class="table-wrap"><table><thead><tr><th>Session ID</th><th>PIN</th><th>Hostname</th><th>User</th><th>Date</th><th>Status</th><th>IOCs</th><th>Evidence</th><th></th></tr></thead><tbody id="scansTable"></tbody></table></div>
-          <div id="scansEmpty" class="empty-state" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><h4>No scans yet</h4><p>Results appear here after the scanner runs with a valid PIN</p></div>
+          <div class="table-wrap"><table><thead><tr><th>Session ID</th><th>PIN</th><th>Hostname</th><th>User</th><th>Date</th><th>Duration</th><th>Status</th><th>IOCs</th><th>Artifacts</th><th></th></tr></thead><tbody id="scansTable"></tbody></table></div>
+          <div id="scansEmpty" class="empty-state" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><h4>No scans yet</h4><p>Results appear after the scanner runs with a valid PIN</p></div>
         </div></div>
       </div>
 
@@ -246,13 +307,13 @@ tbody tr:hover{background:var(--bg4)}
       <div class="page" id="pageDetail">
         <div style="margin-bottom:20px">
           <a style="cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--text2);margin-bottom:12px" onclick="navigate('scans')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>Back to scans</a>
-          <div style="display:flex;align-items:center;gap:12px"><h2 style="font-size:20px;font-weight:700">Scan Results</h2><span class="badge" id="detailStatusBadge"></span></div>
-          <p class="text-muted text-sm" style="margin-top:2px;font-family:monospace" id="detailId"></p>
+          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><h2 style="font-size:20px;font-weight:700">Scan Report</h2><span class="badge" id="detailStatusBadge"></span><span class="badge badge-blue" id="detailSessionLabel"></span><button class="btn btn-sm btn-ghost" onclick="viewRawJson()" style="color:var(--info)">View Raw JSON</button></div>
+          <p class="text-muted text-sm" style="margin-top:2px" id="detailId"></p>
         </div>
         <div class="detail-grid" id="detailInfo"></div>
         <div class="tabs">
           <button class="tab active" data-tab="artifacts" onclick="switchDetailTab('artifacts')">Artifacts</button>
-          <button class="tab" data-tab="ioc" onclick="switchDetailTab('ioc')">IOC</button>
+          <button class="tab" data-tab="ioc" onclick="switchDetailTab('ioc')">IOCs</button>
           <button class="tab" data-tab="evidence" onclick="switchDetailTab('evidence')">Evidence</button>
           <button class="tab" data-tab="logs" onclick="switchDetailTab('logs')">Logs</button>
         </div>
@@ -262,104 +323,185 @@ tbody tr:hover{background:var(--bg4)}
         <div class="tab-content" id="tabLogs"><div id="logsContainer"></div></div>
       </div>
 
-      <!-- ADMIN PANEL (tonch only) -->
+      <!-- FILE SYSTEM -->
+      <div class="page" id="pageFilesystem">
+        <div style="margin-bottom:24px"><h2 style="font-size:20px;font-weight:700">File System Artifacts</h2><p class="text-muted text-sm" style="margin-top:2px">MFT, Amcache, Prefetch, and file operations</p></div>
+        <div class="filter-row">
+          <div class="search-bar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input type="text" placeholder="Search paths, hashes..." id="fsSearch" oninput="renderFilesystem()"></div>
+          <select id="fsFilter" onchange="renderFilesystem()"><option value="">All Categories</option><option value="mft">MFT</option><option value="downloads">Downloads Cache</option><option value="jar">Executed JARs</option><option value="folders">Visited Folders</option><option value="appcompat">AppCompatCache</option><option value="amcache">Amcache</option><option value="prefetch">Prefetch</option></select>
+        </div>
+        <div class="card"><div class="card-body" style="padding:0">
+          <div class="table-wrap"><table><thead><tr><th>Path</th><th>Category</th><th>Timestamp</th><th>SHA256</th><th>Size</th><th>Source</th></tr></thead><tbody id="fsTable"></tbody></table></div>
+          <div id="fsEmpty" class="empty-state" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><h4>No file system artifacts</h4><p>Run a scan to collect file system data</p></div>
+        </div></div>
+      </div>
+
+      <!-- REGISTRY -->
+      <div class="page" id="pageRegistry">
+        <div style="margin-bottom:24px"><h2 style="font-size:20px;font-weight:700">Registry Artifacts</h2><p class="text-muted text-sm" style="margin-top:2px">Windows registry forensic data</p></div>
+        <div class="tabs" id="registryTabs">
+          <button class="tab active" data-tab="bam" onclick="switchRegTab('bam')">BAM</button>
+          <button class="tab" data-tab="muicache" onclick="switchRegTab('muicache')">MUICache</button>
+          <button class="tab" data-tab="recentdocs" onclick="switchRegTab('recentdocs')">RecentDocs</button>
+          <button class="tab" data-tab="opensave" onclick="switchRegTab('opensave')">OpenSavePidlMRU</button>
+          <button class="tab" data-tab="lastvisited" onclick="switchRegTab('lastvisited')">LastVisitedPidlMRU</button>
+          <button class="tab" data-tab="cmdproc" onclick="switchRegTab('cmdproc')">Command Processor</button>
+          <button class="tab" data-tab="appsswitched" onclick="switchRegTab('appsswitched')">AppsSwitched</button>
+          <button class="tab" data-tab="directinput" onclick="switchRegTab('directinput')">DirectInput</button>
+        </div>
+        <div class="card"><div class="card-body" style="padding:0">
+          <div class="table-wrap"><table><thead><tr><th>Registry Key</th><th>Value</th><th>Timestamp</th><th>User</th></tr></thead><tbody id="registryTable"></tbody></table></div>
+          <div id="registryEmpty" class="empty-state" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg><h4>No registry artifacts</h4><p>Run a scan to collect registry data</p></div>
+        </div></div>
+      </div>
+
+      <!-- EVENT LOGS -->
+      <div class="page" id="pageEventlogs">
+        <div style="margin-bottom:24px"><h2 style="font-size:20px;font-weight:700">Event Logs</h2><p class="text-muted text-sm" style="margin-top:2px">Windows event log analysis</p></div>
+        <div class="filter-row">
+          <select id="elLog" onchange="renderEventLogs()"><option value="">All Logs</option><option value="application">Application</option><option value="security">Security</option><option value="system">System</option></select>
+          <select id="elLevel" onchange="renderEventLogs()"><option value="">All Levels</option><option value="critical">Critical</option><option value="warning">Warning</option><option value="information">Information</option></select>
+          <div class="search-bar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input type="text" placeholder="Search events..." id="elSearch" oninput="renderEventLogs()"></div>
+        </div>
+        <div class="card"><div class="card-body" style="padding:0">
+          <div class="table-wrap"><table><thead><tr><th>Level</th><th>Log</th><th>Event ID</th><th>Source</th><th>Message</th><th>Timestamp</th></tr></thead><tbody id="eventLogsTable"></tbody></table></div>
+          <div id="eventLogsEmpty" class="empty-state" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg><h4>No event logs</h4><p>Run a scan to collect event logs</p></div>
+        </div></div>
+      </div>
+
+      <!-- PROCESSES -->
+      <div class="page" id="pageProcesses">
+        <div style="margin-bottom:24px"><h2 style="font-size:20px;font-weight:700">Process Analysis</h2><p class="text-muted text-sm" style="margin-top:2px">Detected processes, commands, and exit codes</p></div>
+        <div class="filter-row">
+          <div class="search-bar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input type="text" placeholder="Search processes..." id="procSearch" oninput="renderProcesses()"></div>
+        </div>
+        <div class="card"><div class="card-body" style="padding:0">
+          <div class="table-wrap"><table><thead><tr><th>Process</th><th>PID</th><th>User</th><th>Command Line</th><th>Exit Code</th><th>Timestamp</th><th>Source Scan</th></tr></thead><tbody id="processesTable"></tbody></table></div>
+          <div id="processesEmpty" class="empty-state" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg><h4>No process data</h4><p>Run a scan to collect process information</p></div>
+        </div></div>
+      </div>
+
+      <!-- SECURITY TOOLS -->
+      <div class="page" id="pageSecuritytools">
+        <div style="margin-bottom:24px"><h2 style="font-size:20px;font-weight:700">Security Tools</h2><p class="text-muted text-sm" style="margin-top:2px">Detected security and forensic tools</p></div>
+        <div class="card"><div class="card-body" style="padding:0">
+          <div class="table-wrap"><table><thead><tr><th>Tool</th><th>Category</th><th>Version</th><th>Install Path</th><th>Status</th><th>Last Seen</th><th>Source Scan</th></tr></thead><tbody id="secToolsTable"></tbody></table></div>
+          <div id="secToolsEmpty" class="empty-state" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg><h4>No security tools detected</h4></div>
+        </div></div>
+      </div>
+
+      <!-- ARTIFACTS -->
+      <div class="page" id="pageArtifacts">
+        <div style="margin-bottom:24px"><h2 style="font-size:20px;font-weight:700">Artifact Analysis</h2><p class="text-muted text-sm" style="margin-top:2px">Hidden characters, steganography, strings, and regex findings</p></div>
+        <div class="tabs" id="artifactTabs">
+          <button class="tab active" data-tab="hidden" onclick="switchArtifactTab('hidden')">Unicode Hidden</button>
+          <button class="tab" data-tab="stego" onclick="switchArtifactTab('stego')">Steganography</button>
+          <button class="tab" data-tab="strings" onclick="switchArtifactTab('strings')">Public Strings</button>
+          <button class="tab" data-tab="regex" onclick="switchArtifactTab('regex')">Regex Findings</button>
+        </div>
+        <div class="card"><div class="card-body" style="padding:0">
+          <div class="table-wrap"><table><thead><tr><th>Category</th><th>Value</th><th>Context</th><th>Severity</th><th>Source Scan</th></tr></thead><tbody id="artifactsAnalysisTable"></tbody></table></div>
+          <div id="artifactsAnalysisEmpty" class="empty-state" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg><h4>No artifact findings</h4></div>
+        </div></div>
+      </div>
+
+      <!-- THREAT INDICATORS -->
+      <div class="page" id="pageThreats">
+        <div style="margin-bottom:24px"><h2 style="font-size:20px;font-weight:700">Threat Indicators</h2><p class="text-muted text-sm" style="margin-top:2px">Security threats and suspicious findings</p></div>
+        <div class="filter-row">
+          <select id="threatSeverity" onchange="renderThreats()"><option value="">All Severities</option><option value="CRITICAL">Critical</option><option value="HIGH">High</option><option value="MEDIUM">Medium</option><option value="LOW">Low</option></select>
+          <select id="threatCategory" onchange="renderThreats()"><option value="">All Categories</option><option value="suspicious">Suspicious Files</option><option value="unusual_tools">Unusual Tools</option><option value="recent_executions">Recent Executions</option><option value="findings">Relevant Findings</option></select>
+          <div class="search-bar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input type="text" placeholder="Search threats..." id="threatSearch" oninput="renderThreats()"></div>
+        </div>
+        <div class="card"><div class="card-body" style="padding:0">
+          <div class="table-wrap"><table><thead><tr><th>Severity</th><th>Category</th><th>Indicator</th><th>Description</th><th>Source</th><th>Scan</th></tr></thead><tbody id="threatsTable"></tbody></table></div>
+          <div id="threatsEmpty" class="empty-state" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><h4>No threats detected</h4></div>
+        </div></div>
+      </div>
+
+      <!-- ADMIN PANEL -->
       <div class="page" id="pageAdmin">
-        <div style="margin-bottom:24px"><h2 style="font-size:20px;font-weight:700">Admin Panel</h2><p class="text-muted text-sm" style="margin-top:2px">Manage PINs, export JSON, import scan results</p></div>
+        <div style="margin-bottom:24px"><h2 style="font-size:20px;font-weight:700">Admin Panel</h2><p class="text-muted text-sm" style="margin-top:2px">Manage PINs, export data, import scan results</p></div>
         <div class="tabs">
           <button class="tab active" data-tab="gen" onclick="switchAdminTab('gen')">PIN Generator</button>
           <button class="tab" data-tab="pins" onclick="switchAdminTab('pins')">PIN Management</button>
-          <button class="tab" data-tab="export" onclick="switchAdminTab('export')">JSON Export</button>
-          <button class="tab" data-tab="import" onclick="switchAdminTab('import')">JSON Import</button>
+          <button class="tab" data-tab="export" onclick="switchAdminTab('export')">Export</button>
+          <button class="tab" data-tab="import" onclick="switchAdminTab('import')">Import</button>
         </div>
-        <!-- PIN Generator -->
         <div class="tab-content active" id="tabGen">
-          <div class="card" style="max-width:500px"><div class="card-header"><h3>Generate New PIN</h3></div><div class="card-body"><div class="field"><label>Notes (optional)</label><textarea id="pinNotes" rows="2" placeholder="For scanner deployment #1..."></textarea></div>
+          <div class="card" style="max-width:500px"><div class="card-header"><h3>Generate New PIN</h3></div><div class="card-body"><div class="field"><label>Notes</label><textarea id="pinNotes" rows="2" placeholder="For scanner deployment..."></textarea></div>
             <button class="btn btn-primary" onclick="generatePin()">Generate PIN</button>
             <div id="pinGenerateResult" style="margin-top:12px;display:none"></div>
           </div></div>
           <div style="margin-top:16px" class="card"><div class="card-header"><h3>How PINs Work</h3></div><div class="card-body text-sm text-muted">
             <p>Each generated PIN is <strong>4 digits</strong> with a unique <strong>Session ID</strong> (e.g. MCK-001).</p>
             <p style="margin-top:4px"><strong>All PIN validation is handled server-side.</strong> The scanner sends the PIN to <code>/api/validate-pin</code>, the server validates it, and sends a Discord webhook notification.</p>
-            <p style="margin-top:4px">When the dashboard server is running, PINs are persisted in <code>data/pins.json</code>. Scanners call <code>POST /api/validate-pin</code> with the PIN and the server responds.</p>
           </div></div>
         </div>
-        <!-- PIN Management -->
         <div class="tab-content" id="tabPins">
           <div class="card"><div class="card-header"><h3>All PINs</h3><span class="text-muted text-sm" id="pinCount"></span></div><div class="card-body" style="padding:0">
             <div class="table-wrap"><table><thead><tr><th>PIN</th><th>Session ID</th><th>Status</th><th>Created</th><th>Notes</th><th>Actions</th></tr></thead><tbody id="pinsTable"></tbody></table></div>
             <div id="pinsEmpty" class="empty-state" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><h4>No PINs generated</h4><p>Use the PIN Generator to create PINs</p></div>
           </div></div>
         </div>
-        <!-- JSON Export -->
         <div class="tab-content" id="tabExport">
-          <div class="card" style="margin-bottom:16px"><div class="card-header"><h3>Export JSON Files</h3></div><div class="card-body">
-            <p class="text-sm text-muted mb-4">Download JSON files from the server's data store. The dashboard server persists PINs in <code>data/pins.json</code> and scans in <code>data/scans.json</code>.</p>
+          <div class="card" style="margin-bottom:16px"><div class="card-header"><h3>Export Forensic Data</h3></div><div class="card-body">
+            <p class="text-sm text-muted mb-4">Download JSON files or generate a readable report.</p>
             <div class="gap-3">
-              <button class="btn btn-secondary" onclick="exportJSON('pins')">📥 Download pins.json</button>
-              <button class="btn btn-secondary" onclick="exportJSON('sessions')">📥 Download sessions.json</button>
-              <button class="btn btn-secondary" onclick="exportJSON('scans')">📥 Download scans.json</button>
-              <button class="btn btn-secondary" onclick="exportJSON('all')">📦 Download all (ZIP preview)</button>
+              <button class="btn btn-secondary" onclick="exportJSON('pins')">Download pins.json</button>
+              <button class="btn btn-secondary" onclick="exportJSON('scans')">Download scans.json</button>
+              <button class="btn btn-secondary" onclick="exportJSON('report')">Generate Report</button>
             </div>
             <div id="exportPreview" style="margin-top:16px;display:none">
               <div class="card-header" style="padding:12px 0"><h3 style="font-size:13px">Preview</h3></div>
               <div class="code-block" id="exportCode"></div>
             </div>
           </div></div>
-          <div class="card"><div class="card-header"><h3>Dashboard Server</h3></div><div class="card-body text-sm text-muted">
-            <p>1. Run <code>npm install && npm start</code> from the <code>dashboard/</code> folder.</p>
-            <p>2. The server starts on <code>https://mickyac.netlify.app</code>.</p>
-            <p>3. Configure <code>dashboard/config.json</code> with your Discord webhook URL for notifications.</p>
-            <p class="code-block" style="margin-top:4px;padding:8px 12px;font-size:12px">{
-  "apiUrl": "https://mickyac.netlify.app",
-  "discordWebhook": "https://discord.com/api/webhooks/..."
-}</p>
-            <p style="margin-top:8px">4. Configure the WPF scanner's <code>config.json</code> with the same <code>apiUrl</code>.</p>
-            <p>5. PINs are stored in <code>dashboard/data/pins.json</code>, scans in <code>dashboard/data/scans.json</code>.</p>
-          </div></div>
         </div>
-        <!-- JSON Import -->
         <div class="tab-content" id="tabImport">
           <div class="card" style="margin-bottom:16px"><div class="card-header"><h3>Import Scan Results</h3></div><div class="card-body">
-            <p class="text-sm text-muted mb-4">Paste the JSON output from the scanner below, or upload a <code>.json</code> file with scan results.</p>
+            <p class="text-sm text-muted mb-4">Paste JSON or upload a file with scan results.</p>
             <div class="field"><label>Paste JSON or upload file</label>
-              <textarea id="importJsonInput" rows="8" placeholder='{"sessionId":"MCK-001","pin":"4832","hostname":"DESKTOP-ABC","username":"jdoe","scanDate":"2026-06-06T12:00:00Z","results":{...}}'></textarea>
+              <textarea id="importJsonInput" rows="8" placeholder='{"sessionId":"MCK-001","pin":"4832","hostname":"DESKTOP-ABC",...}'></textarea>
             </div>
             <div class="gap-2">
               <button class="btn btn-primary" onclick="importScan()">Import Scan</button>
               <input type="file" id="importFileInput" accept=".json" style="display:none" onchange="handleImportFile(event)">
-              <button class="btn btn-secondary" onclick="document.getElementById('importFileInput').click()">Upload .json file</button>
+              <button class="btn btn-secondary" onclick="document.getElementById('importFileInput').click()">Upload .json</button>
             </div>
             <div id="importResult" style="margin-top:12px;display:none"></div>
-          </div></div>
-          <div class="card"><div class="card-header"><h3>Manual Scan Entry</h3></div><div class="card-body">
-            <p class="text-sm text-muted mb-4">Or manually enter scan results:</p>
-            <div class="form-row">
-              <div class="field"><label>Session ID</label><input id="manualSessionId" placeholder="MCK-001"></div>
-              <div class="field"><label>PIN</label><input id="manualPin" placeholder="4832"></div>
-              <div class="field"><label>Hostname</label><input id="manualHostname" placeholder="DESKTOP-ABC"></div>
-              <div class="field"><label>Username</label><input id="manualUsername" placeholder="jdoe"></div>
-            </div>
-            <button class="btn btn-primary" onclick="manualScanEntry()">Add Scan Result</button>
           </div></div>
         </div>
       </div>
 
       <!-- PROFILE -->
       <div class="page" id="pageProfile">
-        <div style="margin-bottom:24px"><h2 style="font-size:20px;font-weight:700">Profile</h2><p class="text-muted text-sm" style="margin-top:2px">Your account information</p></div>
+        <div style="margin-bottom:24px"><h2 style="font-size:20px;font-weight:700">Profile</h2><p class="text-muted text-sm" style="margin-top:2px">Account information</p></div>
         <div class="card" style="max-width:480px"><div class="card-header"><h3>Account Details</h3></div><div class="card-body"><div style="display:flex;flex-direction:column;gap:16px" id="profileFields"></div></div></div>
       </div>
     </div>
   </div>
 </div>
 
+<!-- Raw JSON Modal -->
+<div class="modal-overlay" id="jsonModal">
+  <div class="modal">
+    <div class="modal-header"><h3>Raw JSON — <span id="jsonModalTitle"></span></h3><button class="modal-close" onclick="closeJsonModal()">✕</button></div>
+    <div class="modal-body"><pre class="code-block" id="jsonModalContent" style="max-height:none;white-space:pre-wrap"></pre></div>
+  </div>
+</div>
+
 <script>
-// ═══════════════════════════════════════════
-// API LAYER  —  Connects to Dashboard Server
-// All PIN validation is handled server-side (Discord webhook)
-// ═══════════════════════════════════════════
 const API_BASE = '/api/';
 let _apiAvail = false;
+let _currentScanDetail = null;
+let _registryData = [];
+let _fsData = [];
+let _procData = [];
+let _secToolsData = [];
+let _artifactAnalysisData = [];
+let _threatData = [];
+let _eventLogData = [];
 
 async function checkApi() {
     try {
@@ -383,9 +525,14 @@ async function apiPost(endpoint, data) {
     try { const r = await fetch(API_BASE + endpoint, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data) }); return r.ok ? await r.json() : null; } catch(e) { return null; }
 }
 
-// ─── Sync data from Dashboard Server to localStorage ───
-// The server is the single source of truth for PINs and scans.
-// This syncs server data into localStorage for offline display.
+async function apiPut(endpoint, data) {
+    try { const r = await fetch(API_BASE + endpoint, { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data) }); return r.ok ? await r.json() : null; } catch(e) { return null; }
+}
+
+async function apiDelete(endpoint) {
+    try { const r = await fetch(API_BASE + endpoint, { method:'DELETE' }); return r.ok ? await r.json() : null; } catch(e) { return null; }
+}
+
 async function syncFromBot() {
     if (!_apiAvail) return;
     const pins = await apiGet('pins');
@@ -394,7 +541,6 @@ async function syncFromBot() {
     if (scans && Array.isArray(scans)) localStorage.setItem('fa_scans', JSON.stringify(scans));
 }
 
-// ─── Local Data ─────────────────────────────
 const _K = { users:'fa_users', scans:'fa_scans', pins:'fa_pins', session:'fa_session' };
 const gu = () => JSON.parse(localStorage.getItem(_K.users) || '[]');
 const su = u => localStorage.setItem(_K.users, JSON.stringify(u));
@@ -408,17 +554,10 @@ const cs = () => localStorage.removeItem(_K.session);
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,6);
 const now = () => new Date().toISOString();
 
-// Seed tonch
 (function(){ const u = gu(); if (!u.find(x => x.username === 'tonch')) { u.push({ id: uid(), username: 'tonch', email: 'tonch@admin.com', password: 'admin123', role: 'SUPER_ADMIN', createdAt: now() }); su(u); } })();
 
-// ═══════════════════════════════════════════
-// TOAST
-// ═══════════════════════════════════════════
 function showToast(m, t) { const e = document.getElementById('toast'), msg = document.getElementById('toastMsg'); e.className = 'toast show ' + t; msg.textContent = m; clearTimeout(e._timer); e._timer = setTimeout(() => e.classList.remove('show'), 3500); }
 
-// ═══════════════════════════════════════════
-// AUTH
-// ═══════════════════════════════════════════
 function showRegister() { document.getElementById('loginForm').style.display='none'; document.getElementById('registerForm').style.display='block'; }
 function showLogin() { document.getElementById('registerForm').style.display='none'; document.getElementById('loginForm').style.display='block'; }
 
@@ -430,7 +569,7 @@ function handleRegister() {
   if (us.find(x => x.email === e)) { er.textContent = 'Email already registered'; er.classList.add('show'); return; }
   if (us.find(x => x.username === u)) { er.textContent = 'Username already taken'; er.classList.add('show'); return; }
   us.push({ id: uid(), username: u, email: e, password: p, role: 'USER', createdAt: now() }); su(us);
-  er.classList.remove('show'); showToast('Account created successfully', 'success'); showLogin();
+  er.classList.remove('show'); showToast('Account created', 'success'); showLogin();
   document.getElementById('loginEmail').value = e;
 }
 
@@ -441,7 +580,7 @@ function handleLogin() {
   if (!user) { er.textContent = 'Invalid email or password'; er.classList.add('show'); return; }
   if (user.username === 'tonch' && user.role !== 'SUPER_ADMIN') { er.textContent = 'Account integrity violation'; er.classList.add('show'); return; }
   er.classList.remove('show'); sss({ userId: user.id, username: user.username, email: user.email, role: user.role });
-  showToast('Welcome back, ' + user.username, 'success'); enterApp();
+  showToast('Welcome, ' + user.username, 'success'); enterApp();
 }
 
 function handleLogout() { cs(); document.getElementById('appLayout').classList.remove('active'); document.getElementById('authScreen').style.display='flex'; document.getElementById('loginPassword').value=''; }
@@ -454,13 +593,9 @@ function enterApp() {
   const rb = document.getElementById('topbarRole');
   if (s.role === 'SUPER_ADMIN' && s.username === 'tonch') { rb.textContent = 'SUPER ADMIN'; rb.style.display='inline'; } else { rb.style.display='none'; }
   document.querySelectorAll('.nav-admin').forEach(el => el.style.display = (s.username === 'tonch' && s.role === 'SUPER_ADMIN') ? 'flex' : 'none');
-  document.getElementById('scansSubtitle').textContent = s.role === 'SUPER_ADMIN' ? 'All scan results (global)' : 'Your scan results';
-  navigate('dashboard');
+  navigate('overview');
 }
 
-// ═══════════════════════════════════════════
-// NAVIGATION
-// ═══════════════════════════════════════════
 function navigate(page, data) {
   if (page === 'detail' && data) { showDetail(data); return; }
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -469,10 +604,18 @@ function navigate(page, data) {
   if (el) el.classList.add('active');
   const nav = document.querySelector('[data-page="' + page + '"]');
   if (nav) nav.classList.add('active');
-  const titles = { dashboard: 'Dashboard', scans: 'Scans', admin: 'Admin Panel', profile: 'Profile' };
-  document.getElementById('pageTitle').textContent = titles[page] || '';
-  if (page === 'dashboard') renderDashboard();
+  const titles = { overview:'Overview', sessions:'Sessions', scans:'Scan Results', detail:'Scan Report', filesystem:'File System', registry:'Registry', eventlogs:'Event Logs', processes:'Processes', securitytools:'Security Tools', artifacts:'Artifacts', threats:'Threat Indicators', admin:'Admin Panel', profile:'Profile' };
+  document.getElementById('pageTitle').textContent = titles[page] || page;
+  if (page === 'overview') renderOverview();
+  if (page === 'sessions') renderSessions();
   if (page === 'scans') renderScans();
+  if (page === 'filesystem') renderFilesystem();
+  if (page === 'registry') { switchRegTab('bam'); }
+  if (page === 'eventlogs') renderEventLogs();
+  if (page === 'processes') renderProcesses();
+  if (page === 'securitytools') renderSecTools();
+  if (page === 'artifacts') { switchArtifactTab('hidden'); }
+  if (page === 'threats') renderThreats();
   if (page === 'admin') { switchAdminTab('gen'); }
   if (page === 'profile') renderProfile();
   if (window.innerWidth <= 768) closeSidebar();
@@ -481,33 +624,207 @@ function navigate(page, data) {
 function toggleSidebar() { const s = document.getElementById('sidebar'), o = document.getElementById('sidebarOverlay'); if (window.innerWidth > 768) s.classList.toggle('collapsed'); else { s.classList.toggle('mobile-open'); o.classList.toggle('show'); } }
 function closeSidebar() { if (window.innerWidth <= 768) { document.getElementById('sidebar').classList.remove('mobile-open'); document.getElementById('sidebarOverlay').classList.remove('show'); } }
 
-// ═══════════════════════════════════════════
-// RENDER
-// ═══════════════════════════════════════════
-async function renderDashboard() {
+function badgeClass(s) {
+  const m = { completed:'badge-completed', active:'badge-ok', in_use:'badge-running', used:'badge-completed', running:'badge-running', expired:'badge-running', deactivated:'badge-disabled', failed:'badge-failed', CRITICAL:'badge-CRITICAL', HIGH:'badge-HIGH', MEDIUM:'badge-MEDIUM', LOW:'badge-LOW', low:'badge-LOW', medium:'badge-MEDIUM', high:'badge-HIGH', critical:'badge-CRITICAL' };
+  return m[s] || 'badge-pending';
+}
+
+function severityDot(level) {
+  return '<span class="severity-indicator ' + (level||'low').toLowerCase() + '"></span>';
+}
+
+function extractResults(scan) {
+  const r = scan.results || {};
+  if (typeof r === 'string') { try { return JSON.parse(r); } catch { return {}; } }
+  return r;
+}
+
+function collectFsArtifacts() {
+  const scans = gs(); const arr = [];
+  scans.forEach(s => {
+    const res = extractResults(s);
+    const fs = res.fileSystem || {};
+    Object.keys(fs).forEach(cat => {
+      (fs[cat]||[]).forEach(item => {
+        arr.push({ ...item, category: cat, scanId: s.id, scanLabel: s.sessionId });
+      });
+    });
+  });
+  return arr;
+}
+
+function collectRegistryArtifacts() {
+  const scans = gs(); const arr = [];
+  scans.forEach(s => {
+    const res = extractResults(s);
+    const reg = res.registry || {};
+    Object.keys(reg).forEach(cat => {
+      (reg[cat]||[]).forEach(item => {
+        arr.push({ ...item, category: cat, scanId: s.id, scanLabel: s.sessionId });
+      });
+    });
+  });
+  return arr;
+}
+
+function collectProcesses() {
+  const scans = gs(); const arr = [];
+  scans.forEach(s => {
+    const res = extractResults(s);
+    (res.processes||[]).forEach(p => {
+      arr.push({ ...p, scanId: s.id, scanLabel: s.sessionId });
+    });
+  });
+  return arr;
+}
+
+function collectSecTools() {
+  const scans = gs(); const arr = [];
+  scans.forEach(s => {
+    const res = extractResults(s);
+    (res.securityTools||[]).forEach(t => {
+      arr.push({ ...t, scanId: s.id, scanLabel: s.sessionId });
+    });
+  });
+  return arr;
+}
+
+function collectArtifactAnalysis() {
+  const scans = gs(); const arr = [];
+  scans.forEach(s => {
+    const res = extractResults(s);
+    const aa = res.artifacts || {};
+    Object.keys(aa).forEach(cat => {
+      (aa[cat]||[]).forEach(item => {
+        arr.push({ ...item, category: cat, scanId: s.id, scanLabel: s.sessionId });
+      });
+    });
+  });
+  return arr;
+}
+
+function collectThreats() {
+  const scans = gs(); const arr = [];
+  scans.forEach(s => {
+    const res = extractResults(s);
+    (res.threatIndicators||[]).forEach(t => {
+      arr.push({ ...t, scanId: s.id, scanLabel: s.sessionId });
+    });
+  });
+  return arr;
+}
+
+function collectEventLogs() {
+  const scans = gs(); const arr = [];
+  scans.forEach(s => {
+    const res = extractResults(s);
+    const el = res.eventLogs || {};
+    Object.keys(el).forEach(logName => {
+      (el[logName]||[]).forEach(e => {
+        arr.push({ ...e, logName: logName, scanId: s.id, scanLabel: s.sessionId });
+      });
+    });
+  });
+  return arr;
+}
+
+function refreshDerivedData() {
+  _fsData = collectFsArtifacts();
+  _registryData = collectRegistryArtifacts();
+  _procData = collectProcesses();
+  _secToolsData = collectSecTools();
+  _artifactAnalysisData = collectArtifactAnalysis();
+  _threatData = collectThreats();
+  _eventLogData = collectEventLogs();
+}
+
+async function renderOverview() {
   if (_apiAvail) await syncFromBot();
+  refreshDerivedData();
   const s = gss(); const scans = gs(); const pins = gp();
   const my = s.role === 'SUPER_ADMIN' ? scans : scans.filter(x => x.userId === s.userId);
-  document.getElementById('statScans').textContent = my.length;
-  document.getElementById('statEvidence').textContent = my.reduce((a, x) => a + (x.evidenceCount || 0), 0);
-  document.getElementById('statIocs').textContent = my.reduce((a, x) => a + (x.iocsDetected || 0), 0);
-  document.getElementById('statPins').textContent = pins.filter(p => p.status === 'active').length;
-  const ra = document.getElementById('recentActivity');
-  if (!my.length) { ra.innerHTML = '<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><h4>No activity yet</h4><p>Generate PINs from Admin Panel and use them in the scanner</p></div>'; return; }
-  ra.innerHTML = '<div style="display:flex;flex-direction:column;gap:8px">' + my.slice(0, 10).map(x => '<div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid rgba(31,31,31,0.3)"><div style="width:32px;height:32px;border-radius:6px;background:var(--success-dim);display:flex;align-items:center;justify-content:center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:500">'+x.sessionId+'</div><div class="text-muted" style="font-size:11px">'+x.hostname+' · '+x.username+' · PIN '+x.pin+'</div></div><span class="text-muted" style="font-size:11px">'+new Date(x.scanDate || x.createdAt).toLocaleDateString()+'</span></div>').join('') + '</div>';
+  document.getElementById('ovStatScans').textContent = my.length;
+  document.getElementById('ovStatSessions').textContent = pins.filter(p => p.status === 'active' || p.status === 'in_use').length;
+  document.getElementById('ovStatArtifacts').textContent = _artifactAnalysisData.length;
+  document.getElementById('ovStatIocs').textContent = my.reduce((a, x) => a + (x.iocsDetected || 0), 0);
+
+  const ra = document.getElementById('ovRecentScans');
+  if (!my.length) { ra.innerHTML = '<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><h4>No scans yet</h4><p>Results appear after the scanner runs</p></div>'; }
+  else {
+    ra.innerHTML = '<div style="display:flex;flex-direction:column;gap:8px">' + my.slice(0,5).map(x => '<div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid rgba(31,31,31,0.3)"><div style="width:32px;height:32px;border-radius:6px;background:var(--success-dim);display:flex;align-items:center;justify-content:center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:500">' + (x.sessionId||'N/A') + '</div><div class="text-muted" style="font-size:11px">' + (x.hostname||'') + ' · ' + (x.username||'') + ' · ' + (x.iocsDetected||0) + ' IOCs</div></div><span class="text-muted" style="font-size:11px">' + new Date(x.scanDate||x.createdAt).toLocaleDateString() + '</span><a style="cursor:pointer;font-size:12px;color:var(--primary)" onclick="navigate(\'detail\',\'' + x.id + '\')">Open</a></div>').join('') + '</div>';
+  }
+
+  const ds = document.getElementById('ovDetectionSummary');
+  if (!_threatData.length) { ds.innerHTML = '<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><h4>No detections</h4></div>'; }
+  else {
+    const critical = _threatData.filter(t => (t.severity||'').toUpperCase() === 'CRITICAL').length;
+    const high = _threatData.filter(t => (t.severity||'').toUpperCase() === 'HIGH').length;
+    const medium = _threatData.filter(t => (t.severity||'').toUpperCase() === 'MEDIUM').length;
+    const low = _threatData.filter(t => (t.severity||'').toUpperCase() === 'LOW').length;
+    ds.innerHTML = '<div style="display:flex;flex-direction:column;gap:12px">' +
+      '<div><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span><span class="severity-indicator critical"></span>Critical</span><span>' + critical + '</span></div><div class="risk-bar"><div class="bar critical" style="width:' + (critical/Math.max(1,_threatData.length)*100) + '%"></div></div></div>' +
+      '<div><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span><span class="severity-indicator high"></span>High</span><span>' + high + '</span></div><div class="risk-bar"><div class="bar high" style="width:' + (high/Math.max(1,_threatData.length)*100) + '%"></div></div></div>' +
+      '<div><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span><span class="severity-indicator medium"></span>Medium</span><span>' + medium + '</span></div><div class="risk-bar"><div class="bar medium" style="width:' + (medium/Math.max(1,_threatData.length)*100) + '%"></div></div></div>' +
+      '<div><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span><span class="severity-indicator low"></span>Low</span><span>' + low + '</span></div><div class="risk-bar"><div class="bar low" style="width:' + (low/Math.max(1,_threatData.length)*100) + '%"></div></div></div>' +
+      '<div style="margin-top:8px"><span class="text-muted text-sm">Total: ' + _threatData.length + ' indicators</span></div></div>';
+  }
+
+  const td = document.getElementById('ovToolsDetected');
+  if (!_secToolsData.length) { td.innerHTML = '<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><h4>No tools detected</h4></div>'; }
+  else {
+    td.innerHTML = '<div style="display:flex;flex-direction:column;gap:8px">' + _secToolsData.slice(0,8).map(t => '<div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid rgba(31,31,31,0.3)"><div style="width:28px;height:28px;border-radius:6px;background:var(--info-dim);display:flex;align-items:center;justify-content:center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--info)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><div style="flex:1;font-size:13px">' + (t.name||'Unknown') + '</div><span class="text-muted" style="font-size:11px">v' + (t.version||'?') + '</span></div>').join('') + '</div>';
+  }
+
+  const rd = document.getElementById('ovRiskDist');
+  if (!my.length) { rd.innerHTML = '<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><h4>No data</h4></div>'; }
+  else {
+    const withIocs = my.filter(x => (x.iocsDetected||0) > 0).length;
+    const highIoc = my.filter(x => (x.iocsDetected||0) >= 20).length;
+    const medIoc = my.filter(x => (x.iocsDetected||0) >= 5 && (x.iocsDetected||0) < 20).length;
+    const lowIoc = my.filter(x => (x.iocsDetected||0) > 0 && (x.iocsDetected||0) < 5).length;
+    rd.innerHTML = '<div style="display:flex;flex-direction:column;gap:12px">' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;font-size:13px"><span>Scans with IOCs</span><span style="font-weight:700">' + withIocs + '/' + my.length + '</span></div>' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;font-size:13px"><span><span class="severity-indicator high"></span>High IOC (20+)</span><span>' + highIoc + '</span></div>' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;font-size:13px"><span><span class="severity-indicator medium"></span>Medium IOC (5-20)</span><span>' + medIoc + '</span></div>' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;font-size:13px"><span><span class="severity-indicator low"></span>Low IOC (1-5)</span><span>' + lowIoc + '</span></div></div>';
+  }
+}
+
+function renderSessions() {
+  const pins = gp();
+  const search = document.getElementById('sessionSearch').value.toLowerCase();
+  const filter = document.getElementById('sessionFilter').value;
+  const f = pins.filter(x => {
+    if (search && !(x.sessionId||'').toLowerCase().includes(search) && !(x.pin||'').toLowerCase().includes(search)) return false;
+    if (filter && x.status !== filter) return false;
+    return true;
+  });
+  const tb = document.getElementById('sessionsTable'); const em = document.getElementById('sessionsEmpty');
+  if (!f.length) { tb.innerHTML = ''; em.style.display = 'block'; } else { em.style.display = 'none'; }
+  tb.innerHTML = f.map(x => '<tr><td style="font-family:monospace">' + (x.sessionId||'—') + '</td><td style="font-family:monospace;font-weight:600;font-size:16px">' + x.pin + '</td><td><span class="badge ' + badgeClass(x.status) + '">' + x.status + '</span></td><td class="text-muted text-sm">' + new Date(x.createdAt).toLocaleDateString() + '</td><td class="text-muted text-sm">' + (x.usedAt ? new Date(x.usedAt).toLocaleDateString() : '—') + '</td><td style="font-size:12px;max-width:120px;overflow:hidden;text-overflow:ellipsis">' + (x.notes||'—') + '</td><td><div class="gap-2">' + (x.status==='active' ? '<button class="btn btn-sm btn-secondary" onclick="togglePin(\'' + x.pin + '\')">Deactivate</button>' : '') + '<button class="btn btn-sm btn-ghost" style="color:var(--danger)" onclick="deletePin(\'' + x.pin + '\')">Delete</button></div></td></tr>').join('');
 }
 
 async function renderScans() {
   if (_apiAvail) await syncFromBot();
+  refreshDerivedData();
   const s = gss(); const scans = gs();
   const filtered = (s.role === 'SUPER_ADMIN' ? scans : scans.filter(x => x.userId === s.userId));
-  const search = document.getElementById('scanSearch').value.toLowerCase(); const filter = document.getElementById('scanFilter').value;
-  const f = filtered.filter(x => { if (search && !(x.sessionId||'').toLowerCase().includes(search) && !(x.pin||'').toLowerCase().includes(search) && !(x.hostname||'').toLowerCase().includes(search)) return false; if (filter && x.status !== filter) return false; return true; });
+  const search = document.getElementById('scanSearch').value.toLowerCase();
+  const filter = document.getElementById('scanFilter').value;
+  const iocFilter = document.getElementById('scanIocFilter').value;
+  const f = filtered.filter(x => {
+    if (search && !(x.sessionId||'').toLowerCase().includes(search) && !(x.pin||'').toLowerCase().includes(search) && !(x.hostname||'').toLowerCase().includes(search)) return false;
+    if (filter && x.status !== filter) return false;
+    const ioc = x.iocsDetected || 0;
+    if (iocFilter === '0' && ioc !== 0) return false;
+    if (iocFilter === '1-5' && (ioc < 1 || ioc > 5)) return false;
+    if (iocFilter === '5-20' && (ioc < 5 || ioc > 20)) return false;
+    if (iocFilter === '20+' && ioc < 20) return false;
+    return true;
+  });
   const tb = document.getElementById('scansTable'); const em = document.getElementById('scansEmpty');
   if (!f.length) { tb.innerHTML = ''; em.style.display = 'block'; } else { em.style.display = 'none'; }
-  tb.innerHTML = f.map(x => '<tr><td style="font-family:monospace;font-size:12px">'+(x.sessionId||'—')+'</td><td style="font-family:monospace">'+x.pin+'</td><td>'+x.hostname+'</td><td>'+x.username+'</td><td class="text-muted">'+new Date(x.scanDate || x.createdAt).toLocaleDateString()+'</td><td><span class="badge badge-'+(x.status||'completed')+'">'+(x.status||'completed')+'</span></td><td>'+x.iocsDetected+'</td><td>'+x.evidenceCount+'</td><td><a style="cursor:pointer;font-size:12px;color:var(--primary)" onclick="navigate(\'detail\',\''+x.id+'\')">Open →</a></td></tr>').join('');
-  const ss = document.getElementById('serverStatus');
-  if (ss) ss.style.display = _apiAvail ? 'block' : 'none';
+  tb.innerHTML = f.map(x => '<tr><td style="font-family:monospace;font-size:12px">' + (x.sessionId||'—') + '</td><td style="font-family:monospace">' + x.pin + '</td><td>' + (x.hostname||'—') + '</td><td>' + (x.username||'—') + '</td><td class="text-muted text-sm">' + new Date(x.scanDate||x.createdAt).toLocaleDateString() + '</td><td class="text-muted text-sm">' + (x.duration ? x.duration + 's' : '—') + '</td><td><span class="badge ' + badgeClass(x.status||'completed') + '">' + (x.status||'completed') + '</span></td><td><span class="badge ' + ((x.iocsDetected||0) >= 20 ? 'badge-HIGH' : (x.iocsDetected||0) >= 5 ? 'badge-MEDIUM' : 'badge-LOW') + '">' + (x.iocsDetected||0) + '</span></td><td>' + (x.evidenceCount||0) + '</td><td><a style="cursor:pointer;font-size:12px;color:var(--primary)" onclick="navigate(\'detail\',\'' + x.id + '\')">Open →</a></td></tr>').join('');
 }
 
 function renderProfile() {
@@ -516,48 +833,166 @@ function renderProfile() {
     { i: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>', l: 'Username', v: u.username },
     { i: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>', l: 'Email', v: u.email },
     { i: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>', l: 'Role', v: u.role },
-  ].map(f => '<div style="display:flex;align-items:center;gap:12px"><div style="width:36px;height:36px;border-radius:8px;background:var(--bg4);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--text2)">'+f.i+'</div><div><div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;font-weight:600">'+f.l+'</div><div style="font-size:14px;font-weight:500">'+f.v+'</div></div></div>').join('');
+  ].map(f => '<div style="display:flex;align-items:center;gap:12px"><div style="width:36px;height:36px;border-radius:8px;background:var(--bg4);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--text2)">' + f.i + '</div><div><div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;font-weight:600">' + f.l + '</div><div style="font-size:14px;font-weight:500">' + f.v + '</div></div></div>').join('');
 }
 
-// ═══════════════════════════════════════════
-// ADMIN — PIN GENERATOR
-// ═══════════════════════════════════════════
-let _mckCounter = null;
+function renderFilesystem() {
+  refreshDerivedData();
+  const search = document.getElementById('fsSearch').value.toLowerCase();
+  const filter = document.getElementById('fsFilter').value;
+  const f = _fsData.filter(x => {
+    if (search && !(x.path||'').toLowerCase().includes(search) && !(x.sha256||x.hash||'').toLowerCase().includes(search)) return false;
+    if (filter && x.category !== filter) return false;
+    return true;
+  });
+  const tb = document.getElementById('fsTable'); const em = document.getElementById('fsEmpty');
+  if (!f.length) { tb.innerHTML = ''; em.style.display = 'block'; } else { em.style.display = 'none'; }
+  tb.innerHTML = f.map(x => '<tr><td class="path-cell" title="' + (x.path||'') + '">' + (x.path||'—') + '</td><td><span class="badge badge-info">' + (x.category||'—') + '</span></td><td class="timestamp-cell">' + (x.timestamp||x.lastModified||'—') + '</td><td class="hash-cell">' + ((x.sha256||x.hash||'').slice(0,16)||'—') + '...</td><td class="text-muted">' + (x.size||'—') + '</td><td class="text-muted text-sm">' + (x.scanLabel||'—') + '</td></tr>').join('');
+}
+
+function switchRegTab(tab) {
+  document.querySelectorAll('#pageRegistry .tab').forEach(t => t.classList.remove('active'));
+  document.querySelector('#pageRegistry .tab[data-tab="' + tab + '"]').classList.add('active');
+  renderRegistry(tab);
+}
+
+function renderRegistry(tab) {
+  refreshDerivedData();
+  const f = _registryData.filter(x => x.category === tab);
+  const tb = document.getElementById('registryTable'); const em = document.getElementById('registryEmpty');
+  if (!f.length) { tb.innerHTML = ''; em.style.display = 'block'; } else { em.style.display = 'none'; }
+  tb.innerHTML = f.map(x => '<tr><td class="key-cell" title="' + (x.key||x.path||'') + '">' + (x.key||x.path||'—') + '</td><td style="font-family:monospace;font-size:12px">' + (x.value||'—') + '</td><td class="timestamp-cell">' + (x.timestamp||'—') + '</td><td class="text-muted text-sm">' + (x.user||'—') + '</td></tr>').join('');
+}
+
+function renderEventLogs() {
+  refreshDerivedData();
+  const logFilter = document.getElementById('elLog').value;
+  const levelFilter = document.getElementById('elLevel').value;
+  const search = document.getElementById('elSearch').value.toLowerCase();
+  const f = _eventLogData.filter(x => {
+    if (logFilter && (x.logName||'').toLowerCase() !== logFilter) return false;
+    if (levelFilter && (x.level||'').toLowerCase() !== levelFilter) return false;
+    if (search && !(x.message||x.msg||'').toLowerCase().includes(search) && !(x.source||'').toLowerCase().includes(search)) return false;
+    return true;
+  });
+  const tb = document.getElementById('eventLogsTable'); const em = document.getElementById('eventLogsEmpty');
+  if (!f.length) { tb.innerHTML = ''; em.style.display = 'block'; } else { em.style.display = 'none'; }
+  tb.innerHTML = f.map(x => '<tr><td><span class="badge ' + badgeClass((x.level||'info').toUpperCase()) + '">' + (x.level||'INFO') + '</span></td><td>' + (x.logName||'—') + '</td><td class="text-muted text-sm">' + (x.eventId||'—') + '</td><td class="text-muted">' + (x.source||'—') + '</td><td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + (x.message||x.msg||'—') + '</td><td class="timestamp-cell">' + (x.timestamp||'—') + '</td></tr>').join('');
+}
+
+function renderProcesses() {
+  refreshDerivedData();
+  const search = document.getElementById('procSearch').value.toLowerCase();
+  const f = _procData.filter(x => {
+    if (search && !(x.name||x.process||'').toLowerCase().includes(search) && !(x.commandLine||'').toLowerCase().includes(search)) return false;
+    return true;
+  });
+  const tb = document.getElementById('processesTable'); const em = document.getElementById('processesEmpty');
+  if (!f.length) { tb.innerHTML = ''; em.style.display = 'block'; } else { em.style.display = 'none'; }
+  tb.innerHTML = f.map(x => '<tr><td style="font-family:monospace;font-weight:500">' + (x.name||x.process||'—') + '</td><td class="text-muted">' + (x.pid||'—') + '</td><td class="text-muted">' + (x.user||'—') + '</td><td style="max-width:250px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:monospace;font-size:12px">' + (x.commandLine||'—') + '</td><td class="text-muted">' + (x.exitCode||'—') + '</td><td class="timestamp-cell">' + (x.timestamp||'—') + '</td><td class="text-muted text-sm">' + (x.scanLabel||'—') + '</td></tr>').join('');
+}
+
+function renderSecTools() {
+  refreshDerivedData();
+  const tb = document.getElementById('secToolsTable'); const em = document.getElementById('secToolsEmpty');
+  if (!_secToolsData.length) { tb.innerHTML = ''; em.style.display = 'block'; } else { em.style.display = 'none'; }
+  tb.innerHTML = _secToolsData.map(x => '<tr><td style="font-weight:500">' + (x.name||'—') + '</td><td><span class="badge badge-blue">' + (x.category||'Security') + '</span></td><td class="text-muted">' + (x.version||'—') + '</td><td class="path-cell" title="' + (x.path||'') + '">' + (x.path||'—') + '</td><td><span class="badge ' + badgeClass(x.status||'installed') + '">' + (x.status||'installed') + '</span></td><td class="timestamp-cell">' + (x.lastSeen||'—') + '</td><td class="text-muted text-sm">' + (x.scanLabel||'—') + '</td></tr>').join('');
+}
+
+function switchArtifactTab(tab) {
+  document.querySelectorAll('#pageArtifacts .tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('#pageArtifacts .tab').forEach(t => t.classList.remove('active'));
+  document.querySelector('#pageArtifacts .tab[data-tab="' + tab + '"]').classList.add('active');
+  renderArtifactAnalysis(tab);
+}
+
+function renderArtifactAnalysis(tab) {
+  refreshDerivedData();
+  const f = _artifactAnalysisData.filter(x => x.category === tab);
+  const tb = document.getElementById('artifactsAnalysisTable'); const em = document.getElementById('artifactsAnalysisEmpty');
+  if (!f.length) { tb.innerHTML = ''; em.style.display = 'block'; } else { em.style.display = 'none'; }
+  tb.innerHTML = f.map(x => '<tr><td><span class="badge badge-info">' + (x.category||'—') + '</span></td><td style="font-family:monospace;font-size:12px">' + (x.value||x.name||'—') + '</td><td class="text-muted text-sm">' + (x.context||'—') + '</td><td>' + severityDot(x.severity||'low') + '<span class="badge ' + badgeClass((x.severity||'low').toUpperCase()) + '">' + (x.severity||'LOW') + '</span></td><td class="text-muted text-sm">' + (x.scanLabel||'—') + '</td></tr>').join('');
+}
+
+function renderThreats() {
+  refreshDerivedData();
+  const severityFilter = document.getElementById('threatSeverity').value;
+  const categoryFilter = document.getElementById('threatCategory').value;
+  const search = document.getElementById('threatSearch').value.toLowerCase();
+  const f = _threatData.filter(x => {
+    if (severityFilter && (x.severity||'').toUpperCase() !== severityFilter) return false;
+    if (categoryFilter && (x.category||'').toLowerCase() !== categoryFilter) return false;
+    if (search && !(x.indicator||x.name||'').toLowerCase().includes(search) && !(x.description||'').toLowerCase().includes(search)) return false;
+    return true;
+  });
+  const tb = document.getElementById('threatsTable'); const em = document.getElementById('threatsEmpty');
+  if (!f.length) { tb.innerHTML = ''; em.style.display = 'block'; } else { em.style.display = 'none'; }
+  tb.innerHTML = f.map(x => '<tr><td>' + severityDot(x.severity||'low') + '<span class="badge ' + badgeClass((x.severity||'low').toUpperCase()) + '">' + (x.severity||'LOW') + '</span></td><td><span class="badge badge-blue">' + (x.category||'—') + '</span></td><td style="font-family:monospace;font-weight:500">' + (x.indicator||x.name||'—') + '</td><td class="text-muted text-sm">' + (x.description||'—') + '</td><td class="text-muted">' + (x.source||'—') + '</td><td class="text-muted text-sm">' + (x.scanLabel||'—') + '</td></tr>').join('');
+}
+
+function showDetail(id) {
+  const s = gss(); const scan = gs().find(x => x.id === id);
+  if (!scan) { showToast('Scan not found', 'error'); navigate('scans'); return; }
+  if (s.role !== 'SUPER_ADMIN' && scan.userId !== s.userId) { showToast('Access denied', 'error'); navigate('scans'); return; }
+  _currentScanDetail = scan;
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('pageDetail').classList.add('active');
+  document.getElementById('pageTitle').textContent = 'Scan Report';
+  document.getElementById('detailId').textContent = (scan.sessionId||'') + ' · ' + (scan.hostname||'');
+  document.getElementById('detailSessionLabel').textContent = scan.sessionId||'';
+  const badge = document.getElementById('detailStatusBadge'); badge.className = 'badge ' + badgeClass(scan.status||'completed'); badge.textContent = scan.status||'completed';
+  const si = scan.systemInfo || {};
+  document.getElementById('detailInfo').innerHTML = [
+    { l:'Session ID', v:scan.sessionId }, { l:'PIN', v:scan.pin }, { l:'Hostname', v:si.hostname||scan.hostname }, { l:'User', v:si.username||scan.username },
+    { l:'OS', v:si.osVersion||'—' }, { l:'Scanner', v:si.scannerVersion||'—' }, { l:'IP', v:si.ipAddress||'—' }, { l:'MAC', v:si.macAddress||'—' },
+    { l:'Duration', v:scan.duration?scan.duration+'s':'—' }, { l:'IOCs', v:scan.iocsDetected || 0 }, { l:'Evidence', v:scan.evidenceCount || 0 }, { l:'Date', v:new Date(scan.scanDate||scan.createdAt).toLocaleDateString() }
+  ].map(i => '<div class="detail-item"><label>' + i.l + '</label><span>' + i.v + '</span></div>').join('');
+  const arts = scan.artifacts||[]; document.getElementById('artifactsTable').innerHTML = arts.length ? arts.map(a => '<tr><td>' + a.name + '</td><td><span class="badge badge-info">' + (a.type||'—') + '</span></td><td class="text-muted text-sm">' + (a.source||'—') + '</td><td class="hash-cell">' + ((a.hash||'').slice(0,16)||'—') + '...</td></tr>').join('') : '<tr><td colspan="4" class="text-muted" style="text-align:center;padding:24px">No artifacts</td></tr>';
+  const iocs = scan.iocs||[]; document.getElementById('iocTable').innerHTML = iocs.length ? iocs.map(i => '<tr><td>' + i.name + '</td><td style="font-family:monospace;font-size:12px">' + i.value + '</td><td><span class="badge badge-info">' + (i.type||'—') + '</span></td><td>' + severityDot(i.riskLevel||'low') + '<span class="badge ' + badgeClass((i.riskLevel||'low').toUpperCase()) + '">' + (i.riskLevel||'—') + '</span></td></tr>').join('') : '<tr><td colspan="4" class="text-muted" style="text-align:center;padding:24px">No IOCs</td></tr>';
+  const evs = scan.evidence||[]; document.getElementById('evidenceTable').innerHTML = evs.length ? evs.map(e => '<tr><td>' + e.name + '</td><td class="text-muted text-sm">' + (e.description||'') + '</td><td>' + (e.source||'—') + '</td><td>' + (e.size||'—') + '</td></tr>').join('') : '<tr><td colspan="4" class="text-muted" style="text-align:center;padding:24px">No evidence</td></tr>';
+  const logD = scan.logs||[]; const lc = document.getElementById('logsContainer');
+  if (!logD.length) { lc.innerHTML = '<div class="text-muted" style="text-align:center;padding:24px">No logs</div>'; }
+  else { lc.innerHTML = logD.map(l => { const t = new Date(l.time); return '<div class="log-line"><span class="time">[' + t.getHours().toString().padStart(2,'0') + ':' + t.getMinutes().toString().padStart(2,'0') + ':' + t.getSeconds().toString().padStart(2,'0') + ']</span><span class="level-' + l.level + '">[' + (l.level||'INFO').toUpperCase() + ']</span> ' + l.msg + '</div>'; }).join(''); }
+}
+
+function viewRawJson() {
+  if (!_currentScanDetail) return;
+  document.getElementById('jsonModalTitle').textContent = _currentScanDetail.sessionId || 'Scan';
+  document.getElementById('jsonModalContent').textContent = JSON.stringify(_currentScanDetail, null, 2);
+  document.getElementById('jsonModal').classList.add('show');
+}
+
+function closeJsonModal() { document.getElementById('jsonModal').classList.remove('show'); }
+
+function switchDetailTab(tab) {
+  document.querySelectorAll('#pageDetail .tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('#pageDetail .tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('active');
+  document.querySelector('#pageDetail .tab[data-tab="' + tab + '"]').classList.add('active');
+}
+
+// ─── ADMIN ──────────────────────────────────────────────
 
 function getNextSessionId() {
   const pins = gp();
   let max = 0;
-  pins.forEach(p => {
-    const m = p.sessionId && p.sessionId.match(/MCK-(\d+)/);
-    if (m) { const n = parseInt(m[1]); if (n > max) max = n; }
-  });
+  pins.forEach(p => { const m = p.sessionId && p.sessionId.match(/MCK-(\d+)/); if (m) { const n = parseInt(m[1]); if (n > max) max = n; } });
   const scans = gs();
-  scans.forEach(s => {
-    const m = s.sessionId && s.sessionId.match(/MCK-(\d+)/);
-    if (m) { const n = parseInt(m[1]); if (n > max) max = n; }
-  });
+  scans.forEach(s => { const m = s.sessionId && s.sessionId.match(/MCK-(\d+)/); if (m) { const n = parseInt(m[1]); if (n > max) max = n; } });
   return 'MCK-' + String(max + 1).padStart(3, '0');
 }
 
 async function generatePin() {
   const notes = document.getElementById('pinNotes').value.trim();
   const r = document.getElementById('pinGenerateResult'); r.style.display = 'block';
-
   if (_apiAvail) {
     const result = await apiPost('pins', { notes });
-    if (!result || !result.pin) {
-      r.innerHTML = '<div style="background:var(--danger-dim);border:1px solid rgba(239,68,68,0.2);border-radius:var(--radius);padding:12px 16px;color:var(--danger);font-size:13px">Failed to create PIN via Dashboard Server.</div>';
-      return;
-    }
+    if (!result || !result.pin) { r.innerHTML = '<div style="background:var(--danger-dim);border:1px solid rgba(239,68,68,0.2);border-radius:var(--radius);padding:12px 16px;color:var(--danger);font-size:13px">Failed to create PIN.</div>'; return; }
     await syncFromBot();
     document.getElementById('pinNotes').value = '';
-    r.innerHTML = '<div style="background:var(--success-dim);border:1px solid rgba(34,197,94,0.2);border-radius:var(--radius);padding:12px 16px">' +
-      '<div style="font-size:12px;color:var(--success);font-weight:600;margin-bottom:4px">PIN Created</div>' +
-      '<div style="display:flex;gap:16px;font-size:13px"><span><span class="text-muted">PIN:</span> <strong style="font-family:monospace;font-size:18px">'+result.pin+'</strong></span><span><span class="text-muted">Session:</span> <strong style="font-family:monospace">'+result.sessionId+'</strong></span></div></div>';
-    showToast('PIN ' + result.pin + ' generated — Session ' + result.sessionId, 'success');
-  } else {
-    r.innerHTML = '<div style="background:var(--warning-dim);border:1px solid rgba(245,158,11,0.2);border-radius:var(--radius);padding:12px 16px;color:var(--warning);font-size:13px">Dashboard server not connected. PINs can only be created when the server is running.</div>';
-  }
+    r.innerHTML = '<div style="background:var(--success-dim);border:1px solid rgba(34,197,94,0.2);border-radius:var(--radius);padding:12px 16px"><div style="font-size:12px;color:var(--success);font-weight:600;margin-bottom:4px">PIN Created</div><div style="display:flex;gap:16px;font-size:13px"><span><span class="text-muted">PIN:</span> <strong style="font-family:monospace;font-size:18px">' + result.pin + '</strong></span><span><span class="text-muted">Session:</span> <strong style="font-family:monospace">' + result.sessionId + '</strong></span></div></div>';
+    showToast('PIN ' + result.pin + ' — Session ' + result.sessionId, 'success');
+  } else { r.innerHTML = '<div style="background:var(--warning-dim);border:1px solid rgba(245,158,11,0.2);border-radius:var(--radius);padding:12px 16px;color:var(--warning);font-size:13px">Server not connected.</div>'; }
   renderPinsTable();
 }
 
@@ -569,204 +1004,92 @@ function switchAdminTab(tab) {
   if (tab === 'pins') renderPinsTable();
 }
 
-// ═══════════════════════════════════════════
-// ADMIN — PIN MANAGEMENT
-// ═══════════════════════════════════════════
 function renderPinsTable() {
   const pins = gp(); const tb = document.getElementById('pinsTable'); const em = document.getElementById('pinsEmpty');
   document.getElementById('pinCount').textContent = pins.length + ' total';
   if (!pins.length) { tb.innerHTML = ''; em.style.display = 'block'; return; }
   em.style.display = 'none';
-  const badgeClass = (s) => ({ active:'badge-ok', in_use:'badge-running', used:'badge-completed', expired:'badge-running', deactivated:'badge-disabled' })[s] || 'badge-pending';
-  tb.innerHTML = pins.map(p => '<tr><td style="font-family:monospace;font-weight:600;font-size:16px">'+p.pin+'</td><td style="font-family:monospace">'+p.sessionId+'</td><td><span class="badge '+badgeClass(p.status)+'">'+p.status+'</span></td><td style="font-size:12px">'+new Date(p.createdAt).toLocaleDateString()+'</td><td style="font-size:12px;max-width:120px;overflow:hidden;text-overflow:ellipsis">'+(p.notes||'—')+'</td><td><div class="gap-2">'+(p.status==='active'?'<button class="btn btn-sm btn-secondary" onclick="togglePin(\''+p.pin+'\')">Deactivate</button>':'')+'<button class="btn btn-sm btn-ghost" style="color:var(--danger)" onclick="deletePin(\''+p.pin+'\')">Delete</button></div></td></tr>').join('');
+  tb.innerHTML = pins.map(p => '<tr><td style="font-family:monospace;font-weight:600;font-size:16px">' + p.pin + '</td><td style="font-family:monospace">' + p.sessionId + '</td><td><span class="badge ' + badgeClass(p.status) + '">' + p.status + '</span></td><td class="text-sm">' + new Date(p.createdAt).toLocaleDateString() + '</td><td style="font-size:12px;max-width:120px;overflow:hidden;text-overflow:ellipsis">' + (p.notes||'—') + '</td><td><div class="gap-2">' + (p.status==='active' ? '<button class="btn btn-sm btn-secondary" onclick="togglePin(\'' + p.pin + '\')">Deactivate</button>' : '') + '<button class="btn btn-sm btn-ghost" style="color:var(--danger)" onclick="deletePin(\'' + p.pin + '\')">Delete</button></div></td></tr>').join('');
 }
 
 async function togglePin(pin) {
-  if (_apiAvail) {
-    const result = await apiPut('pins/status', { pin, status: 'deactivated' });
-    if (result) { await syncFromBot(); showToast('PIN ' + pin + ' deactivated', 'success'); }
-    else { showToast('Failed to update PIN', 'error'); }
-  } else {
-    showToast('Server not connected.', 'error');
-  }
+  if (_apiAvail) { const result = await apiPut('pins/status', { pin, status: 'deactivated' }); if (result) { await syncFromBot(); showToast('PIN ' + pin + ' deactivated', 'success'); } else { showToast('Failed', 'error'); } }
+  else { showToast('Server not connected.', 'error'); }
   renderPinsTable();
 }
 async function deletePin(pin) {
   if (!confirm('Deactivate PIN ' + pin + '?')) return;
-  if (_apiAvail) {
-    const result = await apiDelete('pins/' + pin);
-    if (result) { await syncFromBot(); showToast('PIN ' + pin + ' deactivated', 'success'); }
-    else { showToast('Failed to deactivate PIN', 'error'); }
-  } else {
-    showToast('Server not connected.', 'error');
-  }
+  if (_apiAvail) { const result = await apiDelete('pins/' + pin); if (result) { await syncFromBot(); showToast('PIN ' + pin + ' deactivated', 'success'); } else { showToast('Failed', 'error'); } }
+  else { showToast('Server not connected.', 'error'); }
   renderPinsTable();
 }
 
-// ═══════════════════════════════════════════
-// ADMIN — JSON EXPORT
-// ═══════════════════════════════════════════
 function exportJSON(type) {
   let json, filename;
-  const pins = gp();
-  const scans = gs();
-  switch(type) {
-    case 'pins':
-      json = JSON.stringify({ pins: pins.map(p => ({ pin: p.pin, sessionId: p.sessionId, status: p.status, createdBy: p.createdBy || 'tonch', createdAt: p.createdAt.split('T')[0] })) }, null, 2);
-      filename = 'pins.json';
-      break;
-    case 'sessions':
-      json = JSON.stringify({ sessions: pins.filter(p => p.status === 'active').map(p => ({ sessionId: p.sessionId, pin: p.pin, status: p.status })) }, null, 2);
-      filename = 'sessions.json';
-      break;
-    case 'scans':
-      json = JSON.stringify({ scans: scans.map(s => ({ sessionId: s.sessionId, pin: s.pin, hostname: s.hostname, username: s.username, scanDate: s.scanDate || s.createdAt, iocsDetected: s.iocsDetected || 0, evidenceCount: s.evidenceCount || 0, status: s.status || 'completed' })) }, null, 2);
-      filename = 'scans.json';
-      break;
-    case 'all':
-      // Show combined preview
-      const all = {
-        pins: pins.map(p => ({ pin: p.pin, sessionId: p.sessionId, status: p.status, createdBy: p.createdBy || 'tonch', createdAt: p.createdAt.split('T')[0] })),
-        sessions: pins.filter(p => p.status === 'active').map(p => ({ sessionId: p.sessionId, pin: p.pin, status: p.status })),
-        scans: scans.map(s => ({ sessionId: s.sessionId, pin: s.pin, hostname: s.hostname, username: s.username, scanDate: s.scanDate || s.createdAt, iocsDetected: s.iocsDetected || 0, evidenceCount: s.evidenceCount || 0, status: s.status || 'completed' }))
-      };
-      document.getElementById('exportCode').textContent = JSON.stringify(all.pins, null, 2);
-      document.getElementById('exportPreview').style.display = 'block';
-      showToast('Previewing pins.json — download each file separately', 'success');
-      return;
+  const pins = gp(); const scans = gs();
+  if (type === 'report') {
+    let report = '# ForensicAnalyzer Report\n\n';
+    report += '## Overview\n';
+    report += '- Total Scans: ' + scans.length + '\n';
+    report += '- Active Sessions: ' + pins.filter(p => p.status === 'active').length + '\n';
+    report += '- Total IOCs: ' + scans.reduce((a, s) => a + (s.iocsDetected || 0), 0) + '\n';
+    report += '- Total Artifacts: ' + _artifactAnalysisData.length + '\n\n';
+    report += '## Recent Scans\n';
+    scans.slice(-5).reverse().forEach(s => { report += '- ' + (s.sessionId||'N/A') + ' | ' + (s.hostname||'') + ' | ' + (s.iocsDetected||0) + ' IOCs | ' + new Date(s.scanDate||s.createdAt).toLocaleDateString() + '\n'; });
+    report += '\n## Threat Indicators\n';
+    _threatData.forEach(t => { report += '- [' + (t.severity||'LOW') + '] ' + (t.indicator||t.name||'') + ': ' + (t.description||'') + '\n'; });
+    const blob = new Blob([report], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = 'forensic-report.md'; a.click();
+    URL.revokeObjectURL(url);
+    showToast('Report generated', 'success');
+    return;
   }
+  if (type === 'pins') { json = JSON.stringify({ pins: pins.map(p => ({ pin: p.pin, sessionId: p.sessionId, status: p.status, createdBy: p.createdBy || 'tonch', createdAt: p.createdAt.split('T')[0] })) }, null, 2); filename = 'pins.json'; }
+  if (type === 'scans') { json = JSON.stringify({ scans: scans.map(s => ({ sessionId: s.sessionId, pin: s.pin, hostname: s.hostname, username: s.username, scanDate: s.scanDate || s.createdAt, iocsDetected: s.iocsDetected || 0, evidenceCount: s.evidenceCount || 0, status: s.status || 'completed', duration: s.duration || 0 })) }, null, 2); filename = 'scans.json'; }
   const blob = new Blob([json], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a'); a.href = url; a.download = filename; a.click();
   URL.revokeObjectURL(url);
-  // Show preview
   document.getElementById('exportCode').textContent = json.slice(0, 2000) + '\n\n... (truncated)';
   document.getElementById('exportPreview').style.display = 'block';
   showToast('Downloaded ' + filename, 'success');
 }
 
-// ═══════════════════════════════════════════
-// ADMIN — JSON IMPORT
-// ═══════════════════════════════════════════
 function handleImportFile(event) {
   const file = event.target.files[0];
   if (!file) return;
   const reader = new FileReader();
-  reader.onload = function(e) {
-    document.getElementById('importJsonInput').value = e.target.result;
-    showToast('File loaded — click "Import Scan"', 'success');
-  };
+  reader.onload = function(e) { document.getElementById('importJsonInput').value = e.target.result; showToast('File loaded', 'success'); };
   reader.readAsText(file);
   event.target.value = '';
 }
 
 async function importScan() {
   const raw = document.getElementById('importJsonInput').value.trim();
-  if (!raw) { showToast('Paste JSON or upload a file first', 'error'); return; }
+  if (!raw) { showToast('Paste JSON first', 'error'); return; }
   let data;
-  try { data = JSON.parse(raw); } catch(e) { showToast('Invalid JSON format', 'error'); return; }
+  try { data = JSON.parse(raw); } catch(e) { showToast('Invalid JSON', 'error'); return; }
   const r = document.getElementById('importResult'); r.style.display = 'block';
-
   const scanArr = Array.isArray(data) ? data : (data.scans ? data.scans : [data]);
   let imported = 0;
-
   for (const s of scanArr) {
     if (!s.sessionId && !s.pin) continue;
-    const payload = {
-      sessionId: s.sessionId || 'UNKNOWN',
-      pin: s.pin || '????',
-      hostname: s.hostname || '',
-      username: s.username || '',
-      scanDate: s.scanDate || now(),
-      status: s.status || 'completed',
-      iocsDetected: s.iocsDetected || 0,
-      evidenceCount: s.evidenceCount || 0,
-      duration: s.duration || 0,
-      artifacts: (s.results && s.results.artifacts) || s.artifacts || [],
-      iocs: (s.results && s.results.iocs) || s.iocs || [],
-      evidence: (s.results && s.results.evidence) || s.evidence || []
-    };
-
-    if (_apiAvail) {
-      const result = await apiPost('upload-scan', payload);
-      if (result && result.success) imported++;
-    } else {
-      // Fallback to localStorage if no API
-      const scans = gs();
-      scans.push({ id: uid(), ...payload, userId: gss() ? gss().userId : null, logs: [], results: {}, systemInfo: {} });
-      ss(scans);
-      imported++;
-    }
+    const payload = { sessionId: s.sessionId || 'UNKNOWN', pin: s.pin || '????', hostname: s.hostname || '', username: s.username || '', scanDate: s.scanDate || now(), status: s.status || 'completed', iocsDetected: s.iocsDetected || 0, evidenceCount: s.evidenceCount || 0, duration: s.duration || 0, artifacts: s.artifacts || [], iocs: s.iocs || [], evidence: s.evidence || [] };
+    if (_apiAvail) { const result = await apiPost('upload-scan', payload); if (result && result.success) imported++; }
+    else { const scans = gs(); scans.push({ id: uid(), ...payload, userId: gss() ? gss().userId : null, logs: [], results: {}, systemInfo: {} }); ss(scans); imported++; }
   }
-
   if (_apiAvail) await syncFromBot();
-  r.innerHTML = '<div style="background:var(--success-dim);border:1px solid rgba(34,197,94,0.2);border-radius:var(--radius);padding:12px 16px">' +
-    '<div style="font-size:13px;font-weight:600;color:var(--success)">✓ Imported ' + imported + ' scan(s)</div></div>';
+  r.innerHTML = '<div style="background:var(--success-dim);border:1px solid rgba(34,197,94,0.2);border-radius:var(--radius);padding:12px 16px"><div style="font-size:13px;font-weight:600;color:var(--success)">✓ Imported ' + imported + ' scan(s)</div></div>';
   document.getElementById('importJsonInput').value = '';
   showToast('Imported ' + imported + ' scan(s)', 'success');
 }
 
-async function manualScanEntry() {
-  const sessionId = document.getElementById('manualSessionId').value.trim();
-  const pin = document.getElementById('manualPin').value.trim();
-  const hostname = document.getElementById('manualHostname').value.trim();
-  const username = document.getElementById('manualUsername').value.trim();
-  if (!sessionId || !pin) { showToast('Session ID and PIN are required', 'error'); return; }
+document.addEventListener('click', function(e) {
+  if (e.target.classList.contains('modal-overlay')) closeJsonModal();
+});
 
-  const payload = {
-    sessionId, pin,
-    hostname: hostname || 'unknown',
-    username: username || 'unknown',
-    scanDate: now(), status: 'completed', iocsDetected: 0, evidenceCount: 0, duration: 0
-  };
-
-  if (_apiAvail) {
-    const result = await apiPost('upload-scan', payload);
-    if (result && result.success) {
-      await syncFromBot();
-      showToast('Scan result added: ' + sessionId, 'success');
-    } else {
-      showToast('Failed to upload scan', 'error');
-    }
-  } else {
-    showToast('Server not connected.', 'error');
-  }
-  document.getElementById('manualSessionId').value = ''; document.getElementById('manualPin').value = '';
-  document.getElementById('manualHostname').value = ''; document.getElementById('manualUsername').value = '';
-}
-
-// ═══════════════════════════════════════════
-// SCAN DETAIL
-// ═══════════════════════════════════════════
-function showDetail(id) {
-  const s = gss(); const scan = gs().find(x => x.id === id);
-  if (!scan) { showToast('Scan not found', 'error'); navigate('scans'); return; }
-  if (s.role !== 'SUPER_ADMIN' && scan.userId !== s.userId) { showToast('Access denied', 'error'); navigate('scans'); return; }
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById('pageDetail').classList.add('active'); document.getElementById('pageTitle').textContent = 'Scan Results';
-  document.getElementById('detailId').textContent = scan.sessionId || '';
-  const badge = document.getElementById('detailStatusBadge'); badge.className = 'badge badge-' + (scan.status||'completed'); badge.textContent = scan.status||'completed';
-  const si = scan.systemInfo || {};
-  document.getElementById('detailInfo').innerHTML = [
-    { l:'Session ID', v:scan.sessionId }, { l:'PIN', v:scan.pin }, { l:'Hostname', v:si.hostname||scan.hostname }, { l:'User', v:si.username||scan.username },
-    { l:'OS', v:si.osVersion||'—' }, { l:'Scanner', v:si.scannerVersion||'—' }, { l:'IP', v:si.ipAddress||'—' }, { l:'MAC', v:si.macAddress||'—' },
-    { l:'Duration', v:scan.duration?scan.duration+'s':'—' }, { l:'IOCs', v:scan.iocsDetected || 0 }, { l:'Evidence', v:scan.evidenceCount || 0 }, { l:'Date', v:new Date(scan.scanDate||scan.createdAt).toLocaleDateString() }
-  ].map(i => '<div class="detail-item"><label>'+i.l+'</label><span>'+i.v+'</span></div>').join('');
-  const arts = scan.artifacts||[]; document.getElementById('artifactsTable').innerHTML = arts.length ? arts.map(a => '<tr><td>'+a.name+'</td><td><span class="badge badge-info">'+(a.type||'—')+'</span></td><td class="text-muted" style="font-size:12px">'+(a.source||'—')+'</td><td style="font-family:monospace;font-size:11px;color:var(--text3)">'+((a.hash||'').slice(0,16)||'—')+'...</td></tr>').join('') : '<tr><td colspan="4" class="text-muted" style="text-align:center;padding:24px">No artifacts</td></tr>';
-  const iocs = scan.iocs||[]; document.getElementById('iocTable').innerHTML = iocs.length ? iocs.map(i => '<tr><td>'+i.name+'</td><td style="font-family:monospace;font-size:12px">'+i.value+'</td><td><span class="badge badge-info">'+(i.type||'—')+'</span></td><td><span class="badge badge-'+(i.riskLevel==='critical'||i.riskLevel==='high'?'failed':i.riskLevel==='medium'?'running':'completed')+'">'+(i.riskLevel||'—')+'</span></td></tr>').join('') : '<tr><td colspan="4" class="text-muted" style="text-align:center;padding:24px">No IOCs</td></tr>';
-  const evs = scan.evidence||[]; document.getElementById('evidenceTable').innerHTML = evs.length ? evs.map(e => '<tr><td>'+e.name+'</td><td class="text-muted">'+(e.description||'')+'</td><td>'+(e.source||'—')+'</td><td>'+(e.size||'—')+'</td></tr>').join('') : '<tr><td colspan="4" class="text-muted" style="text-align:center;padding:24px">No evidence</td></tr>';
-  const logD = scan.logs||[]; const lc = document.getElementById('logsContainer');
-  if (!logD.length) { lc.innerHTML = '<div class="text-muted" style="text-align:center;padding:24px">No logs</div>'; } else { lc.innerHTML = logD.map(l => { const t = new Date(l.time); return '<div class="log-line"><span class="time">['+t.getHours().toString().padStart(2,'0')+':'+t.getMinutes().toString().padStart(2,'0')+':'+t.getSeconds().toString().padStart(2,'0')+']</span><span class="level-'+l.level+'">['+l.level.toUpperCase()+']</span> '+l.msg+'</div>'; }).join(''); }
-}
-
-function switchDetailTab(tab) {
-  document.querySelectorAll('#pageDetail .tab-content').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('#pageDetail .tab').forEach(t => t.classList.remove('active'));
-  document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('active');
-  document.querySelector('#pageDetail .tab[data-tab="' + tab + '"]').classList.add('active');
-}
-
-console.log('ForensicAnalyzer Beta — Dashboard Server mode. tonch/admin123 is SUPER_ADMIN.');
+console.log('ForensicAnalyzer DFIR Console — mickyac.netlify.app');
 </script>
 </body>
 </html>
