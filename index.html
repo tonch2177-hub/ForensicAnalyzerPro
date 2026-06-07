@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ForensicAnalyzer — DFIR Console</title>
+<title>ForensicAnalyzer � DFIR Console</title>
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-:root{--bg:#0a0a0a;--bg2:#0f0f0f;--bg3:#141414;--bg4:#1a1a1a;--border:#1f1f1f;--text:#e0e0e0;--text2:#888;--text3:#555;--primary:#b91c1c;--primary-hover:#991b1b;--primary-dim:rgba(185,28,28,0.12);--primary-glow:rgba(185,28,28,0.25);--success:#22c55e;--success-dim:rgba(34,197,94,0.12);--warning:#f59e0b;--warning-dim:rgba(245,158,11,0.12);--danger:#ef4444;--danger-dim:rgba(239,68,68,0.12);--info:#3b82f6;--info-dim:rgba(59,130,246,0.12);--radius:8px;--transition:0.25s cubic-bezier(0.4,0,0.2,1)}
+:root{--bg:#0a0a0a;--bg2:#0f0f0f;--bg3:#141414;--bg4:#1a1a1a;--border:#1f1f1f;--text:#e0e0e0;--text2:#888;--text3:#555;--primary:#b91c1c;--primary-hover:#991b1b;--primary-dim:rgba(185,28,28,0.12);--primary-glow:rgba(185,28,28,0.25);--success:#22c55e;--success-dim:rgba(34,197,94,0.12);--warning:#f59e0b;--warning-dim:rgba(245,158,11,0.12);--danger:#ef4444;--danger-dim:rgba(239,68,68,0.12);--info:#3b82f6;--info-dim:rgba(59,130,246,0.12);--purple:#8b5cf6;--purple-dim:rgba(139,92,246,0.12);--radius:8px;--transition:0.25s cubic-bezier(0.4,0,0.2,1)}
 html{font-size:15px}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;line-height:1.5}
 a{color:var(--primary);text-decoration:none}
@@ -93,6 +93,7 @@ tbody tr:hover{background:var(--bg4)}
 .badge-failed,.badge-danger,.badge-disabled,.badge-tampered,.badge-HIGH,.badge-CRITICAL{background:var(--danger-dim);color:var(--danger);border:1px solid rgba(239,68,68,0.2)}
 .badge-super{background:var(--warning-dim);color:var(--warning);border:1px solid rgba(245,158,11,0.2);font-size:9px;padding:1px 6px}
 .badge-blue{background:var(--info-dim);color:var(--info);border:1px solid rgba(59,130,246,0.2)}
+.badge-purple{background:var(--purple-dim);color:var(--purple);border:1px solid rgba(139,92,246,0.2)}
 .search-bar{position:relative;max-width:320px}
 .search-bar svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--text3)}
 .search-bar input{padding-left:36px}
@@ -151,6 +152,7 @@ tbody tr:hover{background:var(--bg4)}
 .severity-indicator.high{background:#dc2626;box-shadow:0 0 6px #dc2626}
 .severity-indicator.medium{background:var(--warning);box-shadow:0 0 6px var(--warning)}
 .severity-indicator.low{background:var(--success);box-shadow:0 0 6px var(--success)}
+.severity-indicator.info{background:var(--info);box-shadow:0 0 6px var(--info)}
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;display:none;align-items:center;justify-content:center}
 .modal-overlay.show{display:flex}
 .modal{background:var(--bg3);border:1px solid var(--border);border-radius:12px;width:90%;max-width:900px;max-height:80vh;display:flex;flex-direction:column;animation:fadeIn 0.2s ease-out}
@@ -163,6 +165,18 @@ tbody tr:hover{background:var(--bg4)}
 .key-cell{font-family:Consolas,monospace;font-size:12px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .timestamp-cell{font-family:Consolas,monospace;font-size:11px;color:var(--text2)}
 .hash-cell{font-family:Consolas,monospace;font-size:11px;color:var(--text3)}
+.tl-line{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid rgba(31,31,31,0.3);align-items:flex-start}
+.tl-line .tl-time{font-family:Consolas,monospace;font-size:11px;color:var(--text3);white-space:nowrap;min-width:130px;padding-top:2px}
+.tl-line .tl-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.tl-line .tl-content{flex:1;min-width:0}
+.tl-line .tl-category{font-size:11px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:0.5px}
+.tl-line .tl-desc{font-size:13px;margin-top:1px}
+.tl-line .tl-detail{font-size:11px;color:var(--text3);margin-top:2px}
+.vt-score{font-family:Consolas,monospace;font-size:12px}
+.vt-score .vt-mal{color:var(--danger);font-weight:700}
+.vt-score .vt-sus{color:var(--warning)}
+.vt-score .vt-clean{color:var(--success)}
+.string-match{font-family:Consolas,monospace;font-size:12px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 @media(max-width:768px){
 .sidebar{width:240px;transform:translateX(-100%)}
 .sidebar.mobile-open{transform:translateX(0)}
@@ -187,7 +201,7 @@ tbody tr:hover{background:var(--bg4)}
   <div class="auth-card" id="loginForm">
     <div class="auth-logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
     <h1>ForensicAnalyzer</h1>
-    <p class="sub">DFIR Console — Incident Response Dashboard</p>
+    <p class="sub">DFIR Console � Incident Response Dashboard</p>
     <div class="error" id="loginError"></div>
     <div class="field"><label>Email</label><input type="email" id="loginEmail" placeholder="you@example.com" autocomplete="email"></div>
     <div class="field"><label>Password</label><input type="password" id="loginPassword" placeholder="password" autocomplete="current-password"></div>
@@ -205,9 +219,7 @@ tbody tr:hover{background:var(--bg4)}
     <button class="btn btn-primary" style="width:100%" onclick="handleRegister()">Create account</button>
     <div class="foot">Already have an account? <a onclick="showLogin()">Sign in</a></div>
   </div>
-</div>
-
-<div class="app-layout" id="appLayout">
+</div><div class="app-layout" id="appLayout">
   <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
@@ -223,6 +235,8 @@ tbody tr:hover{background:var(--bg4)}
       <a class="nav-item" data-page="scans" onclick="navigate('scans')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><span>Scan Results</span></a>
       <div class="nav-section">Forensic Artifacts</div>
+      <a class="nav-item" data-page="timeline" onclick="navigate('timeline')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>Timeline</span></a>
       <a class="nav-item" data-page="filesystem" onclick="navigate('filesystem')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><span>File System</span></a>
       <a class="nav-item" data-page="registry" onclick="navigate('registry')">
@@ -232,6 +246,8 @@ tbody tr:hover{background:var(--bg4)}
       <a class="nav-item" data-page="processes" onclick="navigate('processes')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg><span>Processes</span></a>
       <div class="nav-section">Analysis</div>
+      <a class="nav-item" data-page="strings" onclick="navigate('strings')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg><span>String Analysis</span></a>
       <a class="nav-item" data-page="securitytools" onclick="navigate('securitytools')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg><span>Security Tools</span></a>
       <a class="nav-item" data-page="artifacts" onclick="navigate('artifacts')">
@@ -255,13 +271,13 @@ tbody tr:hover{background:var(--bg4)}
       <button class="menu-btn" onclick="toggleSidebar()"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
       <h2 id="pageTitle">Overview</h2>
       <div class="spacer"></div>
-      <div class="user-badge"><span id="topbarUser"></span><span class="role-badge" id="topbarRole"></span><span class="badge badge-api" id="apiBadge" style="display:none">Server</span><div class="avatar" id="topbarAvatar">U</div></div>
+      <div class="user-badge"><span id="topbarUser"></span><span class="role-badge" id="topbarRole"></span><span class="badge badge-api" id="apiBadge" style="display:none">Server</span><span class="badge badge-purple" id="schemaBadge" style="display:none">v2.0</span><div class="avatar" id="topbarAvatar">U</div></div>
     </div>
 
     <div class="content">
       <!-- OVERVIEW -->
       <div class="page active" id="pageOverview">
-        <div style="margin-bottom:24px"><h2 style="font-size:20px;font-weight:700">Overview</h2><p class="text-muted text-sm" style="margin-top:2px">Forensic analysis dashboard — incident summary</p></div>
+        <div style="margin-bottom:24px"><h2 style="font-size:20px;font-weight:700">Overview</h2><p class="text-muted text-sm" style="margin-top:2px">Forensic analysis dashboard � incident summary</p></div>
         <div class="stat-grid" id="overviewStats">
           <div class="stat-card"><div class="stat-icon" style="background:var(--primary-dim)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--primary)"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></div><div class="stat-label">Total Scans</div><div class="stat-value" id="ovStatScans">0</div></div>
           <div class="stat-card"><div class="stat-icon" style="background:var(--info-dim)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--info)"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><div class="stat-label">Active Sessions</div><div class="stat-value" id="ovStatSessions">0</div></div>
@@ -298,7 +314,7 @@ tbody tr:hover{background:var(--bg4)}
           <select id="scanIocFilter" onchange="renderScans()"><option value="">IOC Level</option><option value="0">None</option><option value="1-5">Low (1-5)</option><option value="5-20">Medium (5-20)</option><option value="20+">High (20+)</option></select>
         </div>
         <div class="card"><div class="card-body" style="padding:0">
-          <div class="table-wrap"><table><thead><tr><th>Session ID</th><th>PIN</th><th>Hostname</th><th>User</th><th>Date</th><th>Duration</th><th>Status</th><th>IOCs</th><th>Artifacts</th><th></th></tr></thead><tbody id="scansTable"></tbody></table></div>
+          <div class="table-wrap"><table><thead><tr><th>Session ID</th><th>PIN</th><th>Hostname</th><th>User</th><th>Date</th><th>Duration</th><th>Schema</th><th>Status</th><th>IOCs</th><th>Artifacts</th><th></th></tr></thead><tbody id="scansTable"></tbody></table></div>
           <div id="scansEmpty" class="empty-state" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><h4>No scans yet</h4><p>Results appear after the scanner runs with a valid PIN</p></div>
         </div></div>
       </div>
@@ -317,21 +333,32 @@ tbody tr:hover{background:var(--bg4)}
           <button class="tab" data-tab="evidence" onclick="switchDetailTab('evidence')">Evidence</button>
           <button class="tab" data-tab="logs" onclick="switchDetailTab('logs')">Logs</button>
         </div>
-        <div class="tab-content active" id="tabArtifacts"><div class="table-wrap"><table><thead><tr><th>Name</th><th>Type</th><th>Source</th><th>Hash</th></tr></thead><tbody id="artifactsTable"></tbody></table></div></div>
+        <div class="tab-content active" id="tabArtifacts"><div class="table-wrap"><table><thead><tr><th>Name</th><th>Type</th><th>Source</th><th>Hash</th><th>VT</th></tr></thead><tbody id="artifactsTable"></tbody></table></div></div>
         <div class="tab-content" id="tabIoc"><div class="table-wrap"><table><thead><tr><th>Name</th><th>Value</th><th>Type</th><th>Risk Level</th></tr></thead><tbody id="iocTable"></tbody></table></div></div>
         <div class="tab-content" id="tabEvidence"><div class="table-wrap"><table><thead><tr><th>Name</th><th>Description</th><th>Source</th><th>Size</th></tr></thead><tbody id="evidenceTable"></tbody></table></div></div>
         <div class="tab-content" id="tabLogs"><div id="logsContainer"></div></div>
       </div>
 
+      <!-- TIMELINE -->
+      <div class="page" id="pageTimeline">
+        <div style="margin-bottom:24px"><h2 style="font-size:20px;font-weight:700">Forensic Timeline</h2><p class="text-muted text-sm" style="margin-top:2px">Chronological event view across all scans</p></div>
+        <div class="filter-row">
+          <div class="search-bar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input type="text" placeholder="Search events..." id="tlSearch" oninput="renderTimeline()"></div>
+          <select id="tlCategory" onchange="renderTimeline()"><option value="">All Categories</option><option value="System">System</option><option value="file">File System</option><option value="registry">Registry</option><option value="process">Process</option><option value="eventlog">Event Log</option><option value="threat">Threat</option><option value="tool">Security Tool</option></select>
+          <select id="tlSeverity" onchange="renderTimeline()"><option value="">All Severities</option><option value="critical">Critical</option><option value="warning">Warning</option><option value="info">Info</option></select>
+        </div>
+        <div class="card"><div class="card-body" id="timelineContainer"></div></div>
+      </div>
+
       <!-- FILE SYSTEM -->
       <div class="page" id="pageFilesystem">
-        <div style="margin-bottom:24px"><h2 style="font-size:20px;font-weight:700">File System Artifacts</h2><p class="text-muted text-sm" style="margin-top:2px">MFT, Amcache, Prefetch, and file operations</p></div>
+        <div style="margin-bottom:24px"><h2 style="font-size:20px;font-weight:700">File System Artifacts</h2><p class="text-muted text-sm" style="margin-top:2px">MFT, Amcache, Prefetch, Downloads, and file operations</p></div>
         <div class="filter-row">
           <div class="search-bar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input type="text" placeholder="Search paths, hashes..." id="fsSearch" oninput="renderFilesystem()"></div>
-          <select id="fsFilter" onchange="renderFilesystem()"><option value="">All Categories</option><option value="mft">MFT</option><option value="downloads">Downloads Cache</option><option value="jar">Executed JARs</option><option value="folders">Visited Folders</option><option value="appcompat">AppCompatCache</option><option value="amcache">Amcache</option><option value="prefetch">Prefetch</option></select>
+          <select id="fsFilter" onchange="renderFilesystem()"><option value="">All Categories</option><option value="mft">MFT</option><option value="downloads">Downloads Cache</option><option value="jar">Executed JARs</option><option value="folders">Visited Folders</option><option value="appcompat">AppCompatCache</option><option value="amcache">Amcache</option><option value="prefetch">Prefetch</option><option value="exitcode">Exit Code</option></select>
         </div>
         <div class="card"><div class="card-body" style="padding:0">
-          <div class="table-wrap"><table><thead><tr><th>Path</th><th>Category</th><th>Timestamp</th><th>SHA256</th><th>Size</th><th>Source</th></tr></thead><tbody id="fsTable"></tbody></table></div>
+          <div class="table-wrap"><table><thead><tr><th>Path</th><th>Category</th><th>Timestamp</th><th>SHA256</th><th>Size</th><th>VT</th><th>Source</th></tr></thead><tbody id="fsTable"></tbody></table></div>
           <div id="fsEmpty" class="empty-state" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><h4>No file system artifacts</h4><p>Run a scan to collect file system data</p></div>
         </div></div>
       </div>
@@ -339,6 +366,9 @@ tbody tr:hover{background:var(--bg4)}
       <!-- REGISTRY -->
       <div class="page" id="pageRegistry">
         <div style="margin-bottom:24px"><h2 style="font-size:20px;font-weight:700">Registry Artifacts</h2><p class="text-muted text-sm" style="margin-top:2px">Windows registry forensic data</p></div>
+        <div class="filter-row">
+          <div class="search-bar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input type="text" placeholder="Search registry keys..." id="regSearch" oninput="renderRegistry(_activeRegTab)"></div>
+        </div>
         <div class="tabs" id="registryTabs">
           <button class="tab active" data-tab="bam" onclick="switchRegTab('bam')">BAM</button>
           <button class="tab" data-tab="muicache" onclick="switchRegTab('muicache')">MUICache</button>
@@ -348,19 +378,22 @@ tbody tr:hover{background:var(--bg4)}
           <button class="tab" data-tab="cmdproc" onclick="switchRegTab('cmdproc')">Command Processor</button>
           <button class="tab" data-tab="appsswitched" onclick="switchRegTab('appsswitched')">AppsSwitched</button>
           <button class="tab" data-tab="directinput" onclick="switchRegTab('directinput')">DirectInput</button>
+          <button class="tab" data-tab="archistory" onclick="switchRegTab('archistory')">ArcHistory</button>
+          <button class="tab" data-tab="cidsizemru" onclick="switchRegTab('cidsizemru')">CIDSizeMRU</button>
+          <button class="tab" data-tab="store" onclick="switchRegTab('store')">Store</button>
+          <button class="tab" data-tab="startmenu" onclick="switchRegTab('startmenu')">StartMenuInternet</button>
+          <button class="tab" data-tab="hkids" onclick="switchRegTab('hkids')">HKIDs</button>
         </div>
         <div class="card"><div class="card-body" style="padding:0">
           <div class="table-wrap"><table><thead><tr><th>Registry Key</th><th>Value</th><th>Timestamp</th><th>User</th></tr></thead><tbody id="registryTable"></tbody></table></div>
           <div id="registryEmpty" class="empty-state" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg><h4>No registry artifacts</h4><p>Run a scan to collect registry data</p></div>
         </div></div>
-      </div>
-
-      <!-- EVENT LOGS -->
+      </div>      <!-- EVENT LOGS -->
       <div class="page" id="pageEventlogs">
         <div style="margin-bottom:24px"><h2 style="font-size:20px;font-weight:700">Event Logs</h2><p class="text-muted text-sm" style="margin-top:2px">Windows event log analysis</p></div>
         <div class="filter-row">
           <select id="elLog" onchange="renderEventLogs()"><option value="">All Logs</option><option value="application">Application</option><option value="security">Security</option><option value="system">System</option></select>
-          <select id="elLevel" onchange="renderEventLogs()"><option value="">All Levels</option><option value="critical">Critical</option><option value="warning">Warning</option><option value="information">Information</option></select>
+          <select id="elLevel" onchange="renderEventLogs()"><option value="">All Levels</option><option value="critical">Critical</option><option value="error">Error</option><option value="warning">Warning</option><option value="information">Information</option></select>
           <div class="search-bar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input type="text" placeholder="Search events..." id="elSearch" oninput="renderEventLogs()"></div>
         </div>
         <div class="card"><div class="card-body" style="padding:0">
@@ -381,6 +414,25 @@ tbody tr:hover{background:var(--bg4)}
         </div></div>
       </div>
 
+      <!-- STRING ANALYSIS -->
+      <div class="page" id="pageStrings">
+        <div style="margin-bottom:24px"><h2 style="font-size:20px;font-weight:700">String Analysis</h2><p class="text-muted text-sm" style="margin-top:2px">Pattern matching across all scan data � emails, URLs, IPs, domains, Discord IDs</p></div>
+        <div class="tabs" id="stringTabs">
+          <button class="tab active" data-tab="all" onclick="switchStringTab('all')">All Findings</button>
+          <button class="tab" data-tab="email" onclick="switchStringTab('email')">Emails</button>
+          <button class="tab" data-tab="url" onclick="switchStringTab('url')">URLs</button>
+          <button class="tab" data-tab="domain" onclick="switchStringTab('domain')">Domains</button>
+          <button class="tab" data-tab="ipv4" onclick="switchStringTab('ipv4')">IPv4</button>
+          <button class="tab" data-tab="ipv6" onclick="switchStringTab('ipv6')">IPv6</button>
+          <button class="tab" data-tab="discord_id" onclick="switchStringTab('discord_id')">Discord IDs</button>
+          <button class="tab" data-tab="username" onclick="switchStringTab('username')">Usernames</button>
+        </div>
+        <div class="card"><div class="card-body" style="padding:0">
+          <div class="table-wrap"><table><thead><tr><th>Type</th><th>Value</th><th>Context</th><th>Source Scan</th></tr></thead><tbody id="stringsTable"></tbody></table></div>
+          <div id="stringsEmpty" class="empty-state" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg><h4>No string matches found</h4><p>Run a scan to generate string analysis data</p></div>
+        </div></div>
+      </div>
+
       <!-- SECURITY TOOLS -->
       <div class="page" id="pageSecuritytools">
         <div style="margin-bottom:24px"><h2 style="font-size:20px;font-weight:700">Security Tools</h2><p class="text-muted text-sm" style="margin-top:2px">Detected security and forensic tools</p></div>
@@ -392,12 +444,17 @@ tbody tr:hover{background:var(--bg4)}
 
       <!-- ARTIFACTS -->
       <div class="page" id="pageArtifacts">
-        <div style="margin-bottom:24px"><h2 style="font-size:20px;font-weight:700">Artifact Analysis</h2><p class="text-muted text-sm" style="margin-top:2px">Hidden characters, steganography, strings, and regex findings</p></div>
+        <div style="margin-bottom:24px"><h2 style="font-size:20px;font-weight:700">Artifact Analysis</h2><p class="text-muted text-sm" style="margin-top:2px">Hidden characters, steganography, Minecraft artifacts, forensic tool traces</p></div>
         <div class="tabs" id="artifactTabs">
-          <button class="tab active" data-tab="hidden" onclick="switchArtifactTab('hidden')">Unicode Hidden</button>
+          <button class="tab active" data-tab="unicode" onclick="switchArtifactTab('unicode')">Unicode Hidden</button>
           <button class="tab" data-tab="stego" onclick="switchArtifactTab('stego')">Steganography</button>
-          <button class="tab" data-tab="strings" onclick="switchArtifactTab('strings')">Public Strings</button>
-          <button class="tab" data-tab="regex" onclick="switchArtifactTab('regex')">Regex Findings</button>
+          <button class="tab" data-tab="minecraft" onclick="switchArtifactTab('minecraft')">Minecraft</button>
+          <button class="tab" data-tab="feather" onclick="switchArtifactTab('feather')">Feather</button>
+          <button class="tab" data-tab="alts" onclick="switchArtifactTab('alts')">Minecraft Alts</button>
+          <button class="tab" data-tab="velo" onclick="switchArtifactTab('velo')">Velociraptor</button>
+          <button class="tab" data-tab="shell" onclick="switchArtifactTab('shell')">ShellBags</button>
+          <button class="tab" data-tab="evtx" onclick="switchArtifactTab('evtx')">EVTX Analysis</button>
+          <button class="tab" data-tab="permissions" onclick="switchArtifactTab('permissions')">Folder Permissions</button>
         </div>
         <div class="card"><div class="card-body" style="padding:0">
           <div class="table-wrap"><table><thead><tr><th>Category</th><th>Value</th><th>Context</th><th>Severity</th><th>Source Scan</th></tr></thead><tbody id="artifactsAnalysisTable"></tbody></table></div>
@@ -410,7 +467,7 @@ tbody tr:hover{background:var(--bg4)}
         <div style="margin-bottom:24px"><h2 style="font-size:20px;font-weight:700">Threat Indicators</h2><p class="text-muted text-sm" style="margin-top:2px">Security threats and suspicious findings</p></div>
         <div class="filter-row">
           <select id="threatSeverity" onchange="renderThreats()"><option value="">All Severities</option><option value="CRITICAL">Critical</option><option value="HIGH">High</option><option value="MEDIUM">Medium</option><option value="LOW">Low</option></select>
-          <select id="threatCategory" onchange="renderThreats()"><option value="">All Categories</option><option value="suspicious">Suspicious Files</option><option value="unusual_tools">Unusual Tools</option><option value="recent_executions">Recent Executions</option><option value="findings">Relevant Findings</option></select>
+          <select id="threatCategory" onchange="renderThreats()"><option value="">All Categories</option><option value="suspicious">Suspicious Files</option><option value="unusual_tools">Unusual Tools</option><option value="recent_executions">Recent Executions</option><option value="findings">Relevant Findings</option><option value="malware">Malware</option><option value="persistence">Persistence</option></select>
           <div class="search-bar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input type="text" placeholder="Search threats..." id="threatSearch" oninput="renderThreats()"></div>
         </div>
         <div class="card"><div class="card-body" style="padding:0">
@@ -450,6 +507,7 @@ tbody tr:hover{background:var(--bg4)}
             <div class="gap-3">
               <button class="btn btn-secondary" onclick="exportJSON('pins')">Download pins.json</button>
               <button class="btn btn-secondary" onclick="exportJSON('scans')">Download scans.json</button>
+              <button class="btn btn-secondary" onclick="exportJSON('timeline')">Download timeline.json</button>
               <button class="btn btn-secondary" onclick="exportJSON('report')">Generate Report</button>
             </div>
             <div id="exportPreview" style="margin-top:16px;display:none">
@@ -486,15 +544,23 @@ tbody tr:hover{background:var(--bg4)}
 <!-- Raw JSON Modal -->
 <div class="modal-overlay" id="jsonModal">
   <div class="modal">
-    <div class="modal-header"><h3>Raw JSON — <span id="jsonModalTitle"></span></h3><button class="modal-close" onclick="closeJsonModal()">✕</button></div>
+    <div class="modal-header"><h3>Raw JSON � <span id="jsonModalTitle"></span></h3><button class="modal-close" onclick="closeJsonModal()">?</button></div>
     <div class="modal-body"><pre class="code-block" id="jsonModalContent" style="max-height:none;white-space:pre-wrap"></pre></div>
   </div>
 </div>
 
-<script>
+<!-- VirusTotal Modal -->
+<div class="modal-overlay" id="vtModal">
+  <div class="modal" style="max-width:600px">
+    <div class="modal-header"><h3>VirusTotal � <span id="vtModalHash"></span></h3><button class="modal-close" onclick="document.getElementById('vtModal').classList.remove('show')">?</button></div>
+    <div class="modal-body" id="vtModalBody"><div class="empty-state"><p>Loading...</p></div></div>
+  </div>
+</div><script>
 const API_BASE = '/api/';
 let _apiAvail = false;
 let _currentScanDetail = null;
+let _activeRegTab = 'bam';
+let _activeStringTab = 'all';
 let _registryData = [];
 let _fsData = [];
 let _procData = [];
@@ -502,11 +568,14 @@ let _secToolsData = [];
 let _artifactAnalysisData = [];
 let _threatData = [];
 let _eventLogData = [];
+let _stringData = [];
+let _timelineData = [];
+let _vtCache = {};
 
 async function checkApi() {
     try {
         const r = await fetch(API_BASE + 'health');
-        if (r.ok) { _apiAvail = true; updateApiBadge(); await syncFromBot(); }
+        if (r.ok) { const h = await r.json(); _apiAvail = true; updateApiBadge(); if (h.schemaVersion) document.getElementById('schemaBadge').style.display = 'inline-flex'; await syncFromBot(); }
     } catch(e) { _apiAvail = false; }
 }
 checkApi();
@@ -604,17 +673,19 @@ function navigate(page, data) {
   if (el) el.classList.add('active');
   const nav = document.querySelector('[data-page="' + page + '"]');
   if (nav) nav.classList.add('active');
-  const titles = { overview:'Overview', sessions:'Sessions', scans:'Scan Results', detail:'Scan Report', filesystem:'File System', registry:'Registry', eventlogs:'Event Logs', processes:'Processes', securitytools:'Security Tools', artifacts:'Artifacts', threats:'Threat Indicators', admin:'Admin Panel', profile:'Profile' };
+  const titles = { overview:'Overview', sessions:'Sessions', scans:'Scan Results', detail:'Scan Report', timeline:'Timeline', filesystem:'File System', registry:'Registry', eventlogs:'Event Logs', processes:'Processes', strings:'String Analysis', securitytools:'Security Tools', artifacts:'Artifacts', threats:'Threat Indicators', admin:'Admin Panel', profile:'Profile' };
   document.getElementById('pageTitle').textContent = titles[page] || page;
   if (page === 'overview') renderOverview();
   if (page === 'sessions') renderSessions();
   if (page === 'scans') renderScans();
+  if (page === 'timeline') renderTimeline();
   if (page === 'filesystem') renderFilesystem();
   if (page === 'registry') { switchRegTab('bam'); }
   if (page === 'eventlogs') renderEventLogs();
   if (page === 'processes') renderProcesses();
+  if (page === 'strings') { switchStringTab('all'); }
   if (page === 'securitytools') renderSecTools();
-  if (page === 'artifacts') { switchArtifactTab('hidden'); }
+  if (page === 'artifacts') { switchArtifactTab('unicode'); }
   if (page === 'threats') renderThreats();
   if (page === 'admin') { switchAdminTab('gen'); }
   if (page === 'profile') renderProfile();
@@ -625,7 +696,7 @@ function toggleSidebar() { const s = document.getElementById('sidebar'), o = doc
 function closeSidebar() { if (window.innerWidth <= 768) { document.getElementById('sidebar').classList.remove('mobile-open'); document.getElementById('sidebarOverlay').classList.remove('show'); } }
 
 function badgeClass(s) {
-  const m = { completed:'badge-completed', active:'badge-ok', in_use:'badge-running', used:'badge-completed', running:'badge-running', expired:'badge-running', deactivated:'badge-disabled', failed:'badge-failed', CRITICAL:'badge-CRITICAL', HIGH:'badge-HIGH', MEDIUM:'badge-MEDIUM', LOW:'badge-LOW', low:'badge-LOW', medium:'badge-MEDIUM', high:'badge-HIGH', critical:'badge-CRITICAL' };
+  const m = { completed:'badge-completed', active:'badge-ok', in_use:'badge-running', used:'badge-completed', running:'badge-running', expired:'badge-running', deactivated:'badge-disabled', failed:'badge-failed', CRITICAL:'badge-CRITICAL', HIGH:'badge-HIGH', MEDIUM:'badge-MEDIUM', LOW:'badge-LOW', low:'badge-LOW', medium:'badge-MEDIUM', high:'badge-HIGH', critical:'badge-CRITICAL', info:'badge-blue' };
   return m[s] || 'badge-pending';
 }
 
@@ -728,6 +799,55 @@ function collectEventLogs() {
   return arr;
 }
 
+function collectStrings() {
+  const scans = gs(); const arr = [];
+  const pats = [
+    { name: 'Email', regex: /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, type: 'email' },
+    { name: 'URL', regex: /https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&\/=]*)/g, type: 'url' },
+    { name: 'Domain', regex: /(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}/g, type: 'domain' },
+    { name: 'IPv4', regex: /\b(?:\d{1,3}\.){3}\d{1,3}\b/g, type: 'ipv4' },
+    { name: 'IPv6', regex: /\b(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}\b/g, type: 'ipv6' },
+    { name: 'Discord ID', regex: /\b\d{17,20}\b/g, type: 'discord_id' },
+    { name: 'Username', regex: /\b[a-zA-Z0-9_]{3,32}\b/g, type: 'username' }
+  ];
+  scans.forEach(s => {
+    const searchText = JSON.stringify(extractResults(s));
+    const seen = new Set();
+    pats.forEach(p => { p.regex.lastIndex = 0; let m; while ((m = p.regex.exec(searchText)) !== null) { const key = p.type + ':' + m[0]; if (!seen.has(key)) { seen.add(key); arr.push({ type: p.name, category: p.type, value: m[0], context: extractCtx(searchText, m.index), scanId: s.id, scanLabel: s.sessionId }); } } });
+  });
+  return arr;
+}
+
+function extractCtx(text, index, radius) {
+  radius = radius || 40;
+  const start = Math.max(0, index - radius);
+  const end = Math.min(text.length, index + radius);
+  let ctx = text.slice(start, end).replace(/\n/g, ' ');
+  if (start > 0) ctx = '...' + ctx;
+  if (end < text.length) ctx = ctx + '...';
+  return ctx;
+}
+
+function collectTimeline() {
+  const scans = gs(); const events = [];
+  scans.forEach(s => {
+    const res = extractResults(s);
+    const base = s.createdAt || s.scanDate || now();
+    events.push({ timestamp: base, type: 'scan', category: 'System', description: 'Scan started on ' + (s.hostname||'unknown'), severity: 'info', scanLabel: s.sessionId });
+    const fs = res.fileSystem || {};
+    Object.keys(fs).forEach(cat => { (fs[cat]||[]).forEach(item => { if (item.timestamp) events.push({ timestamp: item.timestamp, type: 'file', category: 'File System - ' + cat, description: (item.path||'Unknown'), severity: 'info', scanLabel: s.sessionId }); }); });
+    const reg = res.registry || {};
+    Object.keys(reg).forEach(cat => { (reg[cat]||[]).forEach(item => { if (item.timestamp) events.push({ timestamp: item.timestamp, type: 'registry', category: 'Registry - ' + cat, description: (item.key||item.path||'Unknown'), severity: 'info', scanLabel: s.sessionId }); }); });
+    (res.processes||[]).forEach(p => { if (p.timestamp) events.push({ timestamp: p.timestamp, type: 'process', category: 'Process', description: (p.name||p.process||'Unknown'), severity: p.exitCode && p.exitCode !== '0' ? 'warning' : 'info', scanLabel: s.sessionId }); });
+    const el = res.eventLogs || {};
+    Object.keys(el).forEach(logName => { (el[logName]||[]).forEach(e => { if (e.timestamp) events.push({ timestamp: e.timestamp, type: 'eventlog', category: 'Event Log - ' + logName, description: (e.source||'Unknown'), severity: (e.level||'info').toLowerCase(), scanLabel: s.sessionId }); }); });
+    (res.threatIndicators||[]).forEach(t => events.push({ timestamp: t.timestamp||base, type: 'threat', category: 'Threat', description: (t.indicator||t.name||'Unknown'), severity: (t.severity||'low').toLowerCase(), scanLabel: s.sessionId }));
+    (res.securityTools||[]).forEach(t => events.push({ timestamp: t.lastSeen||t.timestamp||base, type: 'tool', category: 'Security Tool', description: (t.name||'Unknown'), severity: 'info', scanLabel: s.sessionId }));
+  });
+  events.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+  return events;
+}
+
 function refreshDerivedData() {
   _fsData = collectFsArtifacts();
   _registryData = collectRegistryArtifacts();
@@ -736,6 +856,8 @@ function refreshDerivedData() {
   _artifactAnalysisData = collectArtifactAnalysis();
   _threatData = collectThreats();
   _eventLogData = collectEventLogs();
+  _stringData = collectStrings();
+  _timelineData = collectTimeline();
 }
 
 async function renderOverview() {
@@ -751,7 +873,7 @@ async function renderOverview() {
   const ra = document.getElementById('ovRecentScans');
   if (!my.length) { ra.innerHTML = '<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><h4>No scans yet</h4><p>Results appear after the scanner runs</p></div>'; }
   else {
-    ra.innerHTML = '<div style="display:flex;flex-direction:column;gap:8px">' + my.slice(0,5).map(x => '<div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid rgba(31,31,31,0.3)"><div style="width:32px;height:32px;border-radius:6px;background:var(--success-dim);display:flex;align-items:center;justify-content:center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:500">' + (x.sessionId||'N/A') + '</div><div class="text-muted" style="font-size:11px">' + (x.hostname||'') + ' · ' + (x.username||'') + ' · ' + (x.iocsDetected||0) + ' IOCs</div></div><span class="text-muted" style="font-size:11px">' + new Date(x.scanDate||x.createdAt).toLocaleDateString() + '</span><a style="cursor:pointer;font-size:12px;color:var(--primary)" onclick="navigate(\'detail\',\'' + x.id + '\')">Open</a></div>').join('') + '</div>';
+    ra.innerHTML = '<div style="display:flex;flex-direction:column;gap:8px">' + my.slice(0,5).map(x => '<div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid rgba(31,31,31,0.3)"><div style="width:32px;height:32px;border-radius:6px;background:var(--success-dim);display:flex;align-items:center;justify-content:center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:500">' + (x.sessionId||'N/A') + '</div><div class="text-muted" style="font-size:11px">' + (x.hostname||'') + ' � ' + (x.username||'') + ' � ' + (x.iocsDetected||0) + ' IOCs' + (x.schemaVersion ? ' � v' + x.schemaVersion : '') + '</div></div><span class="text-muted" style="font-size:11px">' + new Date(x.scanDate||x.createdAt).toLocaleDateString() + '</span><a style="cursor:pointer;font-size:12px;color:var(--primary)" onclick="navigate(\'detail\',\'' + x.id + '\')">Open</a></div>').join('') + '</div>';
   }
 
   const ds = document.getElementById('ovDetectionSummary');
@@ -801,7 +923,7 @@ function renderSessions() {
   });
   const tb = document.getElementById('sessionsTable'); const em = document.getElementById('sessionsEmpty');
   if (!f.length) { tb.innerHTML = ''; em.style.display = 'block'; } else { em.style.display = 'none'; }
-  tb.innerHTML = f.map(x => '<tr><td style="font-family:monospace">' + (x.sessionId||'—') + '</td><td style="font-family:monospace;font-weight:600;font-size:16px">' + x.pin + '</td><td><span class="badge ' + badgeClass(x.status) + '">' + x.status + '</span></td><td class="text-muted text-sm">' + new Date(x.createdAt).toLocaleDateString() + '</td><td class="text-muted text-sm">' + (x.usedAt ? new Date(x.usedAt).toLocaleDateString() : '—') + '</td><td style="font-size:12px;max-width:120px;overflow:hidden;text-overflow:ellipsis">' + (x.notes||'—') + '</td><td><div class="gap-2">' + (x.status==='active' ? '<button class="btn btn-sm btn-secondary" onclick="togglePin(\'' + x.pin + '\')">Deactivate</button>' : '') + '<button class="btn btn-sm btn-ghost" style="color:var(--danger)" onclick="deletePin(\'' + x.pin + '\')">Delete</button></div></td></tr>').join('');
+  tb.innerHTML = f.map(x => '<tr><td style="font-family:monospace">' + (x.sessionId||'\u2014') + '</td><td style="font-family:monospace;font-weight:600;font-size:16px">' + x.pin + '</td><td><span class="badge ' + badgeClass(x.status) + '">' + x.status + '</span></td><td class="text-muted text-sm">' + new Date(x.createdAt).toLocaleDateString() + '</td><td class="text-muted text-sm">' + (x.usedAt ? new Date(x.usedAt).toLocaleDateString() : '\u2014') + '</td><td style="font-size:12px;max-width:120px;overflow:hidden;text-overflow:ellipsis">' + (x.notes||'\u2014') + '</td><td><div class="gap-2">' + (x.status==='active' ? '<button class="btn btn-sm btn-secondary" onclick="togglePin(\'' + x.pin + '\')">Deactivate</button>' : '') + '<button class="btn btn-sm btn-ghost" style="color:var(--danger)" onclick="deletePin(\'' + x.pin + '\')">Delete</button></div></td></tr>').join('');
 }
 
 async function renderScans() {
@@ -824,7 +946,28 @@ async function renderScans() {
   });
   const tb = document.getElementById('scansTable'); const em = document.getElementById('scansEmpty');
   if (!f.length) { tb.innerHTML = ''; em.style.display = 'block'; } else { em.style.display = 'none'; }
-  tb.innerHTML = f.map(x => '<tr><td style="font-family:monospace;font-size:12px">' + (x.sessionId||'—') + '</td><td style="font-family:monospace">' + x.pin + '</td><td>' + (x.hostname||'—') + '</td><td>' + (x.username||'—') + '</td><td class="text-muted text-sm">' + new Date(x.scanDate||x.createdAt).toLocaleDateString() + '</td><td class="text-muted text-sm">' + (x.duration ? x.duration + 's' : '—') + '</td><td><span class="badge ' + badgeClass(x.status||'completed') + '">' + (x.status||'completed') + '</span></td><td><span class="badge ' + ((x.iocsDetected||0) >= 20 ? 'badge-HIGH' : (x.iocsDetected||0) >= 5 ? 'badge-MEDIUM' : 'badge-LOW') + '">' + (x.iocsDetected||0) + '</span></td><td>' + (x.evidenceCount||0) + '</td><td><a style="cursor:pointer;font-size:12px;color:var(--primary)" onclick="navigate(\'detail\',\'' + x.id + '\')">Open →</a></td></tr>').join('');
+  tb.innerHTML = f.map(x => '<tr><td style="font-family:monospace;font-size:12px">' + (x.sessionId||'\u2014') + '</td><td style="font-family:monospace">' + x.pin + '</td><td>' + (x.hostname||'\u2014') + '</td><td>' + (x.username||'\u2014') + '</td><td class="text-muted text-sm">' + new Date(x.scanDate||x.createdAt).toLocaleDateString() + '</td><td class="text-muted text-sm">' + (x.duration ? x.duration + 's' : '\u2014') + '</td><td><span class="badge badge-purple">v' + (x.schemaVersion||'1.0') + '</span></td><td><span class="badge ' + badgeClass(x.status||'completed') + '">' + (x.status||'completed') + '</span></td><td><span class="badge ' + ((x.iocsDetected||0) >= 20 ? 'badge-HIGH' : (x.iocsDetected||0) >= 5 ? 'badge-MEDIUM' : 'badge-LOW') + '">' + (x.iocsDetected||0) + '</span></td><td>' + (x.evidenceCount||0) + '</td><td><a style="cursor:pointer;font-size:12px;color:var(--primary)" onclick="navigate(\'detail\',\'' + x.id + '\')">Open \u2192</a></td></tr>').join('');
+}
+
+function renderTimeline() {
+  refreshDerivedData();
+  const search = document.getElementById('tlSearch').value.toLowerCase();
+  const catFilter = document.getElementById('tlCategory').value;
+  const sevFilter = document.getElementById('tlSeverity').value;
+  const f = _timelineData.filter(x => {
+    if (search && !(x.description||'').toLowerCase().includes(search) && !(x.category||'').toLowerCase().includes(search)) return false;
+    if (catFilter && x.type !== catFilter && !(x.category||'').toLowerCase().includes(catFilter.toLowerCase())) return false;
+    if (sevFilter && x.severity !== sevFilter) return false;
+    return true;
+  });
+  const container = document.getElementById('timelineContainer');
+  if (!f.length) { container.innerHTML = '<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><h4>No timeline events</h4><p>Run scans to populate the timeline</p></div>'; return; }
+  container.innerHTML = '<div style="margin-bottom:8px"><span class="text-muted text-sm">' + f.length + ' events</span></div>' + f.slice(0,200).map(e => {
+    const dotColor = { critical:'var(--danger)', warning:'var(--warning)', info:'var(--info)', threat:'var(--danger)', file:'var(--success)', registry:'var(--info)', process:'var(--warning)', eventlog:'var(--info)', tool:'var(--purple)', scan:'var(--success)' };
+    const t = new Date(e.timestamp);
+    const timeStr = isNaN(t.getTime()) ? e.timestamp : t.toLocaleString();
+    return '<div class="tl-line"><div class="tl-time">' + timeStr + '</div><div class="tl-dot" style="background:' + (dotColor[e.type]||dotColor[e.severity]||'var(--text3)') + '"></div><div class="tl-content"><div class="tl-category">' + (e.category||e.type||'Event') + '</div><div class="tl-desc">' + (e.description||'') + '</div><div class="tl-detail">' + (e.scanLabel ? 'Scan: ' + e.scanLabel : '') + '</div></div></div>';
+  }).join('');
 }
 
 function renderProfile() {
@@ -847,21 +990,22 @@ function renderFilesystem() {
   });
   const tb = document.getElementById('fsTable'); const em = document.getElementById('fsEmpty');
   if (!f.length) { tb.innerHTML = ''; em.style.display = 'block'; } else { em.style.display = 'none'; }
-  tb.innerHTML = f.map(x => '<tr><td class="path-cell" title="' + (x.path||'') + '">' + (x.path||'—') + '</td><td><span class="badge badge-info">' + (x.category||'—') + '</span></td><td class="timestamp-cell">' + (x.timestamp||x.lastModified||'—') + '</td><td class="hash-cell">' + ((x.sha256||x.hash||'').slice(0,16)||'—') + '...</td><td class="text-muted">' + (x.size||'—') + '</td><td class="text-muted text-sm">' + (x.scanLabel||'—') + '</td></tr>').join('');
+  tb.innerHTML = f.map(x => '<tr><td class="path-cell" title="' + (x.path||'') + '">' + (x.path||'\u2014') + '</td><td><span class="badge badge-info">' + (x.category||'\u2014') + '</span></td><td class="timestamp-cell">' + (x.timestamp||x.lastModified||'\u2014') + '</td><td class="hash-cell">' + ((x.sha256||x.hash||'').slice(0,16)||'\u2014') + '...</td><td class="text-muted">' + (x.size||'\u2014') + '</td><td>' + ((x.sha256||x.hash) ? '<button class="btn btn-sm btn-ghost" style="color:var(--info);font-size:11px" onclick="lookupVt(\'' + (x.sha256||x.hash) + '\')">VT</button>' : '\u2014') + '</td><td class="text-muted text-sm">' + (x.scanLabel||'\u2014') + '</td></tr>').join('');
 }
 
 function switchRegTab(tab) {
+  _activeRegTab = tab;
   document.querySelectorAll('#pageRegistry .tab').forEach(t => t.classList.remove('active'));
   document.querySelector('#pageRegistry .tab[data-tab="' + tab + '"]').classList.add('active');
   renderRegistry(tab);
-}
-
-function renderRegistry(tab) {
+}function renderRegistry(tab) {
   refreshDerivedData();
-  const f = _registryData.filter(x => x.category === tab);
+  const search = document.getElementById('regSearch').value.toLowerCase();
+  let f = _registryData.filter(x => x.category === tab);
+  if (search) f = f.filter(x => (x.key||x.path||'').toLowerCase().includes(search) || (x.value||'').toLowerCase().includes(search));
   const tb = document.getElementById('registryTable'); const em = document.getElementById('registryEmpty');
   if (!f.length) { tb.innerHTML = ''; em.style.display = 'block'; } else { em.style.display = 'none'; }
-  tb.innerHTML = f.map(x => '<tr><td class="key-cell" title="' + (x.key||x.path||'') + '">' + (x.key||x.path||'—') + '</td><td style="font-family:monospace;font-size:12px">' + (x.value||'—') + '</td><td class="timestamp-cell">' + (x.timestamp||'—') + '</td><td class="text-muted text-sm">' + (x.user||'—') + '</td></tr>').join('');
+  tb.innerHTML = f.map(x => '<tr><td class="key-cell" title="' + (x.key||x.path||'') + '">' + (x.key||x.path||'\u2014') + '</td><td style="font-family:monospace;font-size:12px">' + (x.value||'\u2014') + '</td><td class="timestamp-cell">' + (x.timestamp||'\u2014') + '</td><td class="text-muted text-sm">' + (x.user||'\u2014') + '</td></tr>').join('');
 }
 
 function renderEventLogs() {
@@ -877,7 +1021,7 @@ function renderEventLogs() {
   });
   const tb = document.getElementById('eventLogsTable'); const em = document.getElementById('eventLogsEmpty');
   if (!f.length) { tb.innerHTML = ''; em.style.display = 'block'; } else { em.style.display = 'none'; }
-  tb.innerHTML = f.map(x => '<tr><td><span class="badge ' + badgeClass((x.level||'info').toUpperCase()) + '">' + (x.level||'INFO') + '</span></td><td>' + (x.logName||'—') + '</td><td class="text-muted text-sm">' + (x.eventId||'—') + '</td><td class="text-muted">' + (x.source||'—') + '</td><td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + (x.message||x.msg||'—') + '</td><td class="timestamp-cell">' + (x.timestamp||'—') + '</td></tr>').join('');
+  tb.innerHTML = f.map(x => '<tr><td><span class="badge ' + badgeClass((x.level||'info').toUpperCase()) + '">' + (x.level||'INFO') + '</span></td><td>' + (x.logName||'\u2014') + '</td><td class="text-muted text-sm">' + (x.eventId||'\u2014') + '</td><td class="text-muted">' + (x.source||'\u2014') + '</td><td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + (x.message||x.msg||'\u2014') + '</td><td class="timestamp-cell">' + (x.timestamp||'\u2014') + '</td></tr>').join('');
 }
 
 function renderProcesses() {
@@ -889,18 +1033,32 @@ function renderProcesses() {
   });
   const tb = document.getElementById('processesTable'); const em = document.getElementById('processesEmpty');
   if (!f.length) { tb.innerHTML = ''; em.style.display = 'block'; } else { em.style.display = 'none'; }
-  tb.innerHTML = f.map(x => '<tr><td style="font-family:monospace;font-weight:500">' + (x.name||x.process||'—') + '</td><td class="text-muted">' + (x.pid||'—') + '</td><td class="text-muted">' + (x.user||'—') + '</td><td style="max-width:250px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:monospace;font-size:12px">' + (x.commandLine||'—') + '</td><td class="text-muted">' + (x.exitCode||'—') + '</td><td class="timestamp-cell">' + (x.timestamp||'—') + '</td><td class="text-muted text-sm">' + (x.scanLabel||'—') + '</td></tr>').join('');
+  tb.innerHTML = f.map(x => '<tr><td style="font-family:monospace;font-weight:500">' + (x.name||x.process||'\u2014') + '</td><td class="text-muted">' + (x.pid||'\u2014') + '</td><td class="text-muted">' + (x.user||'\u2014') + '</td><td style="max-width:250px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:monospace;font-size:12px">' + (x.commandLine||'\u2014') + '</td><td class="text-muted">' + (x.exitCode||'\u2014') + '</td><td class="timestamp-cell">' + (x.timestamp||'\u2014') + '</td><td class="text-muted text-sm">' + (x.scanLabel||'\u2014') + '</td></tr>').join('');
+}
+
+function switchStringTab(tab) {
+  _activeStringTab = tab;
+  document.querySelectorAll('#pageStrings .tab').forEach(t => t.classList.remove('active'));
+  document.querySelector('#pageStrings .tab[data-tab="' + tab + '"]').classList.add('active');
+  renderStrings(tab);
+}
+
+function renderStrings(tab) {
+  refreshDerivedData();
+  const f = tab === 'all' ? _stringData : _stringData.filter(x => x.category === tab);
+  const tb = document.getElementById('stringsTable'); const em = document.getElementById('stringsEmpty');
+  if (!f.length) { tb.innerHTML = ''; em.style.display = 'block'; } else { em.style.display = 'none'; }
+  tb.innerHTML = f.map(x => '<tr><td><span class="badge badge-blue">' + (x.type||x.category||'\u2014') + '</span></td><td class="string-match" title="' + (x.value||'') + '">' + (x.value||'\u2014') + '</td><td class="text-muted text-sm" style="max-width:250px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + (x.context||'\u2014') + '</td><td class="text-muted text-sm">' + (x.scanLabel||'\u2014') + '</td></tr>').join('');
 }
 
 function renderSecTools() {
   refreshDerivedData();
   const tb = document.getElementById('secToolsTable'); const em = document.getElementById('secToolsEmpty');
   if (!_secToolsData.length) { tb.innerHTML = ''; em.style.display = 'block'; } else { em.style.display = 'none'; }
-  tb.innerHTML = _secToolsData.map(x => '<tr><td style="font-weight:500">' + (x.name||'—') + '</td><td><span class="badge badge-blue">' + (x.category||'Security') + '</span></td><td class="text-muted">' + (x.version||'—') + '</td><td class="path-cell" title="' + (x.path||'') + '">' + (x.path||'—') + '</td><td><span class="badge ' + badgeClass(x.status||'installed') + '">' + (x.status||'installed') + '</span></td><td class="timestamp-cell">' + (x.lastSeen||'—') + '</td><td class="text-muted text-sm">' + (x.scanLabel||'—') + '</td></tr>').join('');
+  tb.innerHTML = _secToolsData.map(x => '<tr><td style="font-weight:500">' + (x.name||'\u2014') + '</td><td><span class="badge badge-blue">' + (x.category||'Security') + '</span></td><td class="text-muted">' + (x.version||'\u2014') + '</td><td class="path-cell" title="' + (x.path||'') + '">' + (x.path||'\u2014') + '</td><td><span class="badge ' + badgeClass(x.status||'installed') + '">' + (x.status||'installed') + '</span></td><td class="timestamp-cell">' + (x.lastSeen||'\u2014') + '</td><td class="text-muted text-sm">' + (x.scanLabel||'\u2014') + '</td></tr>').join('');
 }
 
 function switchArtifactTab(tab) {
-  document.querySelectorAll('#pageArtifacts .tab-content').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('#pageArtifacts .tab').forEach(t => t.classList.remove('active'));
   document.querySelector('#pageArtifacts .tab[data-tab="' + tab + '"]').classList.add('active');
   renderArtifactAnalysis(tab);
@@ -911,7 +1069,7 @@ function renderArtifactAnalysis(tab) {
   const f = _artifactAnalysisData.filter(x => x.category === tab);
   const tb = document.getElementById('artifactsAnalysisTable'); const em = document.getElementById('artifactsAnalysisEmpty');
   if (!f.length) { tb.innerHTML = ''; em.style.display = 'block'; } else { em.style.display = 'none'; }
-  tb.innerHTML = f.map(x => '<tr><td><span class="badge badge-info">' + (x.category||'—') + '</span></td><td style="font-family:monospace;font-size:12px">' + (x.value||x.name||'—') + '</td><td class="text-muted text-sm">' + (x.context||'—') + '</td><td>' + severityDot(x.severity||'low') + '<span class="badge ' + badgeClass((x.severity||'low').toUpperCase()) + '">' + (x.severity||'LOW') + '</span></td><td class="text-muted text-sm">' + (x.scanLabel||'—') + '</td></tr>').join('');
+  tb.innerHTML = f.map(x => '<tr><td><span class="badge badge-info">' + (x.category||'\u2014') + '</span></td><td style="font-family:monospace;font-size:12px">' + (x.value||x.name||'\u2014') + '</td><td class="text-muted text-sm">' + (x.context||'\u2014') + '</td><td>' + severityDot(x.severity||'low') + '<span class="badge ' + badgeClass((x.severity||'low').toUpperCase()) + '">' + (x.severity||'LOW') + '</span></td><td class="text-muted text-sm">' + (x.scanLabel||'\u2014') + '</td></tr>').join('');
 }
 
 function renderThreats() {
@@ -927,7 +1085,7 @@ function renderThreats() {
   });
   const tb = document.getElementById('threatsTable'); const em = document.getElementById('threatsEmpty');
   if (!f.length) { tb.innerHTML = ''; em.style.display = 'block'; } else { em.style.display = 'none'; }
-  tb.innerHTML = f.map(x => '<tr><td>' + severityDot(x.severity||'low') + '<span class="badge ' + badgeClass((x.severity||'low').toUpperCase()) + '">' + (x.severity||'LOW') + '</span></td><td><span class="badge badge-blue">' + (x.category||'—') + '</span></td><td style="font-family:monospace;font-weight:500">' + (x.indicator||x.name||'—') + '</td><td class="text-muted text-sm">' + (x.description||'—') + '</td><td class="text-muted">' + (x.source||'—') + '</td><td class="text-muted text-sm">' + (x.scanLabel||'—') + '</td></tr>').join('');
+  tb.innerHTML = f.map(x => '<tr><td>' + severityDot(x.severity||'low') + '<span class="badge ' + badgeClass((x.severity||'low').toUpperCase()) + '">' + (x.severity||'LOW') + '</span></td><td><span class="badge badge-blue">' + (x.category||'\u2014') + '</span></td><td style="font-family:monospace;font-weight:500">' + (x.indicator||x.name||'\u2014') + '</td><td class="text-muted text-sm">' + (x.description||'\u2014') + '</td><td class="text-muted">' + (x.source||'\u2014') + '</td><td class="text-muted text-sm">' + (x.scanLabel||'\u2014') + '</td></tr>').join('');
 }
 
 function showDetail(id) {
@@ -938,18 +1096,21 @@ function showDetail(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('pageDetail').classList.add('active');
   document.getElementById('pageTitle').textContent = 'Scan Report';
-  document.getElementById('detailId').textContent = (scan.sessionId||'') + ' · ' + (scan.hostname||'');
+  document.getElementById('detailId').textContent = (scan.sessionId||'') + ' \u00b7 ' + (scan.hostname||'');
   document.getElementById('detailSessionLabel').textContent = scan.sessionId||'';
   const badge = document.getElementById('detailStatusBadge'); badge.className = 'badge ' + badgeClass(scan.status||'completed'); badge.textContent = scan.status||'completed';
   const si = scan.systemInfo || {};
   document.getElementById('detailInfo').innerHTML = [
     { l:'Session ID', v:scan.sessionId }, { l:'PIN', v:scan.pin }, { l:'Hostname', v:si.hostname||scan.hostname }, { l:'User', v:si.username||scan.username },
-    { l:'OS', v:si.osVersion||'—' }, { l:'Scanner', v:si.scannerVersion||'—' }, { l:'IP', v:si.ipAddress||'—' }, { l:'MAC', v:si.macAddress||'—' },
-    { l:'Duration', v:scan.duration?scan.duration+'s':'—' }, { l:'IOCs', v:scan.iocsDetected || 0 }, { l:'Evidence', v:scan.evidenceCount || 0 }, { l:'Date', v:new Date(scan.scanDate||scan.createdAt).toLocaleDateString() }
+    { l:'OS', v:si.osVersion||'\u2014' }, { l:'Scanner', v:si.scannerVersion||'\u2014' }, { l:'IP', v:si.ipAddress||'\u2014' }, { l:'MAC', v:si.macAddress||'\u2014' },
+    { l:'Duration', v:scan.duration?scan.duration+'s':'\u2014' }, { l:'Schema', v:'v'+(scan.schemaVersion||'1.0') }, { l:'IOCs', v:scan.iocsDetected || 0 }, { l:'Date', v:new Date(scan.scanDate||scan.createdAt).toLocaleDateString() }
   ].map(i => '<div class="detail-item"><label>' + i.l + '</label><span>' + i.v + '</span></div>').join('');
-  const arts = scan.artifacts||[]; document.getElementById('artifactsTable').innerHTML = arts.length ? arts.map(a => '<tr><td>' + a.name + '</td><td><span class="badge badge-info">' + (a.type||'—') + '</span></td><td class="text-muted text-sm">' + (a.source||'—') + '</td><td class="hash-cell">' + ((a.hash||'').slice(0,16)||'—') + '...</td></tr>').join('') : '<tr><td colspan="4" class="text-muted" style="text-align:center;padding:24px">No artifacts</td></tr>';
-  const iocs = scan.iocs||[]; document.getElementById('iocTable').innerHTML = iocs.length ? iocs.map(i => '<tr><td>' + i.name + '</td><td style="font-family:monospace;font-size:12px">' + i.value + '</td><td><span class="badge badge-info">' + (i.type||'—') + '</span></td><td>' + severityDot(i.riskLevel||'low') + '<span class="badge ' + badgeClass((i.riskLevel||'low').toUpperCase()) + '">' + (i.riskLevel||'—') + '</span></td></tr>').join('') : '<tr><td colspan="4" class="text-muted" style="text-align:center;padding:24px">No IOCs</td></tr>';
-  const evs = scan.evidence||[]; document.getElementById('evidenceTable').innerHTML = evs.length ? evs.map(e => '<tr><td>' + e.name + '</td><td class="text-muted text-sm">' + (e.description||'') + '</td><td>' + (e.source||'—') + '</td><td>' + (e.size||'—') + '</td></tr>').join('') : '<tr><td colspan="4" class="text-muted" style="text-align:center;padding:24px">No evidence</td></tr>';
+  const arts = scan.artifacts||[];
+  document.getElementById('artifactsTable').innerHTML = arts.length ? arts.map(a => '<tr><td>' + a.name + '</td><td><span class="badge badge-info">' + (a.type||'\u2014') + '</span></td><td class="text-muted text-sm">' + (a.source||'\u2014') + '</td><td class="hash-cell">' + ((a.hash||'').slice(0,16)||'\u2014') + '...</td><td>' + (a.hash ? '<button class="btn btn-sm btn-ghost" style="color:var(--info);font-size:11px" onclick="lookupVt(\'' + a.hash + '\')">VT</button>' : '\u2014') + '</td></tr>').join('') : '<tr><td colspan="5" class="text-muted" style="text-align:center;padding:24px">No artifacts</td></tr>';
+  const iocs = scan.iocs||[];
+  document.getElementById('iocTable').innerHTML = iocs.length ? iocs.map(i => '<tr><td>' + i.name + '</td><td style="font-family:monospace;font-size:12px">' + i.value + '</td><td><span class="badge badge-info">' + (i.type||'\u2014') + '</span></td><td>' + severityDot(i.riskLevel||'low') + '<span class="badge ' + badgeClass((i.riskLevel||'low').toUpperCase()) + '">' + (i.riskLevel||'\u2014') + '</span></td></tr>').join('') : '<tr><td colspan="4" class="text-muted" style="text-align:center;padding:24px">No IOCs</td></tr>';
+  const evs = scan.evidence||[];
+  document.getElementById('evidenceTable').innerHTML = evs.length ? evs.map(e => '<tr><td>' + e.name + '</td><td class="text-muted text-sm">' + (e.description||'') + '</td><td>' + (e.source||'\u2014') + '</td><td>' + (e.size||'\u2014') + '</td></tr>').join('') : '<tr><td colspan="4" class="text-muted" style="text-align:center;padding:24px">No evidence</td></tr>';
   const logD = scan.logs||[]; const lc = document.getElementById('logsContainer');
   if (!logD.length) { lc.innerHTML = '<div class="text-muted" style="text-align:center;padding:24px">No logs</div>'; }
   else { lc.innerHTML = logD.map(l => { const t = new Date(l.time); return '<div class="log-line"><span class="time">[' + t.getHours().toString().padStart(2,'0') + ':' + t.getMinutes().toString().padStart(2,'0') + ':' + t.getSeconds().toString().padStart(2,'0') + ']</span><span class="level-' + l.level + '">[' + (l.level||'INFO').toUpperCase() + ']</span> ' + l.msg + '</div>'; }).join(''); }
@@ -971,7 +1132,35 @@ function switchDetailTab(tab) {
   document.querySelector('#pageDetail .tab[data-tab="' + tab + '"]').classList.add('active');
 }
 
-// ─── ADMIN ──────────────────────────────────────────────
+async function lookupVt(hash) {
+  if (!hash) { showToast('No hash to look up', 'error'); return; }
+  document.getElementById('vtModalHash').textContent = hash;
+  document.getElementById('vtModalBody').innerHTML = '<div class="empty-state"><p>Looking up hash on VirusTotal...</p></div>';
+  document.getElementById('vtModal').classList.add('show');
+  if (_vtCache[hash]) { renderVtResult(hash, _vtCache[hash]); return; }
+  const result = await apiGet('virustotal/' + hash);
+  if (!result) { document.getElementById('vtModalBody').innerHTML = '<div class="empty-state"><h4>Lookup failed</h4><p>VirusTotal API key may not be configured on the server. Set VIRUSTOTAL_API_KEY env var.</p></div>'; return; }
+  _vtCache[hash] = result;
+  renderVtResult(hash, result);
+}
+
+function renderVtResult(hash, data) {
+  if (!data.found) { document.getElementById('vtModalBody').innerHTML = '<div class="empty-state"><h4>Hash not found</h4><p>' + hash + ' was not found in VirusTotal database.</p></div>'; return; }
+  const total = data.total || 0;
+  const malPct = total > 0 ? Math.round(data.malicious / total * 100) : 0;
+  const scoreColor = data.malicious > 0 ? 'var(--danger)' : (data.suspicious > 0 ? 'var(--warning)' : 'var(--success)');
+  const verdict = data.malicious > 0 ? 'MALICIOUS' : (data.suspicious > 0 ? 'SUSPICIOUS' : 'CLEAN');
+  document.getElementById('vtModalBody').innerHTML = '<div style="display:flex;flex-direction:column;gap:16px">' +
+    '<div style="display:flex;align-items:center;gap:16px"><div style="text-align:center"><div style="font-size:36px;font-weight:700;color:' + scoreColor + '">' + malPct + '%</div><div class="text-muted text-sm">Malicious</div></div>' +
+    '<div style="flex:1"><div class="vt-score" style="margin-bottom:8px"><span class="vt-mal">\u25a0 ' + data.malicious + '</span> malicious \u00b7 <span class="vt-sus">\u25a0 ' + data.suspicious + '</span> suspicious \u00b7 <span class="vt-clean">\u25a0 ' + data.harmless + '</span> harmless</div>' +
+    '<div><span class="badge ' + (data.malicious > 0 ? 'badge-CRITICAL' : data.suspicious > 0 ? 'badge-MEDIUM' : 'badge-LOW') + '" style="font-size:13px">' + verdict + '</span></div></div></div>' +
+    (data.meaningful_name ? '<div><span class="text-muted text-sm">File: </span><span>' + data.meaningful_name + '</span></div>' : '') +
+    (data.type_description ? '<div><span class="text-muted text-sm">Type: </span><span>' + data.type_description + '</span></div>' : '') +
+    (data.tags && data.tags.length ? '<div><span class="text-muted text-sm">Tags: </span>' + data.tags.map(t => '<span class="badge badge-blue" style="margin-right:4px">' + t + '</span>').join('') + '</div>' : '') +
+    (data.last_analysis_date ? '<div><span class="text-muted text-sm">Last analysis: </span><span>' + data.last_analysis_date + '</span></div>' : '') +
+    (data.permalink ? '<div><a href="' + data.permalink + '" target="_blank" class="btn btn-sm btn-secondary" style="display:inline-flex">Open in VirusTotal \u2197</a></div>' : '') +
+    '</div>';
+}
 
 function getNextSessionId() {
   const pins = gp();
@@ -991,7 +1180,7 @@ async function generatePin() {
     await syncFromBot();
     document.getElementById('pinNotes').value = '';
     r.innerHTML = '<div style="background:var(--success-dim);border:1px solid rgba(34,197,94,0.2);border-radius:var(--radius);padding:12px 16px"><div style="font-size:12px;color:var(--success);font-weight:600;margin-bottom:4px">PIN Created</div><div style="display:flex;gap:16px;font-size:13px"><span><span class="text-muted">PIN:</span> <strong style="font-family:monospace;font-size:18px">' + result.pin + '</strong></span><span><span class="text-muted">Session:</span> <strong style="font-family:monospace">' + result.sessionId + '</strong></span></div></div>';
-    showToast('PIN ' + result.pin + ' — Session ' + result.sessionId, 'success');
+    showToast('PIN ' + result.pin + ' \u2014 Session ' + result.sessionId, 'success');
   } else { r.innerHTML = '<div style="background:var(--warning-dim);border:1px solid rgba(245,158,11,0.2);border-radius:var(--radius);padding:12px 16px;color:var(--warning);font-size:13px">Server not connected.</div>'; }
   renderPinsTable();
 }
@@ -1009,7 +1198,7 @@ function renderPinsTable() {
   document.getElementById('pinCount').textContent = pins.length + ' total';
   if (!pins.length) { tb.innerHTML = ''; em.style.display = 'block'; return; }
   em.style.display = 'none';
-  tb.innerHTML = pins.map(p => '<tr><td style="font-family:monospace;font-weight:600;font-size:16px">' + p.pin + '</td><td style="font-family:monospace">' + p.sessionId + '</td><td><span class="badge ' + badgeClass(p.status) + '">' + p.status + '</span></td><td class="text-sm">' + new Date(p.createdAt).toLocaleDateString() + '</td><td style="font-size:12px;max-width:120px;overflow:hidden;text-overflow:ellipsis">' + (p.notes||'—') + '</td><td><div class="gap-2">' + (p.status==='active' ? '<button class="btn btn-sm btn-secondary" onclick="togglePin(\'' + p.pin + '\')">Deactivate</button>' : '') + '<button class="btn btn-sm btn-ghost" style="color:var(--danger)" onclick="deletePin(\'' + p.pin + '\')">Delete</button></div></td></tr>').join('');
+  tb.innerHTML = pins.map(p => '<tr><td style="font-family:monospace;font-weight:600;font-size:16px">' + p.pin + '</td><td style="font-family:monospace">' + p.sessionId + '</td><td><span class="badge ' + badgeClass(p.status) + '">' + p.status + '</span></td><td class="text-sm">' + new Date(p.createdAt).toLocaleDateString() + '</td><td style="font-size:12px;max-width:120px;overflow:hidden;text-overflow:ellipsis">' + (p.notes||'\u2014') + '</td><td><div class="gap-2">' + (p.status==='active' ? '<button class="btn btn-sm btn-secondary" onclick="togglePin(\'' + p.pin + '\')">Deactivate</button>' : '') + '<button class="btn btn-sm btn-ghost" style="color:var(--danger)" onclick="deletePin(\'' + p.pin + '\')">Delete</button></div></td></tr>').join('');
 }
 
 async function togglePin(pin) {
@@ -1017,6 +1206,7 @@ async function togglePin(pin) {
   else { showToast('Server not connected.', 'error'); }
   renderPinsTable();
 }
+
 async function deletePin(pin) {
   if (!confirm('Deactivate PIN ' + pin + '?')) return;
   if (_apiAvail) { const result = await apiDelete('pins/' + pin); if (result) { await syncFromBot(); showToast('PIN ' + pin + ' deactivated', 'success'); } else { showToast('Failed', 'error'); } }
@@ -1033,11 +1223,16 @@ function exportJSON(type) {
     report += '- Total Scans: ' + scans.length + '\n';
     report += '- Active Sessions: ' + pins.filter(p => p.status === 'active').length + '\n';
     report += '- Total IOCs: ' + scans.reduce((a, s) => a + (s.iocsDetected || 0), 0) + '\n';
-    report += '- Total Artifacts: ' + _artifactAnalysisData.length + '\n\n';
+    report += '- Total Artifacts: ' + _artifactAnalysisData.length + '\n';
+    report += '- Schema Version: ' + (scans.find(s => s.schemaVersion)?.schemaVersion || '1.0') + '\n\n';
     report += '## Recent Scans\n';
-    scans.slice(-5).reverse().forEach(s => { report += '- ' + (s.sessionId||'N/A') + ' | ' + (s.hostname||'') + ' | ' + (s.iocsDetected||0) + ' IOCs | ' + new Date(s.scanDate||s.createdAt).toLocaleDateString() + '\n'; });
+    scans.slice(-5).reverse().forEach(s => { report += '- ' + (s.sessionId||'N/A') + ' | ' + (s.hostname||'') + ' | ' + (s.iocsDetected||0) + ' IOCs | v' + (s.schemaVersion||'1.0') + ' | ' + new Date(s.scanDate||s.createdAt).toLocaleDateString() + '\n'; });
     report += '\n## Threat Indicators\n';
     _threatData.forEach(t => { report += '- [' + (t.severity||'LOW') + '] ' + (t.indicator||t.name||'') + ': ' + (t.description||'') + '\n'; });
+    report += '\n## String Analysis\n';
+    _stringData.slice(0,30).forEach(s => { report += '- [' + (s.type||'unknown') + '] ' + s.value + '\n'; });
+    report += '\n## Timeline Events\n';
+    _timelineData.slice(0,30).forEach(e => { report += '- [' + e.timestamp + '] ' + (e.category||'') + ': ' + (e.description||'') + '\n'; });
     const blob = new Blob([report], { type: 'text/markdown' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a'); a.href = url; a.download = 'forensic-report.md'; a.click();
@@ -1045,8 +1240,13 @@ function exportJSON(type) {
     showToast('Report generated', 'success');
     return;
   }
+  if (type === 'timeline') {
+    json = JSON.stringify({ timeline: _timelineData.slice(0,500) }, null, 2);
+    filename = 'timeline.json';
+  }
   if (type === 'pins') { json = JSON.stringify({ pins: pins.map(p => ({ pin: p.pin, sessionId: p.sessionId, status: p.status, createdBy: p.createdBy || 'tonch', createdAt: p.createdAt.split('T')[0] })) }, null, 2); filename = 'pins.json'; }
-  if (type === 'scans') { json = JSON.stringify({ scans: scans.map(s => ({ sessionId: s.sessionId, pin: s.pin, hostname: s.hostname, username: s.username, scanDate: s.scanDate || s.createdAt, iocsDetected: s.iocsDetected || 0, evidenceCount: s.evidenceCount || 0, status: s.status || 'completed', duration: s.duration || 0 })) }, null, 2); filename = 'scans.json'; }
+  if (type === 'scans') { json = JSON.stringify({ scans: scans.map(s => ({ sessionId: s.sessionId, pin: s.pin, hostname: s.hostname, username: s.username, scanDate: s.scanDate || s.createdAt, iocsDetected: s.iocsDetected || 0, evidenceCount: s.evidenceCount || 0, status: s.status || 'completed', duration: s.duration || 0, schemaVersion: s.schemaVersion || '1.0' })) }, null, 2); filename = 'scans.json'; }
+  if (!json) return;
   const blob = new Blob([json], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a'); a.href = url; a.download = filename; a.click();
@@ -1075,12 +1275,12 @@ async function importScan() {
   let imported = 0;
   for (const s of scanArr) {
     if (!s.sessionId && !s.pin) continue;
-    const payload = { sessionId: s.sessionId || 'UNKNOWN', pin: s.pin || '????', hostname: s.hostname || '', username: s.username || '', scanDate: s.scanDate || now(), status: s.status || 'completed', iocsDetected: s.iocsDetected || 0, evidenceCount: s.evidenceCount || 0, duration: s.duration || 0, artifacts: s.artifacts || [], iocs: s.iocs || [], evidence: s.evidence || [] };
+    const payload = { sessionId: s.sessionId || 'UNKNOWN', pin: s.pin || '????', hostname: s.hostname || '', username: s.username || '', scanDate: s.scanDate || now(), status: s.status || 'completed', iocsDetected: s.iocsDetected || 0, evidenceCount: s.evidenceCount || 0, duration: s.duration || 0, artifacts: s.artifacts || [], iocs: s.iocs || [], evidence: s.evidence || [], schemaVersion: s.schemaVersion || '2.0' };
     if (_apiAvail) { const result = await apiPost('upload-scan', payload); if (result && result.success) imported++; }
     else { const scans = gs(); scans.push({ id: uid(), ...payload, userId: gss() ? gss().userId : null, logs: [], results: {}, systemInfo: {} }); ss(scans); imported++; }
   }
   if (_apiAvail) await syncFromBot();
-  r.innerHTML = '<div style="background:var(--success-dim);border:1px solid rgba(34,197,94,0.2);border-radius:var(--radius);padding:12px 16px"><div style="font-size:13px;font-weight:600;color:var(--success)">✓ Imported ' + imported + ' scan(s)</div></div>';
+  r.innerHTML = '<div style="background:var(--success-dim);border:1px solid rgba(34,197,94,0.2);border-radius:var(--radius);padding:12px 16px"><div style="font-size:13px;font-weight:600;color:var(--success)">\u2713 Imported ' + imported + ' scan(s)</div></div>';
   document.getElementById('importJsonInput').value = '';
   showToast('Imported ' + imported + ' scan(s)', 'success');
 }
@@ -1089,7 +1289,7 @@ document.addEventListener('click', function(e) {
   if (e.target.classList.contains('modal-overlay')) closeJsonModal();
 });
 
-console.log('ForensicAnalyzer DFIR Console — mickyac.netlify.app');
+console.log('ForensicAnalyzer DFIR Console v2.0 \u2014 mickyac.netlify.app');
 </script>
 </body>
 </html>
