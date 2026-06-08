@@ -26,6 +26,15 @@
         <Storyboard x:Key="ShrinkToScan">
             <DoubleAnimation Storyboard.TargetProperty="Width" From="720" To="720" Duration="0:0:0.3"/>
         </Storyboard>
+        <Storyboard x:Key="ScanSweep" RepeatBehavior="Forever">
+            <DoubleAnimation Storyboard.TargetProperty="(Border.RenderTransform).(TranslateTransform.X)" From="-400" To="1200" Duration="0:0:2.5"/>
+            <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="0.25" Duration="0:0:1" AutoReverse="True"/>
+        </Storyboard>
+        <Storyboard x:Key="NodePulse" RepeatBehavior="Forever" AutoReverse="True">
+            <DoubleAnimation Storyboard.TargetProperty="(Ellipse.Opacity)" From="0.2" To="0.8" Duration="0:0:1.2"/>
+            <DoubleAnimation Storyboard.TargetProperty="(Ellipse.RenderTransform).(ScaleTransform.ScaleX)" From="0.85" To="1.15" Duration="0:0:1.2"/>
+            <DoubleAnimation Storyboard.TargetProperty="(Ellipse.RenderTransform).(ScaleTransform.ScaleY)" From="0.85" To="1.15" Duration="0:0:1.2"/>
+        </Storyboard>
 
         <VisualBrush x:Key="GridPattern" TileMode="Tile" Stretch="None" Viewport="0,0,40,40" ViewportUnits="Absolute">
             <VisualBrush.Visual>
@@ -213,9 +222,37 @@
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
 
+                        <!-- Analysis sweep layer -->
+                        <Rectangle Grid.Row="0" Grid.RowSpan="7" Fill="#ff1f3d" Opacity="0" Height="4" VerticalAlignment="Top" IsHitTestVisible="False">
+                            <Rectangle.RenderTransform><TranslateTransform X="-400"/></Rectangle.RenderTransform>
+                            <Rectangle.Triggers>
+                                <EventTrigger RoutedEvent="Loaded">
+                                    <BeginStoryboard Storyboard="{StaticResource ScanSweep}"/>
+                                </EventTrigger>
+                            </Rectangle.Triggers>
+                        </Rectangle>
+
+                        <!-- Connection nodes -->
+                        <Border Grid.Row="0" Grid.RowSpan="7" IsHitTestVisible="False" Opacity="0.15">
+                            <Canvas>
+                                <Ellipse Width="6" Height="6" Fill="#ff1f3d" Canvas.Left="20" Canvas.Top="30" RenderTransformOrigin="0.5,0.5">
+                                    <Ellipse.RenderTransform><ScaleTransform/></Ellipse.RenderTransform>
+                                    <Ellipse.Triggers><EventTrigger RoutedEvent="Loaded"><BeginStoryboard Storyboard="{StaticResource NodePulse}"/></EventTrigger></Ellipse.Triggers>
+                                </Ellipse>
+                                <Ellipse Width="4" Height="4" Fill="#ff1f3d" Canvas.Left="120" Canvas.Top="60" RenderTransformOrigin="0.5,0.5">
+                                    <Ellipse.RenderTransform><ScaleTransform/></Ellipse.RenderTransform>
+                                    <Ellipse.Triggers><EventTrigger RoutedEvent="Loaded"><BeginStoryboard Storyboard="{StaticResource NodePulse}"/></EventTrigger></Ellipse.Triggers>
+                                </Ellipse>
+                                <Ellipse Width="5" Height="5" Fill="#ff1f3d" Canvas.Left="60" Canvas.Top="120" RenderTransformOrigin="0.5,0.5">
+                                    <Ellipse.RenderTransform><ScaleTransform/></Ellipse.RenderTransform>
+                                    <Ellipse.Triggers><EventTrigger RoutedEvent="Loaded"><BeginStoryboard Storyboard="{StaticResource NodePulse}"/></EventTrigger></Ellipse.Triggers>
+                                </Ellipse>
+                            </Canvas>
+                        </Border>
+
                         <!-- Scan title -->
                         <TextBlock Grid.Row="0" Text="FORENSIC ANALYSIS IN PROGRESS"
-                                   FontSize="14" FontWeight="Bold" Foreground="#ffffff"/>
+                                   FontSize="14" FontWeight="Bold" Foreground="#ffffff" Margin="0,2,0,0"/>
                         <TextBlock Grid.Row="1" Text="{Binding CurrentArtifactName}"
                                    FontSize="11" Foreground="#9a9a9a" Margin="0,2,0,16"/>
 
