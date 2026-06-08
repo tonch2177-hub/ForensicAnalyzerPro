@@ -61,6 +61,20 @@ public class ApiService
         }
     }
 
+    public async Task<bool> UsePinAsync(string pin)
+    {
+        try
+        {
+            var url = $"{BaseUrl}/api/use-pin";
+            var response = await _http.PostAsJsonAsync(url, new { pin, computerName = Environment.MachineName }, JsonOpts);
+            return response.IsSuccessStatusCode;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
     public async Task<bool> UploadScanAsync(object scanResult)
     {
         try

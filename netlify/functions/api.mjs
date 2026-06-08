@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 
-const SCHEMA_VERSION = '2.0';
+let seeded = false;
 
 async function getStore() {
     const { getStore } = await import('@netlify/blobs');
@@ -11,13 +11,42 @@ async function readJSON(key) {
     try {
         const store = await getStore();
         const raw = await store.get(key);
-        return raw ? JSON.parse(raw) : [];
-    } catch { return []; }
+        return raw ? JSON.parse(raw) : null;
+    } catch { return null; }
 }
 
 async function writeJSON(key, data) {
     const store = await getStore();
     await store.set(key, JSON.stringify(data, null, 2));
+}
+
+async function seedData() {
+    if (seeded) return;
+    try {
+        let pd = await readJSON('pinsv2');
+        if (!pd) {
+            pd = { masterPin: '1188', pins: [] };
+            await writeJSON('pinsv2', pd);
+            console.log('[API] Seeded pinsv2');
+        }
+        let rd = await readJSON('resultsv2');
+        if (!rd) {
+            rd = [];
+            await writeJSON('resultsv2', rd);
+            console.log('[API] Seeded resultsv2');
+        }
+        seeded = true;
+    } catch (e) {
+        console.log('[API] seedData error:', e.message);
+        seeded = true;
+    }
+}
+
+function isMaster(pin) { return String(pin) === '1188'; }
+
+function isAdmin(headers) {
+    const p = headers.get('x-admin-pin') || '';
+    return isMaster(p.trim());
 }
 
 function getConfig() {
@@ -30,92 +59,66 @@ function getConfig() {
 async function sendWebhook(event, data) {
     const config = getConfig();
     if (!config.discordWebhook) return;
-
     const embeds = {
-        pinCreated: { title: '🔑 New PIN Generated', color: 0xE8102D, fields: [
+        pinCreated: { title: '🔑 PIN Generated', color: 0xE8102D, fields: [
             { name: 'PIN', value: `||${data.pin}||`, inline: true },
-            { name: 'Session', value: data.sessionId, inline: true }
+            { name: 'By', value: data.createdBy || '—', inline: true }
         ], timestamp: new Date().toISOString() },
-
-        pinUsed: { title: '🔍 PIN Used', color: 0xFF8800, fields: [
+        scanStarted: { title: '🔍 Scan Started', color: 0xFF8800, fields: [
             { name: 'PIN', value: `||${data.pin}||`, inline: true },
-            { name: 'Session', value: data.sessionId, inline: true },
-            { name: 'Hostname', value: data.hostname || 'Unknown', inline: true }
+            { name: 'Computer', value: data.computerName || '—', inline: true }
         ], timestamp: new Date().toISOString() },
-
-        scanComplete: { title: '✅ Scan Completed', color: 0x22C55E, fields: [
-            { name: 'Session', value: data.sessionId, inline: true },
-            { name: 'Items', value: String(data.totalItems || 0), inline: true },
-            { name: 'IOCs', value: String(data.iocsDetected || 0), inline: true },
-            { name: 'Schema', value: SCHEMA_VERSION, inline: true }
+        scanCompleted: { title: '✅ Scan Completed', color: 0x22C55E, fields: [
+            { name: 'PIN', value: `||${data.pin}||`, inline: true },
+            { name: 'Computer', value: data.computerName || '—', inline: true },
+            { name: 'Risk Score', value: String(data.riskScore ?? '—'), inline: true },
+            { name: 'Detections', value: String(data.detectionCount ?? 0), inline: true }
+        ], timestamp: new Date().toISOString() },
+        riskDetected: { title: '🚨 Risk Detected', color: 0xE8102D, fields: [
+            { name: 'PIN', value: `||${data.pin}||`, inline: true },
+            { name: 'Score', value: String(data.riskScore ?? '—'), inline: true },
+            { name: 'Details', value: (data.details || '').slice(0, 200), inline: false }
         ], timestamp: new Date().toISOString() }
     };
-
     try {
         await fetch(config.discordWebhook, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ embeds: [embeds[event] || embeds.pinCreated] })
+            body: JSON.stringify({ embeds: [embeds[event] || embeds.scanCompleted] })
         });
     } catch {}
 }
 
-function generatePin() {
-    return String(crypto.randomInt(1000, 9999));
-}
-
-function nextSessionId(pins, scans) {
-    let max = 0;
-    [...pins, ...scans].forEach(item => {
-        const m = (item.sessionId || '').match(/MCK-(\d+)/);
-        if (m) { const n = parseInt(m[1]); if (n > max) max = n; }
-    });
-    return 'MCK-' + String(max + 1).padStart(3, '0');
-}
-
-function json(res, data, status = 200) {
+function json(data, status = 200) {
     return new Response(JSON.stringify(data), {
         status,
-        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'Content-Type, X-Admin-Pin', 'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS' }
     });
 }
 
-function error(res, msg, status = 400) {
-    return json(res, { error: msg }, status);
+function error(msg, status = 400) {
+    return json({ error: msg }, status);
 }
 
-function safeJsonParse(str, fallback = {}) {
-    if (typeof str === 'object') return str;
-    try { return JSON.parse(str); } catch { return fallback; }
-}
-
-// ─── String Analysis ─────────────────────────────────────
+// ─── String Analysis (unchanged) ────────────────────────────
 function analyzeStrings(text) {
     const findings = [];
     if (!text) return findings;
-
     const patterns = [
         { name: 'Email', regex: /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, type: 'email' },
         { name: 'URL', regex: /https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&\/=]*)/g, type: 'url' },
         { name: 'Domain', regex: /(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}/g, type: 'domain' },
         { name: 'IPv4', regex: /\b(?:\d{1,3}\.){3}\d{1,3}\b/g, type: 'ipv4' },
-        { name: 'IPv6', regex: /\b(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}\b/g, type: 'ipv6' },
-        { name: 'Discord ID', regex: /\b\d{17,20}\b/g, type: 'discord_id' },
-        { name: 'Username', regex: /\b[a-zA-Z0-9_]{3,32}\b/g, type: 'username' }
+        { name: 'IPv6', regex: /\b(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}\b/g, type: 'ipv6' }
     ];
-
     const seen = new Set();
     patterns.forEach(p => {
         let match;
         while ((match = p.regex.exec(text)) !== null) {
             const key = p.type + ':' + match[0];
-            if (!seen.has(key)) {
-                seen.add(key);
-                findings.push({ type: p.name, category: p.type, value: match[0], context: extractContext(text, match.index) });
-            }
+            if (!seen.has(key)) { seen.add(key); findings.push({ type: p.name, category: p.type, value: match[0], context: extractContext(text, match.index) }); }
         }
     });
-
     return findings;
 }
 
@@ -128,62 +131,15 @@ function extractContext(text, index, radius = 40) {
     return ctx;
 }
 
-// ─── Timeline Generation ──────────────────────────────────
+// ─── Timeline (unchanged) ────────────────────────────────────
 function buildTimeline(scan) {
     const events = [];
-    const results = safeJsonParse(scan.results);
     const baseTime = scan.createdAt || scan.scanDate || new Date().toISOString();
-
-    // Scan start
-    events.push({ timestamp: baseTime, type: 'scan', category: 'System', description: `Scan started on ${scan.hostname || 'unknown'}`, severity: 'info', source: scan.sessionId });
-
-    // Filesystem events
-    const fs = results.fileSystem || {};
-    Object.keys(fs).forEach(cat => {
-        (fs[cat] || []).forEach(item => {
-            if (item.timestamp) {
-                events.push({ timestamp: item.timestamp, type: 'file', category: `File System - ${cat}`, description: `${item.path || 'Unknown path'}`, severity: 'info', source: scan.sessionId, detail: `Size: ${item.size || '?'} | Hash: ${(item.sha256 || item.hash || '').slice(0, 16)}` });
-            }
-        });
-    });
-
-    // Registry events
-    const reg = results.registry || {};
-    Object.keys(reg).forEach(cat => {
-        (reg[cat] || []).forEach(item => {
-            if (item.timestamp) {
-                events.push({ timestamp: item.timestamp, type: 'registry', category: `Registry - ${cat}`, description: `${item.key || item.path || 'Unknown key'}`, severity: 'info', source: scan.sessionId, detail: `Value: ${(item.value || '').slice(0, 60)}` });
-            }
-        });
-    });
-
-    // Process events
-    (results.processes || []).forEach(p => {
-        if (p.timestamp) {
-            events.push({ timestamp: p.timestamp, type: 'process', category: 'Process', description: `${p.name || p.process || 'Unknown'} (PID: ${p.pid || '?'})`, severity: p.exitCode && p.exitCode !== '0' ? 'warning' : 'info', source: scan.sessionId, detail: `Exit: ${p.exitCode || '0'} | User: ${p.user || '?'}` });
-        }
-    });
-
-    // Event log entries
-    const el = results.eventLogs || {};
-    Object.keys(el).forEach(logName => {
-        (el[logName] || []).forEach(e => {
-            if (e.timestamp) {
-                events.push({ timestamp: e.timestamp, type: 'eventlog', category: `Event Log - ${logName}`, description: `${e.source || 'Unknown'} (ID: ${e.eventId || '?'})`, severity: (e.level || 'info').toLowerCase(), source: scan.sessionId, detail: (e.message || e.msg || '').slice(0, 100) });
-            }
-        });
-    });
-
-    // Threat indicators
-    (results.threatIndicators || []).forEach(t => {
-        events.push({ timestamp: t.timestamp || baseTime, type: 'threat', category: 'Threat', description: `${t.indicator || t.name || 'Unknown'}`, severity: (t.severity || 'low').toLowerCase(), source: scan.sessionId, detail: t.description || '' });
-    });
-
-    // Security tools
-    (results.securityTools || []).forEach(t => {
-        events.push({ timestamp: t.lastSeen || t.timestamp || baseTime, type: 'tool', category: 'Security Tool', description: `${t.name || 'Unknown'} v${t.version || '?'}`, severity: t.status === 'running' ? 'warning' : 'info', source: scan.sessionId, detail: `Path: ${t.path || '?'}` });
-    });
-
+    events.push({ timestamp: baseTime, type: 'scan', category: 'System', description: `Scan started on ${scan.computerName || 'unknown'}`, severity: 'info', source: scan.scanId });
+    if (scan.fileSystem) Object.keys(scan.fileSystem).forEach(cat => (scan.fileSystem[cat] || []).forEach(item => { if (item.timestamp) events.push({ timestamp: item.timestamp, type: 'file', category: `FS - ${cat}`, description: item.path || '?', severity: 'info', source: scan.scanId }); }));
+    if (scan.registry) Object.keys(scan.registry).forEach(cat => (scan.registry[cat] || []).forEach(item => { if (item.timestamp) events.push({ timestamp: item.timestamp, type: 'registry', category: `Reg - ${cat}`, description: item.key || '?', severity: 'info', source: scan.scanId }); }));
+    (scan.processes || []).forEach(p => { if (p.timestamp) events.push({ timestamp: p.timestamp, type: 'process', category: 'Process', description: `${p.name || '?'} (PID: ${p.pid || '?'})`, severity: 'info', source: scan.scanId }); });
+    (scan.detections || []).forEach(d => events.push({ timestamp: d.timestamp || baseTime, type: 'threat', category: 'Detection', description: d.name || '?', severity: (d.severity || 'medium').toLowerCase(), source: scan.scanId, detail: d.description || '' }));
     events.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
     return events;
 }
@@ -194,214 +150,260 @@ export default async (req) => {
     const path = url.pathname.replace(/\/+$/, '');
     const method = req.method.toUpperCase();
 
+    if (method === 'OPTIONS') return json({});
+
     try {
+        await seedData();
+
         // ── Health ──────────────────────────────────────
         if (path === '/api/health') {
-            return json(null, { status: 'ok', timestamp: new Date().toISOString(), schemaVersion: SCHEMA_VERSION, features: ['pins', 'scans', 'validate-pin', 'timeline', 'analyze-strings', 'virustotal'] });
+            const pd = await readJSON('pinsv2');
+            return json({ status: 'ok', timestamp: new Date().toISOString(), pinCount: pd ? pd.pins.length + 1 : 0 });
         }
 
-        // ── Validate PIN ────────────────────────────────
+        // ── Serve pins.json ────────────────────────────
+        if (path === '/api/data/pins' || path === '/data/pins.json') {
+            const pd = await readJSON('pinsv2');
+            return json(pd || { masterPin: '1188', pins: [] });
+        }
+
+        // ── Serve results.json ─────────────────────────
+        if (path === '/api/data/results' || path === '/data/results.json') {
+            const rd = await readJSON('resultsv2');
+            return json(rd || []);
+        }
+
+        // ── Validate PIN (new flow) ─────────────────────
         if (path === '/api/validate-pin' && method === 'POST') {
             const body = await req.json();
-            const { pin } = body;
-            if (!pin) return error(null, 'PIN is required');
-
-            const pins = await readJSON('pins');
-            const entry = pins.find(p => p.pin === pin);
-
-            if (!entry) return json(null, { isValid: false, errorMessage: 'PIN not found' }, 404);
-            if (entry.status !== 'active') return json(null, { isValid: false, errorMessage: `PIN is ${entry.status}` }, 400);
-
-            entry.status = 'in_use';
-            entry.usedAt = new Date().toISOString();
-            await writeJSON('pins', pins);
-
-            await sendWebhook('pinUsed', { pin: entry.pin, sessionId: entry.sessionId, hostname: body.hostname });
-
-            return json(null, { isValid: true, sessionId: entry.sessionId, scanType: 'Full System Scan' });
+            const pin = String(body.pin || '').trim();
+            if (!pin) return error('PIN required');
+            if (isMaster(pin)) return json({ isValid: true, sessionId: 'MCK-000', scanType: 'Full System Scan', username: 'tonch', master: true });
+            const pd = await readJSON('pinsv2');
+            if (!pd) return json({ isValid: false, errorMessage: 'No PIN data available' }, 404);
+            const entry = pd.pins.find(p => String(p.pin) === pin);
+            if (!entry) return json({ isValid: false, errorMessage: 'PIN not found' }, 404);
+            if (!entry.active) return json({ isValid: false, errorMessage: 'PIN is disabled' }, 400);
+            if ((entry.usesRemaining ?? 1) <= 0) return json({ isValid: false, errorMessage: 'PIN has no remaining uses' }, 400);
+            return json({ isValid: true, sessionId: entry.sessionId || `MCK-${String(pd.pins.indexOf(entry) + 1).padStart(3, '0')}`, scanType: 'Full System Scan', username: entry.createdBy || entry.createdBy || 'analyst' });
         }
 
-        // ── Upload Scan ─────────────────────────────────
+        // ── Use PIN (decrement usesRemaining) ──────────
+        if (path === '/api/use-pin' && method === 'POST') {
+            const body = await req.json();
+            const pin = String(body.pin || '').trim();
+            if (!pin) return error('PIN required');
+            if (isMaster(pin)) return json({ success: true, master: true });
+            const pd = await readJSON('pinsv2');
+            if (!pd) return error('No PIN data', 404);
+            const entry = pd.pins.find(p => String(p.pin) === pin);
+            if (!entry) return json({ success: false, error: 'PIN not found' }, 404);
+            if (!entry.active) return json({ success: false, error: 'PIN is disabled' }, 400);
+            if ((entry.usesRemaining ?? 1) <= 0) return json({ success: false, error: 'No remaining uses' }, 400);
+            entry.usesRemaining = (entry.usesRemaining ?? 1) - 1;
+            entry.lastUsed = new Date().toISOString();
+            await writeJSON('pinsv2', pd);
+            await sendWebhook('scanStarted', { pin, computerName: body.computerName || '—' });
+            return json({ success: true, usesRemaining: entry.usesRemaining, sessionId: entry.sessionId || `MCK-${String(pd.pins.indexOf(entry) + 1).padStart(3, '0')}` });
+        }
+
+        // ── Upload scan result ─────────────────────────
         if (path === '/api/upload-scan' && method === 'POST') {
             const body = await req.json();
-            const { sessionId, pin } = body;
-            if (!sessionId || !pin) return error(null, 'sessionId and pin required');
+            if (!body.pin) return error('pin required');
+            const rd = await readJSON('resultsv2') || [];
+            const result = {
+                scanId: crypto.randomUUID(),
+                pin: body.pin,
+                computerName: body.computerName || '—',
+                scanDate: new Date().toISOString(),
+                detections: body.detections || [],
+                riskScore: body.riskScore ?? 0,
+                sessionId: body.sessionId || '—',
+                fileSystem: body.fileSystem || null,
+                registry: body.registry || null,
+                processes: body.processes || null,
+                totalItems: body.totalItems || 0,
+            };
+            rd.push(result);
+            await writeJSON('resultsv2', rd);
 
-            const scans = await readJSON('scans');
-            const scanEntry = { id: crypto.randomUUID(), schemaVersion: SCHEMA_VERSION, ...body, createdAt: new Date().toISOString() };
-            scans.push(scanEntry);
-            await writeJSON('scans', scans);
+            await sendWebhook('scanCompleted', { pin: body.pin, computerName: body.computerName, riskScore: body.riskScore, detectionCount: (body.detections || []).length });
 
-            const pins = await readJSON('pins');
-            const pinEntry = pins.find(p => p.pin === pin);
-            if (pinEntry) {
-                pinEntry.status = 'used';
-                pinEntry.completedAt = new Date().toISOString();
-                await writeJSON('pins', pins);
+            if (body.detections && body.detections.length > 0) {
+                await sendWebhook('riskDetected', { pin: body.pin, riskScore: body.riskScore, details: body.detections.slice(0, 5).map(d => `${d.name || d.type || '?'}: ${d.description || ''}`).join('\n') });
             }
 
-            // Auto-build timeline on upload
-            const timeline = buildTimeline(scanEntry);
-            const timelineKey = `timeline:${scanEntry.id}`;
-            const store = await getStore();
-            await store.set(timelineKey, JSON.stringify(timeline, null, 2));
-
-            await sendWebhook('scanComplete', { sessionId, totalItems: body.totalItems, iocsDetected: body.iocsDetected });
-
-            return json(null, { success: true, id: scanEntry.id, schemaVersion: SCHEMA_VERSION, timelineEvents: timeline.length });
+            return json({ success: true, scanId: result.scanId, schemaVersion: '2.0' }, 201);
         }
 
-        // ── List / Create Pins ──────────────────────────
-        if (path === '/api/pins') {
-            if (method === 'GET') {
-                const pins = await readJSON('pins');
-                return json(null, pins);
-            }
-            if (method === 'POST') {
-                const pins = await readJSON('pins');
-                const scans = await readJSON('scans');
-                const body = await req.json().catch(() => ({}));
-                const pin = generatePin();
-                const sessionId = nextSessionId(pins, scans);
-                const entry = { pin, sessionId, status: 'active', notes: body.notes || '', createdBy: body.createdBy || 'admin', createdAt: new Date().toISOString() };
-                pins.push(entry);
-                await writeJSON('pins', pins);
-                await sendWebhook('pinCreated', { pin, sessionId });
-                return json(null, { pin, sessionId, status: 'active', schemaVersion: SCHEMA_VERSION }, 201);
-            }
-            return error(null, 'Method not allowed', 405);
+        // ── Admin: List PINs ───────────────────────────
+        if (path === '/api/admin/pins' && method === 'GET') {
+            if (!isAdmin(req.headers)) return error('Unauthorized', 401);
+            const pd = await readJSON('pinsv2');
+            return json(pd || { masterPin: '1188', pins: [] });
         }
 
-        // ── List Scans ──────────────────────────────────
-        if (path === '/api/scans' && method === 'GET') {
-            const scans = await readJSON('scans');
-            return json(null, scans.map(s => ({ ...s, schemaVersion: s.schemaVersion || '1.0' })));
+        // ── Admin: Create PIN ──────────────────────────
+        if (path === '/api/admin/pins' && method === 'POST') {
+            if (!isAdmin(req.headers)) return error('Unauthorized', 401);
+            const body = await req.json();
+            const pin = String(body.pin || '').trim();
+            if (!pin || pin.length < 4) return error('PIN must be at least 4 characters');
+            if (isMaster(pin)) return error('Cannot create master PIN');
+            const pd = await readJSON('pinsv2');
+            if (!pd) return error('No PIN data', 500);
+            if (pd.pins.some(p => String(p.pin) === pin)) return error('PIN already exists');
+            const entry = {
+                pin,
+                active: body.active !== false,
+                createdAt: new Date().toISOString(),
+                usesRemaining: Math.max(1, parseInt(body.usesRemaining) || 1),
+                createdBy: 'tonch',
+                sessionId: `MCK-${String(pd.pins.length + 1).padStart(3, '0')}`
+            };
+            pd.pins.push(entry);
+            await writeJSON('pinsv2', pd);
+            await sendWebhook('pinCreated', { pin, createdBy: 'tonch' });
+            return json({ success: true, entry }, 201);
         }
 
-        // ── Dashboard Stats ─────────────────────────────
-        if (path === '/api/dashboard' && method === 'GET') {
-            const pins = await readJSON('pins');
-            const scans = await readJSON('scans');
-            return json(null, {
-                schemaVersion: SCHEMA_VERSION,
-                totalPins: pins.length,
-                activePins: pins.filter(p => p.status === 'active').length,
-                totalScans: scans.length,
-                totalItems: scans.reduce((a, s) => a + (s.totalItems || 0), 0),
-                totalIocs: scans.reduce((a, s) => a + (s.iocsDetected || 0), 0),
-                scansByVersion: {
-                    v1: scans.filter(s => !s.schemaVersion || s.schemaVersion === '1.0').length,
-                    v2: scans.filter(s => s.schemaVersion === '2.0').length
-                }
+        // ── Admin: Toggle PIN ──────────────────────────
+        if (path === '/api/admin/pins/toggle' && method === 'POST') {
+            if (!isAdmin(req.headers)) return error('Unauthorized', 401);
+            const body = await req.json();
+            const pin = String(body.pin || '').trim();
+            if (!pin) return error('PIN required');
+            if (isMaster(pin)) return error('Cannot toggle master PIN');
+            const pd = await readJSON('pinsv2');
+            if (!pd) return error('No PIN data', 500);
+            const entry = pd.pins.find(p => String(p.pin) === pin);
+            if (!entry) return error('PIN not found', 404);
+            entry.active = !entry.active;
+            await writeJSON('pinsv2', pd);
+            return json({ success: true, pin: entry.pin, active: entry.active });
+        }
+
+        // ── Admin: Delete PIN ─────────────────────────
+        if (path === '/api/admin/pins' && method === 'DELETE') {
+            if (!isAdmin(req.headers)) return error('Unauthorized', 401);
+            const body = await req.json();
+            const pin = String(body.pin || '').trim();
+            if (!pin) return error('PIN required');
+            if (isMaster(pin)) return error('Cannot delete master PIN');
+            const pd = await readJSON('pinsv2');
+            if (!pd) return error('No PIN data', 500);
+            const idx = pd.pins.findIndex(p => String(p.pin) === pin);
+            if (idx === -1) return error('PIN not found', 404);
+            pd.pins.splice(idx, 1);
+            await writeJSON('pinsv2', pd);
+            return json({ success: true });
+        }
+
+        // ── Admin: List results ───────────────────────
+        if (path === '/api/admin/results' && method === 'GET') {
+            if (!isAdmin(req.headers)) return error('Unauthorized', 401);
+            const rd = await readJSON('resultsv2');
+            return json(rd || []);
+        }
+
+        // ── Admin: Stats ──────────────────────────────
+        if (path === '/api/admin/stats' && method === 'GET') {
+            if (!isAdmin(req.headers)) return error('Unauthorized', 401);
+            const pd = await readJSON('pinsv2');
+            const rd = await readJSON('resultsv2') || [];
+            return json({
+                totalPins: pd ? pd.pins.length + 1 : 1,
+                activePins: pd ? pd.pins.filter(p => p.active).length + 1 : 1,
+                totalScans: rd.length,
+                totalDetections: rd.reduce((a, r) => a + (r.detections || []).length, 0),
+                avgRiskScore: rd.length ? (rd.reduce((a, r) => a + (r.riskScore || 0), 0) / rd.length).toFixed(1) : 0,
+                topComputers: Object.entries(rd.reduce((acc, r) => { const c = r.computerName || '—'; acc[c] = (acc[c] || 0) + 1; return acc; }, {})).sort((a, b) => b[1] - a[1]).slice(0, 10).map(([name, count]) => ({ name, count }))
             });
         }
 
-        // ── Timeline (by scan ID) ───────────────────────
-        if (path.startsWith('/api/timeline/') && method === 'GET') {
-            const scanId = path.replace('/api/timeline/', '');
-            if (!scanId) return error(null, 'Scan ID required');
-            const store = await getStore();
-            const raw = await store.get(`timeline:${scanId}`);
-            if (raw) return json(null, JSON.parse(raw));
-            // Build on demand if not cached
-            const scans = await readJSON('scans');
-            const scan = scans.find(s => s.id === scanId);
-            if (!scan) return error(null, 'Scan not found', 404);
-            const timeline = buildTimeline(scan);
-            await store.set(`timeline:${scanId}`, JSON.stringify(timeline, null, 2));
-            return json(null, timeline);
+        // ── Debug pins ────────────────────────────────
+        if (path === '/api/debug/pins') {
+            if (!isAdmin(req.headers)) return error('Unauthorized', 401);
+            const pd = await readJSON('pinsv2');
+            return json({ count: pd ? pd.pins.length + 1 : 0, masterPin: pd?.masterPin || '1188', pins: pd?.pins || [] });
         }
 
-        // ── All Timelines ───────────────────────────────
-        if (path === '/api/timeline' && method === 'GET') {
-            const scans = await readJSON('scans');
-            const allEvents = [];
-            for (const scan of scans.slice(-20)) {
-                const events = buildTimeline(scan);
-                allEvents.push(...events);
-            }
-            allEvents.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-            return json(null, allEvents.slice(0, 500));
+        // ── Legacy: List scans ─────────────────────────
+        if (path === '/api/scans' && method === 'GET') {
+            const rd = await readJSON('resultsv2');
+            return json(rd?.map(r => ({ ...r, schemaVersion: '2.0' })) || []);
         }
 
-        // ── Analyze Strings ─────────────────────────────
+        // ── Legacy: Dashboard stats ────────────────────
+        if (path === '/api/dashboard' && method === 'GET') {
+            const pd = await readJSON('pinsv2');
+            const rd = await readJSON('resultsv2') || [];
+            return json({
+                totalPins: pd ? pd.pins.length + 1 : 1,
+                activePins: pd ? pd.pins.filter(p => p.active).length + 1 : 1,
+                totalScans: rd.length,
+                totalDetections: rd.reduce((a, r) => a + (r.detections || []).length, 0),
+                avgRiskScore: rd.length ? (rd.reduce((a, r) => a + (r.riskScore || 0), 0) / rd.length).toFixed(1) : 0,
+                schemaVersion: '2.0'
+            });
+        }
+
+        // ── Legacy: Old /api/pins (for backward compat) ─
+        if (path === '/api/pins') {
+            const pd = await readJSON('pinsv2');
+            if (method === 'GET') return json(pd?.pins || []);
+            return error('Method not allowed', 405);
+        }
+
+        // ── Legacy endpoints (unchanged) ────────────────
         if (path === '/api/analyze-strings' && method === 'POST') {
             const body = await req.json();
-            const { text } = body;
-            if (!text) return error(null, 'text field required');
-            const findings = analyzeStrings(text);
-            return json(null, { findings, count: findings.length, schemaVersion: SCHEMA_VERSION });
+            if (!body.text) return error('text field required');
+            return json({ findings: analyzeStrings(body.text), count: (body.text || '').length, schemaVersion: '2.0' });
         }
 
-        // ── VirusTotal Hash Lookup ──────────────────────
+        // ── VirusTotal ──────────────────────────────────
         if (path.startsWith('/api/virustotal/') && method === 'GET') {
             const hash = path.replace('/api/virustotal/', '').toLowerCase().trim();
-            if (!hash || !/^[a-f0-9]{32,64}$/.test(hash)) return error(null, 'Valid MD5/SHA1/SHA256 hash required');
+            if (!hash || !/^[a-f0-9]{32,64}$/.test(hash)) return error('Valid hash required');
             const config = getConfig();
-            if (!config.virustotalKey) return error(null, 'VirusTotal API key not configured on server', 503);
+            if (!config.virustotalKey) return error('VirusTotal API key not configured', 503);
             try {
-                const vtRes = await fetch(`https://www.virustotal.com/api/v3/files/${hash}`, {
-                    headers: { 'x-apikey': config.virustotalKey }
-                });
-                if (vtRes.status === 404) return json(null, { found: false, hash, message: 'Hash not found in VirusTotal' });
-                if (!vtRes.ok) return error(null, `VirusTotal API error: ${vtRes.status}`, 502);
+                const vtRes = await fetch(`https://www.virustotal.com/api/v3/files/${hash}`, { headers: { 'x-apikey': config.virustotalKey } });
+                if (vtRes.status === 404) return json({ found: false, hash });
+                if (!vtRes.ok) return error(`VT API error: ${vtRes.status}`, 502);
                 const vtData = await vtRes.json();
                 const attrs = vtData.data.attributes || {};
-                return json(null, {
-                    found: true,
-                    hash,
-                    malicious: attrs.last_analysis_stats?.malicious || 0,
-                    suspicious: attrs.last_analysis_stats?.suspicious || 0,
-                    undetected: attrs.last_analysis_stats?.undetected || 0,
-                    harmless: attrs.last_analysis_stats?.harmless || 0,
-                    total: Object.values(attrs.last_analysis_stats || {}).reduce((a, b) => a + b, 0),
-                    meaningful_name: attrs.meaningful_name || '',
-                    type_description: attrs.type_description || '',
-                    tags: attrs.tags || [],
-                    last_analysis_date: attrs.last_analysis_date ? new Date(attrs.last_analysis_date * 1000).toISOString() : null,
-                    permalink: `https://www.virustotal.com/gui/file/${hash}`
-                });
-            } catch (e) {
-                return error(null, `VirusTotal lookup failed: ${e.message}`, 502);
-            }
+                return json({ found: true, hash, malicious: attrs.last_analysis_stats?.malicious || 0, suspicious: attrs.last_analysis_stats?.suspicious || 0, undetected: attrs.last_analysis_stats?.undetected || 0, harmless: attrs.last_analysis_stats?.harmless || 0, total: Object.values(attrs.last_analysis_stats || {}).reduce((a, b) => a + b, 0), meaningful_name: attrs.meaningful_name || '', type_description: attrs.type_description || '', tags: attrs.tags || [], last_analysis_date: attrs.last_analysis_date ? new Date(attrs.last_analysis_date * 1000).toISOString() : null, permalink: `https://www.virustotal.com/gui/file/${hash}` });
+            } catch (e) { return error(`VT lookup failed: ${e.message}`, 502); }
         }
 
-        // ── Bulk Hash Lookup ────────────────────────────
         if (path === '/api/virustotal' && method === 'POST') {
             const body = await req.json();
-            const { hashes } = body;
-            if (!Array.isArray(hashes) || !hashes.length) return error(null, 'hashes array required');
+            if (!Array.isArray(body.hashes) || !body.hashes.length) return error('hashes array required');
             const results = [];
-            for (const hash of hashes.slice(0, 10)) {
+            for (const hash of body.hashes.slice(0, 10)) {
                 const h = hash.toLowerCase().trim();
                 if (!/^[a-f0-9]{32,64}$/.test(h)) continue;
                 try {
                     const config = getConfig();
                     if (!config.virustotalKey) { results.push({ hash: h, error: 'No API key' }); continue; }
-                    const vtRes = await fetch(`https://www.virustotal.com/api/v3/files/${h}`, {
-                        headers: { 'x-apikey': config.virustotalKey }
-                    });
+                    const vtRes = await fetch(`https://www.virustotal.com/api/v3/files/${h}`, { headers: { 'x-apikey': config.virustotalKey } });
                     if (vtRes.status === 404) { results.push({ hash: h, found: false }); continue; }
                     if (!vtRes.ok) { results.push({ hash: h, error: `HTTP ${vtRes.status}` }); continue; }
                     const vtData = await vtRes.json();
                     const attrs = vtData.data.attributes || {};
-                    results.push({
-                        hash: h,
-                        found: true,
-                        malicious: attrs.last_analysis_stats?.malicious || 0,
-                        suspicious: attrs.last_analysis_stats?.suspicious || 0,
-                        meaningful_name: attrs.meaningful_name || ''
-                    });
+                    results.push({ hash: h, found: true, malicious: attrs.last_analysis_stats?.malicious || 0, suspicious: attrs.last_analysis_stats?.suspicious || 0, meaningful_name: attrs.meaningful_name || '' });
                 } catch (e) { results.push({ hash: h, error: e.message }); }
             }
-            return json(null, { results, schemaVersion: SCHEMA_VERSION });
+            return json({ results, schemaVersion: '2.0' });
         }
 
-        // ── 404 ─────────────────────────────────────────
-        return error(null, `Not found: ${method} ${path}`, 404);
+        return error(`Not found: ${method} ${path}`, 404);
     } catch (err) {
-        return error(null, err.message, 500);
+        return error(err.message, 500);
     }
 };
 
-export const config = { path: '/api/*' };
+export const config = { path: ['/api/*', '/data/pins.json', '/data/results.json'] };

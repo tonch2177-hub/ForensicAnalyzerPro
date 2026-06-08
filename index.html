@@ -1,733 +1,406 @@
 ﻿<!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MICKY.AC — Forensic Investigation Platform</title>
+<title>MICKY.AC — DFIR Console</title>
 <style>
-*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-:root{--bg:#090909;--bg2:#111111;--bg3:#161616;--bg4:#1c1c1c;--bg5:#232323;--border:#232323;--border-light:#2a2a2a;--text:#ffffff;--text2:#9a9a9a;--text3:#666666;--primary:#ff1f3d;--primary-hover:#d6002a;--primary-dim:rgba(255,31,61,0.1);--primary-glow:rgba(255,31,61,0.2);--primary-subtle:rgba(255,31,61,0.06);--success:#00d26a;--success-dim:rgba(0,210,106,0.12);--warning:#ff8c00;--warning-dim:rgba(255,140,0,0.12);--danger:#ff2e4d;--danger-dim:rgba(255,46,77,0.12);--info:#3b82f6;--info-dim:rgba(59,130,246,0.12);--purple:#8b5cf6;--purple-dim:rgba(139,92,246,0.12);--radius:6px;--radius-lg:10px;--shadow:0 4px 24px rgba(0,0,0,0.4);--shadow-card:0 2px 8px rgba(0,0,0,0.3);--font:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;--font-mono:JetBrains Mono,Consolas,'Courier New',monospace;--transition:0.2s cubic-bezier(0.4,0,0.2,1);--sidebar-w:260px}
-html{font-size:14px;scroll-behavior:smooth}
-body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;line-height:1.6;-webkit-font-smoothing:antialiased}
-::selection{background:var(--primary-dim);color:var(--primary)}
-a{color:var(--primary);text-decoration:none;transition:color var(--transition)}
-a:hover{color:var(--primary-hover)}
-input,select,textarea{font:inherit;color:var(--text);background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:0 14px;height:42px;width:100%;outline:none;transition:all var(--transition)}
-input:focus,select:focus,textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-dim)}
-textarea{padding:12px 14px;height:auto}
-button{font:inherit;cursor:pointer;border:none;border-radius:var(--radius);transition:all var(--transition);font-weight:500}
-button:active{transform:scale(0.97)}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:42px;padding:0 22px;font-size:13px;font-weight:600;border-radius:var(--radius);letter-spacing:0.2px}
-.btn-primary{background:var(--primary);color:#fff}
-.btn-primary:hover{background:var(--primary-hover);box-shadow:0 0 24px var(--primary-glow)}
-.btn-secondary{background:var(--bg4);color:var(--text);border:1px solid var(--border)}
-.btn-secondary:hover{background:var(--bg5);border-color:var(--border-light)}
-.btn-ghost{background:transparent;color:var(--text2)}
-.btn-ghost:hover{background:var(--bg4);color:var(--text)}
-.btn-sm{height:34px;padding:0 14px;font-size:12px}
-.btn-xs{height:28px;padding:0 10px;font-size:11px}
-.btn-icon{width:36px;height:36px;padding:0;display:inline-flex;align-items:center;justify-content:center}
-::-webkit-scrollbar{width:6px;height:6px}
-::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:var(--text3);border-radius:3px}
-::-webkit-scrollbar-thumb:hover{background:#888}
-.auth-screen{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:var(--bg);z-index:1000}
-.auth-screen::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(ellipse at 30% 20%,rgba(255,31,61,0.03) 0%,transparent 60%),radial-gradient(ellipse at 70% 80%,rgba(255,31,61,0.02) 0%,transparent 50%);pointer-events:none}
-.auth-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);width:100%;max-width:420px;padding:36px;position:relative;animation:fadeIn 0.5s ease-out;box-shadow:var(--shadow)}
-.auth-card .brand{text-align:center;margin-bottom:28px}
-.auth-card .brand .logo{width:52px;height:52px;border-radius:12px;background:var(--primary-dim);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;border:1px solid rgba(255,31,61,0.15)}
-.auth-card .brand h1{font-size:20px;font-weight:700;letter-spacing:-0.5px}
-.auth-card .brand .sub{color:var(--text2);font-size:12px;margin-top:2px}
-.auth-card .brand .sub span{color:var(--primary);font-weight:600}
-.auth-card .field{margin-bottom:14px}
-.auth-card label{display:block;font-size:11px;font-weight:600;color:var(--text2);margin-bottom:5px;text-transform:uppercase;letter-spacing:0.8px}
-.auth-card .error{background:var(--danger-dim);color:var(--danger);border:1px solid rgba(255,46,77,0.2);border-radius:var(--radius);padding:10px 14px;font-size:12px;margin-bottom:14px;display:none}
-.auth-card .error.show{display:block}
-.auth-card .foot{text-align:center;margin-top:20px;font-size:12px;color:var(--text2)}
-.auth-card .foot a{color:var(--primary);cursor:pointer;font-weight:600}
-.app-layout{display:none;min-height:100vh}
-.app-layout.active{display:flex}
-.sidebar{width:var(--sidebar-w);background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;transition:all var(--transition);overflow:hidden}
-.sidebar.collapsed{width:68px}
-.sidebar-header{height:60px;display:flex;align-items:center;padding:0 16px;border-bottom:1px solid var(--border);gap:10px;flex-shrink:0}
-.sidebar-header .logo{width:34px;height:34px;border-radius:8px;background:var(--primary);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;font-weight:800;color:#fff;letter-spacing:0.5px}
-.sidebar-header .brand-text{font-size:15px;font-weight:700;white-space:nowrap;letter-spacing:-0.3px}
-.sidebar-header .brand-text span{color:var(--primary)}
-.sidebar.collapsed .sidebar-header .brand-text{opacity:0;width:0;overflow:hidden}
-.sidebar-nav{flex:1;padding:10px 8px;overflow-y:auto;display:flex;flex-direction:column;gap:1px}
-.sidebar-nav .nav-section{font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1.2px;padding:12px 14px 6px}
-.sidebar.collapsed .sidebar-nav .nav-section{display:none}
-.nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--radius);color:var(--text2);font-size:13px;font-weight:450;cursor:pointer;transition:all var(--transition);white-space:nowrap;overflow:hidden;text-decoration:none;position:relative}
-.nav-item:hover{background:var(--bg4);color:var(--text)}
-.nav-item.active{background:var(--primary-subtle);color:var(--primary)}
-.nav-item.active::before{content:'';position:absolute;left:0;top:6px;bottom:6px;width:2px;background:var(--primary);border-radius:0 2px 2px 0}
-.nav-item svg{width:18px;height:18px;flex-shrink:0}
-.sidebar.collapsed .nav-item{padding:9px;justify-content:center}
-.sidebar.collapsed .nav-item span{opacity:0;width:0;overflow:hidden}
-.sidebar-footer{padding:10px 8px;border-top:1px solid var(--border)}
-.sidebar-overlay{display:none}
-.main{flex:1;margin-left:var(--sidebar-w);min-height:100vh;display:flex;flex-direction:column;transition:margin-left var(--transition)}
-.sidebar.collapsed + .main{margin-left:68px}
-.topbar{height:60px;border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 28px;gap:14px;background:var(--bg2);position:sticky;top:0;z-index:50}
-.topbar .menu-btn{display:none;background:none;border:none;color:var(--text2);cursor:pointer;padding:6px;border-radius:var(--radius)}
-.topbar .menu-btn:hover{background:var(--bg4)}
-.topbar h2{font-size:16px;font-weight:600;letter-spacing:-0.3px}
-.topbar .spacer{flex:1}
-.topbar .topbar-status{display:flex;align-items:center;gap:10px}
-.topbar .status-dot{width:8px;height:8px;border-radius:50%;display:inline-block}
-.topbar .status-dot.online{background:var(--success);box-shadow:0 0 8px rgba(0,210,106,0.4)}
-.topbar .status-dot.offline{background:var(--text3)}
-.topbar .status-dot.warning{background:var(--warning);box-shadow:0 0 8px rgba(255,140,0,0.4)}
-.topbar .status-badge{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;padding:4px 10px;border-radius:99px;background:var(--bg4);border:1px solid var(--border);color:var(--text2)}
-.topbar .status-badge.active{background:var(--success-dim);border-color:rgba(0,210,106,0.2);color:var(--success)}
-.topbar .search-bar{position:relative;max-width:280px}
-.topbar .search-bar svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:15px;height:15px;color:var(--text3);pointer-events:none}
-.topbar .search-bar input{padding-left:36px;height:36px;font-size:13px;background:var(--bg3);border-color:var(--border)}
-.topbar .user-badge{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text2);padding:4px 10px;border-radius:99px;background:var(--bg3);border:1px solid var(--border)}
-.topbar .user-badge .avatar{width:28px;height:28px;border-radius:50%;background:var(--primary-dim);color:var(--primary);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
-.content{padding:28px;flex:1}
-.page{display:none;animation:fadeIn 0.3s ease-out}
+*{margin:0;padding:0;box-sizing:border-box}
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+:root{--bg:#090909;--bg2:#0f0f0f;--bg3:#161616;--bg4:#1e1e1e;--bg5:#252525;--red:#d6002a;--red2:#ff1f3d;--red3:#ff3355;--red-dim:#8a001b;--text:#e8e8e8;--text2:#a0a0a0;--text3:#606060;--border:#1e1e1e;--glow:0 0 10px rgba(214,0,42,.3),0 0 20px rgba(214,0,42,.1);--radius:6px;--font:'Inter',sans-serif;--mono:'JetBrains Mono',monospace}
+body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;overflow-x:hidden}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:var(--bg2)}
+::-webkit-scrollbar-thumb{background:var(--red-dim);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--red)}
+::selection{background:var(--red);color:#fff}
+#authScreen{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:var(--bg)}
+.auth-box{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:48px 40px 40px;width:400px;max-width:90vw;text-align:center}
+.auth-logo{font-size:32px;font-weight:900;letter-spacing:-1px;color:var(--red)}.auth-logo small{display:block;font-size:11px;font-weight:400;color:var(--text3);letter-spacing:4px;text-transform:uppercase;margin-top:4px}
+.auth-box h2{font-size:18px;font-weight:500;margin:24px 0 8px;color:var(--text)}
+.auth-box p{font-size:13px;color:var(--text3);margin-bottom:24px}
+.auth-tabs{display:flex;gap:0;margin-bottom:24px;background:var(--bg3);border-radius:var(--radius);overflow:hidden;border:1px solid var(--border)}
+.auth-tab{flex:1;padding:10px;text-align:center;font-size:13px;font-weight:500;cursor:pointer;color:var(--text3);transition:all .2s;background:transparent;border:none;font-family:var(--font)}
+.auth-tab.active{background:var(--red);color:#fff}
+.auth-form{display:none;text-align:left}
+.auth-form.active{display:block}
+.auth-form input{width:100%;padding:12px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:14px;font-family:var(--mono);outline:none;transition:all .2s;margin-bottom:14px}
+.auth-form input:focus{border-color:var(--red);box-shadow:var(--glow)}
+.auth-form .btn{width:100%;padding:12px;background:var(--red);color:#fff;border:none;border-radius:var(--radius);font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;font-family:var(--font)}
+.auth-form .btn:hover{background:var(--red2);box-shadow:var(--glow)}
+.auth-error{color:var(--red2);font-size:13px;margin-top:12px;display:none;text-align:center}
+.auth-error.show{display:block}
+.auth-footer{margin-top:20px;font-size:12px;color:var(--text3)}
+#appLayout{display:none;min-height:100vh}
+#appLayout.active{display:flex}
+.sidebar{width:240px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:1000}
+.sidebar-brand{padding:20px 20px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px}
+.sidebar-logo{width:38px;height:38px;border-radius:8px;background:var(--red);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:18px;color:#fff;flex-shrink:0}
+.sidebar-brand-text h1{font-size:18px;font-weight:900;letter-spacing:-.3px;color:var(--text)}
+.sidebar-brand-text small{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:2px;display:block;margin-top:0px}
+.sidebar-user{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.sidebar-avatar{width:30px;height:30px;border-radius:50%;background:var(--red);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:#fff;flex-shrink:0}
+.sidebar-user-info{flex:1;min-width:0}
+.sidebar-user-info .name{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sidebar-user-info .role{font-size:10px;color:var(--text3)}
+.sidebar-nav{flex:1;padding:8px 6px;overflow-y:auto}
+.nav-item{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:var(--radius);cursor:pointer;font-size:12px;color:var(--text2);transition:all .12s;margin-bottom:1px}
+.nav-item:hover{background:var(--bg3);color:var(--text)}
+.nav-item.active{background:var(--red);color:#fff;font-weight:500}
+.nav-item svg{width:16px;height:16px;flex-shrink:0}
+.nav-section{font-size:9px;text-transform:uppercase;letter-spacing:1.5px;color:var(--text3);padding:12px 12px 4px;font-weight:600}
+.sidebar-footer{padding:12px 16px;border-top:1px solid var(--border);font-size:10px;color:var(--text3)}
+.main{flex:1;margin-left:240px;min-height:100vh;background:var(--bg)}
+.main-header{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;border-bottom:1px solid var(--border);background:var(--bg2)}
+.main-header h2{font-size:15px;font-weight:600}
+.main-header .badge{font-size:10px;padding:3px 8px;border-radius:20px;background:var(--red-dim);color:var(--red2);font-weight:500}
+.main-body{padding:20px 24px}
+.page{display:none}
 .page.active{display:block}
-.card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow-card)}
-.card-header{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
-.card-header h3{font-size:14px;font-weight:600;letter-spacing:-0.2px}
-.card-header .card-badge{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;padding:3px 10px;border-radius:99px;background:var(--bg4);color:var(--text2);border:1px solid var(--border)}
-.card-body{padding:22px}
-.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:28px}
-.stat-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-lg);padding:22px;display:flex;flex-direction:column;gap:6px;transition:all var(--transition);cursor:default;position:relative;overflow:hidden}
-.stat-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--border)}
-.stat-card:hover{border-color:var(--border-light);transform:translateY(-2px);box-shadow:var(--shadow)}
-.stat-card:hover::after{background:var(--primary)}
-.stat-card .stat-icon{width:38px;height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:6px;font-size:16px}
-.stat-card .stat-label{font-size:11px;color:var(--text2);font-weight:500;text-transform:uppercase;letter-spacing:0.6px}
-.stat-card .stat-value{font-size:30px;font-weight:700;line-height:1.1;letter-spacing:-1px}
-.stat-card .stat-sub{font-size:12px;color:var(--text3);margin-top:2px}
-.table-wrap{overflow-x:auto}
-table{width:100%;border-collapse:collapse;font-size:13px}
-thead th{padding:12px 16px;text-align:left;font-weight:600;color:var(--text2);font-size:11px;text-transform:uppercase;letter-spacing:0.7px;border-bottom:1px solid var(--border);white-space:nowrap;background:var(--bg4)}
-tbody td{padding:12px 16px;border-bottom:1px solid rgba(35,35,35,0.6);font-size:13px;color:var(--text)}
-tbody tr{transition:background var(--transition)}
-tbody tr:hover{background:var(--bg4)}
-tbody tr:last-child td{border-bottom:none}
-.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:99px;font-size:10px;font-weight:700;letter-spacing:0.3px;text-transform:uppercase}
-.badge-completed,.badge-active,.badge-ok,.badge-LOW,.badge-low{background:var(--success-dim);color:var(--success);border:1px solid rgba(0,210,106,0.2)}
-.badge-running,.badge-expired,.badge-MEDIUM,.badge-medium,.badge-warning{background:var(--warning-dim);color:var(--warning);border:1px solid rgba(255,140,0,0.2)}
-.badge-pending,.badge-info{background:var(--primary-dim);color:var(--primary);border:1px solid rgba(255,31,61,0.2)}
-.badge-failed,.badge-danger,.badge-disabled,.badge-tampered,.badge-HIGH,.badge-high,.badge-CRITICAL,.badge-critical{background:var(--danger-dim);color:var(--danger);border:1px solid rgba(255,46,77,0.2)}
-.badge-blue{background:var(--info-dim);color:var(--info);border:1px solid rgba(59,130,246,0.2)}
-.badge-purple{background:var(--purple-dim);color:var(--purple);border:1px solid rgba(139,92,246,0.2)}
-.filter-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:18px}
-.filter-row select{width:auto;min-width:140px;height:36px;font-size:12px}
-.filter-row .search-bar{position:relative;max-width:260px}
-.filter-row .search-bar svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);width:14px;height:14px;color:var(--text3);pointer-events:none}
-.filter-row .search-bar input{padding-left:34px;height:36px;font-size:12px}
-.tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:22px;overflow-x:auto}
-.tab{padding:12px 20px;font-size:12px;font-weight:500;color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;transition:all var(--transition);background:none;white-space:nowrap;letter-spacing:0.2px}
-.tab:hover{color:var(--text);background:var(--bg4)}
-.tab.active{color:var(--primary);border-bottom-color:var(--primary);background:var(--primary-subtle)}
-.tab-content{display:none}
-.tab-content.active{display:block;animation:fadeIn 0.25s ease-out}
-.detail-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-bottom:22px}
-.detail-item{background:var(--bg4);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px}
-.detail-item label{display:block;font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:0.7px;margin-bottom:3px}
-.detail-item span{font-size:13px;font-weight:500;color:var(--text)}
-.empty-state{text-align:center;padding:56px 20px;color:var(--text2)}
-.empty-state svg{width:44px;height:44px;margin-bottom:14px;opacity:0.3}
-.empty-state h4{font-size:15px;color:var(--text);margin-bottom:4px;font-weight:600}
-.empty-state p{font-size:13px;color:var(--text3)}
-.toast{position:fixed;bottom:28px;right:28px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px 22px;font-size:13px;font-weight:500;z-index:9999;display:none;align-items:center;gap:12px;box-shadow:0 12px 48px rgba(0,0,0,0.6);max-width:380px;animation:slideUp 0.3s ease-out}
-.toast.show{display:flex}
-.toast.success{border-color:rgba(0,210,106,0.3)}
-.toast.success svg{color:var(--success)}
-.toast.error{border-color:rgba(255,46,77,0.3)}
-.toast.error svg{color:var(--danger)}
-.toast.info{border-color:rgba(59,130,246,0.3)}
-.toast.info svg{color:var(--info)}
-.log-line{padding:5px 0;font-size:12px;font-family:var(--font-mono);color:var(--text2);border-bottom:1px solid rgba(35,35,35,0.4)}
-.log-line .time{color:var(--text3);margin-right:10px}
-.log-line .level-info{color:var(--primary)}
-.log-line .level-warn{color:var(--warning)}
-.log-line .level-error{color:var(--danger)}
-.log-line .level-success{color:var(--success)}
-.text-muted{color:var(--text2)}
-.text-sm{font-size:13px}
-.gap-2{display:flex;gap:8px;flex-wrap:wrap}
-.gap-3{display:flex;gap:12px}
-.mt-2{margin-top:8px}
-.mb-4{margin-bottom:16px}
-.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.code-block{background:var(--bg4);border:1px solid var(--border);border-radius:var(--radius);padding:18px;font-family:var(--font-mono);font-size:12px;overflow-x:auto;white-space:pre;max-height:420px;line-height:1.7}
-.widget-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px;margin-bottom:24px}
-.severity-indicator{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:6px;vertical-align:middle}
-.severity-indicator.critical{background:var(--danger);box-shadow:0 0 6px var(--danger)}
-.severity-indicator.high{background:#ff6b6b;box-shadow:0 0 6px #ff6b6b}
-.severity-indicator.medium{background:var(--warning);box-shadow:0 0 6px var(--warning)}
-.severity-indicator.low{background:var(--success);box-shadow:0 0 6px var(--success)}
-.severity-indicator.info{background:var(--info);box-shadow:0 0 6px var(--info)}
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:9999;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.grid-5{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:16px}
+.card-header{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:6px;font-weight:600}
+.card-value{font-size:24px;font-weight:700;color:var(--text);font-family:var(--mono)}
+.card-value.red{color:var(--red)}
+.card-value.green{color:#22c55e}
+.card-value.orange{color:#ff8800}
+.card-value.yellow{color:#eab308}
+.card-label{font-size:11px;color:var(--text3);margin-top:2px}
+.table-wrap{overflow-x:auto;margin-top:10px}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{padding:8px 12px;text-align:left;font-weight:500;color:var(--text3);font-size:10px;text-transform:uppercase;letter-spacing:.8px;border-bottom:1px solid var(--border);background:var(--bg3)}
+td{padding:8px 12px;border-bottom:1px solid var(--border);color:var(--text2)}
+tr:hover td{background:var(--bg3)}
+.status-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:500}
+.status-badge.active{background:rgba(34,197,94,.15);color:#22c55e}
+.status-badge.disabled{background:rgba(255,255,255,.05);color:var(--text3)}
+.status-badge.used{background:rgba(255,136,0,.15);color:#ff8800}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:var(--radius);font-size:12px;font-weight:500;cursor:pointer;border:none;font-family:var(--font);transition:all .12s}
+.btn-red{background:var(--red);color:#fff}
+.btn-red:hover{background:var(--red2);box-shadow:var(--glow)}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--text2)}
+.btn-outline:hover{border-color:var(--red);color:var(--text);background:var(--bg3)}
+.btn-sm{padding:4px 8px;font-size:11px}
+.btn-icon{width:28px;height:28px;padding:0;display:inline-flex;align-items:center;justify-content:center;border-radius:var(--radius)}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9998;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
 .modal-overlay.show{display:flex}
-.modal{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);width:90%;max-width:920px;max-height:82vh;display:flex;flex-direction:column;animation:fadeIn 0.2s ease-out;box-shadow:0 24px 64px rgba(0,0,0,0.5)}
-.modal-header{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
-.modal-header h3{font-size:15px;font-weight:600}
-.modal-body{padding:22px;overflow-y:auto;flex:1}
-.modal-close{background:var(--bg4);border:1px solid var(--border);color:var(--text2);width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;transition:all var(--transition)}
-.modal-close:hover{background:var(--bg5);color:var(--text);border-color:var(--border-light)}
-.path-cell{font-family:var(--font-mono);font-size:12px;max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.key-cell{font-family:var(--font-mono);font-size:12px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text2)}
-.timestamp-cell{font-family:var(--font-mono);font-size:11px;color:var(--text3)}
-.hash-cell{font-family:var(--font-mono);font-size:11px;color:var(--text3)}
-.tl-line{display:flex;gap:14px;padding:12px 0;border-bottom:1px solid rgba(35,35,35,0.4);align-items:flex-start;transition:background var(--transition)}
-.tl-line:hover{background:var(--bg4);margin:0 -12px;padding:12px 12px;border-radius:var(--radius)}
-.tl-line .tl-time{font-family:var(--font-mono);font-size:11px;color:var(--text3);white-space:nowrap;min-width:140px;padding-top:3px}
-.tl-line .tl-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:4px;position:relative}
-.tl-line .tl-dot::after{content:'';position:absolute;top:14px;left:50%;transform:translateX(-50%);width:1px;height:calc(100% + 14px);background:var(--border)}
-.tl-line:last-child .tl-dot::after{display:none}
-.tl-line .tl-content{flex:1;min-width:0}
-.tl-line .tl-category{font-size:10px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:0.7px}
-.tl-line .tl-desc{font-size:13px;margin-top:2px;color:var(--text)}
-.tl-line .tl-detail{font-size:11px;color:var(--text3);margin-top:3px}
-.vt-score{font-family:var(--font-mono);font-size:12px}
-.vt-score .vt-mal{color:var(--danger);font-weight:700}
-.vt-score .vt-sus{color:var(--warning)}
-.vt-score .vt-clean{color:var(--success)}
-.string-match{font-family:var(--font-mono);font-size:12px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.section-title{font-size:18px;font-weight:700;margin-bottom:4px;letter-spacing:-0.3px}
-.section-sub{font-size:13px;color:var(--text2);margin-bottom:22px}
-.risk-bar{display:flex;gap:4px;align-items:center;height:6px}
-.risk-bar .bar{height:6px;border-radius:3px;flex:1;transition:width 0.6s ease-out}
-.risk-bar .bar.critical{background:var(--danger)}
-.risk-bar .bar.high{background:#ff6b6b}
-.risk-bar .bar.medium{background:var(--warning)}
-.risk-bar .bar.low{background:var(--success)}
-.card-row{display:flex;gap:8px;flex-wrap:wrap}
-.tool-card{background:var(--bg4);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;display:flex;align-items:center;gap:12px;flex:1;min-width:200px;transition:all var(--transition)}
-.tool-card:hover{border-color:var(--border-light);transform:translateY(-1px)}
-.tool-card .tool-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.tool-card .tool-info{flex:1;min-width:0}
-.tool-card .tool-info .tool-name{font-size:13px;font-weight:600}
-.tool-card .tool-info .tool-meta{font-size:11px;color:var(--text3);margin-top:2px}
-.tool-card .tool-status{flex-shrink:0}
-.section-divider{height:1px;background:var(--border);margin:24px 0}
-.info-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(35,35,35,0.4);font-size:13px}
-.info-row:last-child{border-bottom:none}
-.info-row .info-label{color:var(--text2)}
-.info-row .info-value{font-weight:500;text-align:right}
-@media(max-width:768px){
-:root{--sidebar-w:260px}
-.sidebar{transform:translateX(-100%)}
-.sidebar.mobile-open{transform:translateX(0)}
-.sidebar.collapsed.collapsed{width:260px;transform:translateX(-100%)}
-.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:99}
-.sidebar-overlay.show{display:block}
-.main{margin-left:0!important}
-.topbar .menu-btn{display:block}
-.topbar h2{font-size:14px}
-.topbar .search-bar{max-width:160px}
-.stat-grid{grid-template-columns:1fr 1fr}
-.widget-grid{grid-template-columns:1fr}
-.form-row{grid-template-columns:1fr}
-.content{padding:16px}
-.detail-grid{grid-template-columns:1fr 1fr}
-}
-@media(max-width:480px){.stat-grid{grid-template-columns:1fr}.content{padding:12px}.detail-grid{grid-template-columns:1fr}}
-@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
-.pulse{animation:pulse 2s ease-in-out infinite}
+.modal{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:24px;width:520px;max-width:90vw;max-height:80vh;overflow-y:auto}
+.modal h3{font-size:15px;font-weight:600;margin-bottom:4px}
+.modal p{font-size:12px;color:var(--text3);margin-bottom:16px}
+.modal input,.modal select,.modal textarea{width:100%;padding:9px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:12px;font-family:var(--mono);outline:none;margin-bottom:10px}
+.modal input:focus{border-color:var(--red)}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
+.toast{position:fixed;bottom:20px;right:20px;z-index:99999;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:12px 16px;display:flex;align-items:center;gap:8px;font-size:12px;box-shadow:0 8px 32px rgba(0,0,0,.5);transform:translateY(120%);opacity:0;transition:all .3s ease;max-width:400px}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.success{border-left:3px solid #22c55e}
+.toast.error{border-left:3px solid var(--red)}
+.toast.info{border-left:3px solid #3b82f6}
+.empty{text-align:center;padding:40px 16px;color:var(--text3)}
+.empty svg{width:40px;height:40px;opacity:.3;margin-bottom:10px}
+.empty p{font-size:13px}
+/* risk levels */
+.risk-low{color:#22c55e}
+.risk-medium{color:#eab308}
+.risk-high{color:#ff8800}
+.risk-critical{color:var(--red)}
+.risk-badge{display:inline-block;padding:2px 8px;border-radius:3px;font-size:10px;font-weight:600}
+.risk-badge.low{background:rgba(34,197,94,.15);color:#22c55e}
+.risk-badge.medium{background:rgba(234,179,8,.15);color:#eab308}
+.risk-badge.high{background:rgba(255,136,0,.15);color:#ff8800}
+.risk-badge.critical{background:rgba(214,0,42,.2);color:var(--red)}
+/* search */
+.search-bar{display:flex;gap:8px;margin-bottom:14px}
+.search-bar input{flex:1;padding:8px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:12px;font-family:var(--font);outline:none}
+.search-bar input:focus{border-color:var(--red)}
+.search-bar select{padding:8px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:12px;outline:none}
+/* raw json */
+.json-viewer{background:#050505;border:1px solid var(--border);border-radius:var(--radius);padding:16px;font-family:var(--mono);font-size:12px;line-height:1.6;overflow:auto;max-height:70vh;white-space:pre-wrap;word-break:break-all}
+.json-key{color:#7dd3fc}.json-string{color:#86efac}.json-number{color:#fbbf24}.json-boolean{color:#f472b6}.json-null{color:var(--text3)}.json-bracket{color:var(--text)}
+/* filter pills */
+.filter-bar{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.filter-pill{padding:4px 12px;border-radius:20px;font-size:11px;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--text3);transition:all .12s;font-family:var(--font)}
+.filter-pill.active{background:var(--red);border-color:var(--red);color:#fff}
+.filter-pill:hover{border-color:var(--red);color:var(--text)}
+@media(max-width:768px){.sidebar{display:none}.main{margin-left:0}.grid-2,.grid-3,.grid-4,.grid-5{grid-template-columns:1fr}}
 </style>
 </head>
-<body><div class="auth-screen" id="authScreen">
-  <div class="auth-card">
-    <div class="brand">
-      <div class="logo">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ff1f3d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-      </div>
-      <h1>MICKY<span style="color:var(--primary)">.AC</span></h1>
-      <div class="sub">Forensic Investigation Platform <span>v2.0</span></div>
-    </div>
-    <div class="error" id="authError"></div>
-    <div id="loginForm">
-      <div class="field"><label>PIN</label><input type="password" id="loginPin" placeholder="Enter investigation PIN" maxlength="16" autocomplete="off"></div>
-      <button class="btn btn-primary" style="width:100%;margin-top:6px" onclick="attemptLogin()">Authenticate</button>
-      <div class="foot">Need access? <a onclick="showRegister()">Request registration</a></div>
-    </div>
-    <div id="registerForm" style="display:none">
-      <div class="field"><label>Choose a Username</label><input type="text" id="regUser" placeholder="username" maxlength="24"></div>
-      <div class="field"><label>Set a PIN (6-16 chars)</label><input type="password" id="regPin" placeholder="••••••••" maxlength="16"></div>
-      <div class="field"><label>Confirm PIN</label><input type="password" id="regPin2" placeholder="••••••••" maxlength="16"></div>
-      <button class="btn btn-primary" style="width:100%;margin-top:6px" onclick="attemptRegister()">Register</button>
-      <div class="foot">Already registered? <a onclick="showLogin()">Sign in</a></div>
-    </div>
-  </div>
+<body>
+
+<div id="authScreen">
+<div class="auth-box">
+<div class="auth-logo">MICKY.AC<small>Digital Forensics & Incident Response</small></div>
+<h2>Access Console</h2>
+<p>Enter your PIN to access the DFIR platform</p>
+<div class="auth-tabs">
+<button class="auth-tab active" onclick="showAuthTab('login')">Login</button>
+<button class="auth-tab" onclick="showAuthTab('register')">Register</button>
+</div>
+<div id="authError" class="auth-error"></div>
+<div id="loginForm" class="auth-form active">
+<input type="password" id="loginPin" placeholder="Enter your PIN" maxlength="20" autocomplete="off" onkeydown="if(event.key==='Enter')attemptLogin()">
+<button class="btn" onclick="attemptLogin()">Authenticate</button>
+</div>
+<div id="registerForm" class="auth-form">
+<input type="text" id="regUser" placeholder="Username" maxlength="32" autocomplete="off">
+<input type="password" id="regPin" placeholder="Choose a PIN (4+ characters)" maxlength="20" autocomplete="off">
+<input type="password" id="regPin2" placeholder="Confirm PIN" maxlength="20" autocomplete="off">
+<button class="btn" onclick="attemptRegister()">Register</button>
+</div>
+<div class="auth-footer">Use PIN 1188 for admin access</div>
+</div>
 </div>
 
-<div class="toast" id="toast"><span id="toastIcon"></span><span id="toastMsg"></span></div>
-<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleMobileSidebar()"></div><div class="app-layout" id="appLayout">
-  <aside class="sidebar" id="sidebar">
-    <div class="sidebar-header">
-      <div class="logo">MA</div>
-      <div class="brand-text">MICKY<span>.AC</span></div>
-    </div>
-    <nav class="sidebar-nav">
-      <div class="nav-section">General</div>
-      <a class="nav-item active" data-page="overview" onclick="navigate('overview')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-        <span>Overview</span>
-      </a>
-      <a class="nav-item" data-page="scans" onclick="navigate('scans')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-        <span>Scans</span>
-      </a>
-      <a class="nav-item" data-page="live" onclick="navigate('live')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-        <span>Live Scanner</span>
-      </a>
-      <a class="nav-item" data-page="timeline" onclick="navigate('timeline')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-        <span>Timeline</span>
-      </a>
-      <div class="nav-section">Forensics</div>
-      <a class="nav-item" data-page="registry" onclick="navigate('registry')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-        <span>Registry</span>
-      </a>
-      <a class="nav-item" data-page="artifacts" onclick="navigate('artifacts')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
-        <span>Artifacts</span>
-      </a>
-      <a class="nav-item" data-page="strings" onclick="navigate('strings')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
-        <span>String Analysis</span>
-      </a>
-      <a class="nav-item" data-page="virustotal" onclick="navigate('virustotal')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="2" x2="12" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
-        <span>VirusTotal</span>
-      </a>
-      <div class="nav-section">Administration</div>
-      <a class="nav-item" data-page="admin" onclick="navigate('admin')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-        <span>Admin Panel</span>
-      </a>
-      <a class="nav-item" data-page="settings" onclick="navigate('settings')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-        <span>Settings</span>
-      </a>
-    </nav>
-    <div class="sidebar-footer">
-      <a class="nav-item" onclick="handleLogout()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-        <span>Logout</span>
-      </a>
-    </div>
-  </aside>
+<div id="appLayout">
+<aside class="sidebar">
+<div class="sidebar-brand">
+<div class="sidebar-logo">MA</div>
+<div class="sidebar-brand-text"><h1>MICKY.AC</h1><small>DFIR Console</small></div>
+</div>
+<div class="sidebar-user">
+<div class="sidebar-avatar" id="userAvatar">U</div>
+<div class="sidebar-user-info">
+<div class="name" id="userName">user</div>
+<div class="role" id="userRole">analyst</div>
+</div>
+<button class="btn btn-icon btn-outline" onclick="handleLogout()" title="Logout">
+<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+</button>
+</div>
+<nav class="sidebar-nav">
+<div class="nav-section">Forensics</div>
+<div class="nav-item active" data-page="overview" onclick="navigate('overview')">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+Overview
+</div>
+<div class="nav-item" data-page="sessions" onclick="navigate('sessions')">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+Sessions
+</div>
+<div class="nav-item" data-page="timeline" onclick="navigate('timeline')">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+Timeline
+</div>
+<div class="nav-item" data-page="registry" onclick="navigate('registry')">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+Registry
+</div>
+<div class="nav-item" data-page="processes" onclick="navigate('processes')">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+Processes
+</div>
+<div class="nav-item" data-page="services" onclick="navigate('services')">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+Services
+</div>
+<div class="nav-item" data-page="drivers" onclick="navigate('drivers')">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+Drivers
+</div>
+<div class="nav-item" data-page="filesystem" onclick="navigate('filesystem')">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+FileSystem
+</div>
+<div class="nav-item" data-page="events" onclick="navigate('events')">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+Event Logs
+</div>
+<div class="nav-item" data-page="network" onclick="navigate('network')">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16.5 17.5 6.5 6.5"/><circle cx="18.5" cy="5.5" r="3"/><circle cx="5.5" cy="18.5" r="3"/></svg>
+Network
+</div>
+<div class="nav-item" data-page="security" onclick="navigate('security')">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+Security
+</div>
+<div class="nav-section">Analysis</div>
+<div class="nav-item" data-page="indicators" onclick="navigate('indicators')">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+Threat Indicators
+</div>
+<div class="nav-item" data-page="rawjson" onclick="navigate('rawjson')">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+Raw JSON
+</div>
+<div class="nav-item" data-page="reports" onclick="navigate('reports')">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+Reports
+</div>
+<div class="nav-section" id="adminSection" style="display:none">Administration</div>
+<div class="nav-item" id="adminPinsNav" data-page="admin" onclick="navigate('admin')" style="display:none">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+Admin Panel
+</div>
+</nav>
+<div class="sidebar-footer">MICKY.AC v2.0 • DFIR Platform</div>
+</aside>
 
-  <div class="main" id="mainContent">
-    <header class="topbar">
-      <button class="menu-btn" onclick="toggleMobileSidebar()">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-      </button>
-      <h2 id="pageTitle">Overview</h2>
-      <div class="spacer"></div>
-      <div class="search-bar" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="globalSearch" placeholder="Search scans..." oninput="filterScansTable()"></div>
-      <div class="topbar-status">
-        <div class="status-badge active" id="apiStatus"><span class="status-dot online" id="statusDot"></span><span id="statusText">Connected</span></div>
-      </div>
-      <div class="user-badge" id="userBadge">
-        <div class="avatar" id="userAvatar">U</div>
-        <span id="userName">user</span>
-      </div>
-    </header>
-
-    <div class="content" id="contentArea"><div class="page active" id="page-overview">
-  <div class="section-title">Dashboard Overview</div>
-  <div class="section-sub" id="ovSub">Real-time forensic investigation overview</div>
-  <div class="stat-grid" id="ovStats"></div>
-  <div class="widget-grid">
-    <div class="card">
-      <div class="card-header"><h3>Recent Activity</h3><span class="card-badge">Live</span></div>
-      <div class="card-body" style="padding:12px 22px;max-height:300px;overflow-y:auto" id="ovLog"><div class="log-line"><span class="time">[--:--:--]</span><span class="level-info">INFO</span> Awaiting data...</div></div>
-    </div>
-    <div class="card">
-      <div class="card-header"><h3>Quick Actions</h3><span class="card-badge">Tools</span></div>
-      <div class="card-body">
-        <div class="card-row">
-          <div class="tool-card" onclick="navigate('live')"><div class="tool-icon" style="background:var(--primary-dim);color:var(--primary)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div class="tool-info"><div class="tool-name">New Scan</div><div class="tool-meta">Launch live forensic scan</div></div><div class="tool-status"><span class="badge badge-info">Run</span></div></div>
-          <div class="tool-card" onclick="navigate('timeline')"><div class="tool-icon" style="background:var(--warning-dim);color:var(--warning)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div><div class="tool-info"><div class="tool-name">Timeline</div><div class="tool-meta">View forensic timeline</div></div><div class="tool-status"><span class="badge badge-blue">View</span></div></div>
-        </div>
-        <div class="card-row mt-2">
-          <div class="tool-card" onclick="navigate('strings')"><div class="tool-icon" style="background:var(--success-dim);color:var(--success)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg></div><div class="tool-info"><div class="tool-name">String Analysis</div><div class="tool-meta">Extract IOCs from text</div></div><div class="tool-status"><span class="badge badge-purple">Analyze</span></div></div>
-          <div class="tool-card" onclick="navigate('virustotal')"><div class="tool-icon" style="background:var(--danger-dim);color:var(--danger)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="2" x2="12" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/></svg></div><div class="tool-info"><div class="tool-name">VirusTotal</div><div class="tool-meta">Hash reputation lookup</div></div><div class="tool-status"><span class="badge badge-info">Check</span></div></div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div><div class="page" id="page-scans">
-  <div class="section-title">Scan Results</div>
-  <div class="section-sub">Browse all forensic scan submissions</div>
-  <div class="filter-row">
-    <div class="search-bar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="scansFilter" placeholder="Filter scans..." oninput="filterScansTable()"></div>
-    <select id="scansSeverityFilter" onchange="filterScansTable()"><option value="">All severities</option><option value="critical">Critical</option><option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option></select>
-    <select id="scansStatusFilter" onchange="filterScansTable()"><option value="">All status</option><option value="completed">Completed</option><option value="running">Running</option><option value="pending">Pending</option><option value="failed">Failed</option></select>
-    <button class="btn btn-secondary btn-sm" onclick="exportScansCSV()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Export CSV</button>
-  </div>
-  <div class="card">
-    <div class="card-body" style="padding:0">
-      <div class="table-wrap"><table><thead><tr><th>Timestamp</th><th>Hostname</th><th>User</th><th>OS</th><th>Severity</th><th>Status</th><th>Actions</th></tr></thead><tbody id="scansBody"></tbody></table></div>
-    </div>
-  </div>
+<div class="main">
+<div class="main-header">
+<h2 id="pageTitle">Overview</h2>
+<div id="mainBadge"></div>
+</div>
+<div class="main-body" id="mainBody"></div>
+</div>
 </div>
 
-<div class="page" id="page-live">
-  <div class="section-title">Live Scanner</div>
-  <div class="section-sub">Real-time forensic evidence submission — fully coordinated with the API</div>
-  <div class="stat-grid" id="liveStats"></div>
-  <div class="widget-grid">
-    <div class="card">
-      <div class="card-header"><h3>Console Output</h3><span class="card-badge" id="liveStatusBadge">Idle</span></div>
-      <div class="card-body" style="padding:12px 22px;max-height:360px;overflow-y:auto;font-family:var(--font-mono);font-size:12px;line-height:1.7" id="liveLog"><div class="log-line"><span class="time">[--:--:--]</span><span class="level-info">INFO</span> Live scanner ready</div></div>
-    </div>
-    <div class="card">
-      <div class="card-header"><h3>Scan Controls</h3><span class="card-badge">v2.0</span></div>
-      <div class="card-body">
-        <div class="form-row">
-          <div class="field"><label>Hostname</label><input type="text" id="liveHost" placeholder="WORKSTATION-01" value="WORKSTATION-01"></div>
-          <div class="field"><label>Username</label><input type="text" id="liveUser" placeholder="analyst" value="analyst"></div>
-        </div>
-        <div class="field"><label>OS / Platform</label><input type="text" id="liveOs" placeholder="Windows 11" value="Windows 11"></div>
-        <div class="field"><label>Forensic Data (JSON)</label><textarea id="liveJsonInput" rows="7" placeholder="Paste forensic evidence as JSON, or use a template below."></textarea></div>
-        <div class="gap-2 mb-4">
-          <button class="btn btn-xs btn-secondary" onclick="loadTemplate('files')" type="button">File System</button>
-          <button class="btn btn-xs btn-secondary" onclick="loadTemplate('registry')" type="button">Registry</button>
-          <button class="btn btn-xs btn-secondary" onclick="loadTemplate('strings')" type="button">Strings</button>
-          <button class="btn btn-xs btn-secondary" onclick="loadTemplate('full')" type="button">Full Scan</button>
-          <button class="btn btn-xs btn-secondary" onclick="document.getElementById('liveJsonInput').value='';toast('Cleared','info')" type="button">Clear</button>
-        </div>
-        <div class="gap-2">
-          <button class="btn btn-primary" onclick="startLiveScan()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>Submit to API</button>
-          <button class="btn btn-secondary" onclick="stopLiveScan()" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>Stop</button>
-          <button class="btn btn-secondary" onclick="clearLiveLog()" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Clear</button>
-        </div>
-        <div class="section-divider"></div>
-        <div class="info-row"><span class="info-label">Last submission</span><span class="info-value" id="liveLastScan">-</span></div>
-        <div class="info-row"><span class="info-label">API Status</span><span class="info-value" id="liveApiStatus"><span class="badge badge-completed">Ready</span></span></div>
-      </div>
-    </div>
-  </div>
-  <div id="liveResults" style="display:none" class="card">
-    <div class="card-header"><h3>Scan Results</h3><span class="card-badge" id="liveResultBadge">Complete</span></div>
-    <div class="card-body" id="liveResultsBody"></div>
-  </div>
-</div><div class="page" id="page-timeline">
-  <div class="section-title">Forensic Timeline</div>
-  <div class="section-sub">Chronological event timeline across all scans</div>
-  <div class="filter-row">
-    <select id="tlSeverity" onchange="renderTimeline()"><option value="">All severities</option><option value="critical">Critical</option><option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option><option value="info">Info</option></select>
-    <select id="tlCategory" onchange="renderTimeline()"><option value="">All categories</option><option value="filesystem">File System</option><option value="registry">Registry</option><option value="process">Process</option><option value="network">Network</option><option value="eventlog">Event Log</option><option value="ioc">IOC</option></select>
-    <select id="tlLimit" onchange="renderTimeline()"><option value="50">50 events</option><option value="100">100 events</option><option value="200" selected>200 events</option><option value="500">500 events</option></select>
-    <button class="btn btn-secondary btn-sm" onclick="refreshTimeline()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>Refresh</button>
-  </div>
-  <div class="card">
-    <div class="card-body" id="timelineContent"><div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><h4>No events</h4><p>Timeline will populate after scans are submitted</p></div></div>
-  </div>
-</div><div class="page" id="page-registry">
-  <div class="section-title">Windows Registry Forensics</div>
-  <div class="section-sub">Analyze registry hives and forensic artifacts</div>
-  <div class="tabs" id="registryTabs">
-    <button class="tab active" data-tab="reg-NetworkList">NetworkList</button>
-    <button class="tab" data-tab="reg-NetworkCards">NetworkCards</button>
-    <button class="tab" data-tab="reg-USB">USB</button>
-    <button class="tab" data-tab="reg-RDP">RDP</button>
-    <button class="tab" data-tab="reg-ShimCache">ShimCache</button>
-    <button class="tab" data-tab="reg-Prefetch">Prefetch</button>
-    <button class="tab" data-tab="reg-AmCache">AmCache</button>
-    <button class="tab" data-tab="reg-UserAssist">UserAssist</button>
-    <button class="tab" data-tab="reg-ArcHistory">ArcHistory</button>
-    <button class="tab" data-tab="reg-CIDSizeMRU">CIDSizeMRU</button>
-    <button class="tab" data-tab="reg-Store">Store</button>
-    <button class="tab" data-tab="reg-StartMenuInternet">StartMenuInternet</button>
-    <button class="tab" data-tab="reg-HKIDs">HKIDs</button>
-  </div>
-  <div id="registryContent"></div>
+<div class="modal-overlay" id="createPinModal">
+<div class="modal">
+<h3>Create PIN</h3>
+<p>Generate a new access code for scanner authentication</p>
+<input type="text" id="newPinValue" placeholder="PIN (4+ characters)" maxlength="20">
+<input type="number" id="newPinUses" placeholder="Uses remaining" value="1" min="1" max="999">
+<div class="modal-actions">
+<button class="btn btn-outline" onclick="closeModal('createPinModal')">Cancel</button>
+<button class="btn btn-red" onclick="createPin()">Create</button>
+</div>
+</div>
 </div>
 
-<div class="page" id="page-artifacts">
-  <div class="section-title">Forensic Artifacts</div>
-  <div class="section-sub">Categorized forensic evidence collection</div>
-  <div class="tabs" id="artifactTabs">
-    <button class="tab active" data-tab="art-files">Files</button>
-    <button class="tab" data-tab="art-registry">Registry</button>
-    <button class="tab" data-tab="art-processes">Processes</button>
-    <button class="tab" data-tab="art-strings">Strings</button>
-    <button class="tab" data-tab="art-eventlog">Event Logs</button>
-    <button class="tab" data-tab="art-unicode">Unicode</button>
-    <button class="tab" data-tab="art-steganography">Steganography</button>
-    <button class="tab" data-tab="art-minecraft">Minecraft</button>
-    <button class="tab" data-tab="art-feather">Feather</button>
-    <button class="tab" data-tab="art-alts">Alts</button>
-    <button class="tab" data-tab="art-velociraptor">Velociraptor</button>
-    <button class="tab" data-tab="art-shellbags">Shellbags</button>
-    <button class="tab" data-tab="art-evtx">EVTX</button>
-    <button class="tab" data-tab="art-permissions">Permissions</button>
-  </div>
-  <div id="artifactContent"></div>
+<div class="modal-overlay" id="jsonViewerModal">
+<div class="modal" style="width:90vw;max-width:900px">
+<h3>Raw Data</h3>
+<div class="json-viewer" id="jsonViewerContent" style="max-height:60vh"></div>
+<div class="modal-actions">
+<button class="btn btn-outline" onclick="closeModal('jsonViewerModal')">Close</button>
+<button class="btn btn-red" onclick="copyJsonViewer()">Copy</button>
+</div>
+</div>
 </div>
 
-<div class="page" id="page-strings">
-  <div class="section-title">String Analysis</div>
-  <div class="section-sub">Extract and analyze forensic strings and IOCs</div>
-  <div class="card mb-4">
-    <div class="card-body">
-      <div class="field"><label>Input Text</label><textarea id="stringInput" rows="6" placeholder="Paste forensic text data here for analysis..."></textarea></div>
-      <div class="gap-2"><button class="btn btn-primary" onclick="analyzeStrings()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Analyze</button><button class="btn btn-secondary" onclick="document.getElementById('stringInput').value=''">Clear</button></div>
-    </div>
-  </div>
-  <div class="tabs" id="stringTabs">
-    <button class="tab active" data-tab="str-all">All</button>
-    <button class="tab" data-tab="str-emails">Emails</button>
-    <button class="tab" data-tab="str-urls">URLs</button>
-    <button class="tab" data-tab="str-domains">Domains</button>
-    <button class="tab" data-tab="str-ipv4">IPv4</button>
-    <button class="tab" data-tab="str-ipv6">IPv6</button>
-    <button class="tab" data-tab="str-discordIds">Discord IDs</button>
-    <button class="tab" data-tab="str-usernames">Usernames</button>
-  </div>
-  <div id="stringContent"></div>
-</div>
+<div class="toast" id="toast"><span id="toastMsg"></span></div>
 
-<div class="page" id="page-virustotal">
-  <div class="section-title">VirusTotal Intelligence</div>
-  <div class="section-sub">Hash reputation and IOC validation</div>
-  <div class="card mb-4">
-    <div class="card-body">
-      <div class="field"><label>Enter hashes (one per line, max 10)</label><textarea id="vtInput" rows="4" placeholder="SHA256, SHA1, or MD5 hashes...&#10;e.g.: d41d8cd98f00b204e9800998ecf8427e"></textarea></div>
-      <div class="gap-2"><button class="btn btn-primary" onclick="checkVTBulk()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="2" x2="12" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/></svg>Check Hashes</button><button class="btn btn-secondary" onclick="document.getElementById('vtInput').value=''">Clear</button></div>
-    </div>
-  </div>
-  <div id="vtResults" class="card"><div class="card-body"><div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="2" x2="12" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/></svg><h4>No results yet</h4><p>Enter hashes above and click Check Hashes</p></div></div></div>
-</div><div class="page" id="page-admin">
-  <div class="section-title">Administration Panel</div>
-  <div class="section-sub">User management and system configuration</div>
-  <div class="stat-grid" id="adminStats"></div>
-  <div class="widget-grid">
-    <div class="card">
-      <div class="card-header"><h3>Registered Users</h3><span class="card-badge" id="adminUserCount">0</span></div>
-      <div class="card-body" style="padding:0">
-        <div class="table-wrap"><table><thead><tr><th>Username</th><th>PIN</th><th>Role</th><th>Created</th><th>Last Login</th><th>Actions</th></tr></thead><tbody id="adminUsersBody"></tbody></table></div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-header"><h3>System Health</h3><span class="card-badge">Status</span></div>
-      <div class="card-body">
-        <div class="info-row"><span class="info-label">API Status</span><span class="info-value"><span class="badge badge-completed" id="adminApiStatus">Online</span></span></div>
-        <div class="info-row"><span class="info-label">Schema Version</span><span class="info-value" id="adminSchemaVer">—</span></div>
-        <div class="info-row"><span class="info-label">Total Scans</span><span class="info-value" id="adminTotalScans">0</span></div>
-        <div class="info-row"><span class="info-label">Data Storage</span><span class="info-value" id="adminStorage">LocalStorage</span></div>
-        <div class="section-divider"></div>
-        <div class="gap-2"><button class="btn btn-secondary btn-sm" onclick="syncFromServer()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>Sync from Server</button><button class="btn btn-secondary btn-sm" onclick="exportAllData()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Export All Data</button><button class="btn btn-secondary btn-sm" style="color:var(--danger)" onclick="clearLocalData()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Clear Local Data</button></div>
-      </div>
-    </div>
-  </div>
-</div>
+<script>
+const API = '/api';
+let loggedInUser = null;
+let isAdmin = false;
+let allResults = [];
 
-<div class="page" id="page-settings">
-  <div class="section-title">Settings</div>
-  <div class="section-sub">Application preferences and configuration</div>
-  <div class="widget-grid">
-    <div class="card">
-      <div class="card-header"><h3>Profile</h3></div>
-      <div class="card-body">
-        <div class="detail-item"><label>Username</label><span id="setUsername">—</span></div>
-        <div class="detail-item mt-2"><label>Role</label><span id="setRole">analyst</span></div>
-        <div class="detail-item mt-2"><label>Registration PIN</label><span id="setPin" style="font-family:var(--font-mono)">—</span></div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-header"><h3>Preferences</h3></div>
-      <div class="card-body">
-        <div class="field"><label>Theme</label><select id="setTheme" onchange="applySettings()"><option value="dark">Dark (default)</option></select></div>
-        <div class="field mt-2"><label>Timeline default limit</label><select id="setTlLimit" onchange="applySettings()"><option value="50">50</option><option value="100">100</option><option value="200" selected>200</option><option value="500">500</option></select></div>
-        <div class="section-divider"></div>
-        <button class="btn btn-secondary btn-sm" onclick="handleLogout()">Logout</button>
-      </div>
-    </div>
-  </div>
-</div></div></div></div>
+function toast(m,t){const e=document.getElementById('toast');e.className='toast '+t;e.querySelector('#toastMsg').textContent=m;e.classList.add('show');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('show'),3500)}
 
-<div class="modal-overlay" id="scanModal">
-  <div class="modal">
-    <div class="modal-header"><h3 id="scanModalTitle">Scan Details</h3><button class="modal-close" onclick="closeModal('scanModal')">?</button></div>
-    <div class="modal-body" id="scanModalBody"></div>
-  </div>
-</div>
+function showAuthTab(t){document.querySelectorAll('.auth-tab').forEach(e=>e.classList.toggle('active',e.textContent.toLowerCase().includes(t)));document.getElementById('loginForm').classList.toggle('active',t==='login');document.getElementById('registerForm').classList.toggle('active',t==='register');document.getElementById('authError').classList.remove('show')}
 
-<div class="modal-overlay" id="vtModal">
-  <div class="modal">
-    <div class="modal-header"><h3>VirusTotal Report</h3><button class="modal-close" onclick="closeModal('vtModal')">?</button></div>
-    <div class="modal-body" id="vtModalBody"></div>
-  </div>
-</div>
+function attemptLogin(){const p=document.getElementById('loginPin').value.trim();const err=document.getElementById('authError');if(!p){err.textContent='Enter your PIN';err.classList.add('show');return}
+fetch(API+'/validate-pin',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pin:p})}).then(r=>r.json()).then(d=>{if(!d.isValid)throw new Error(d.errorMessage||'Invalid PIN');loggedInUser={pin:p,username:d.username||'analyst',role:d.master?'admin':'analyst',master:!!d.master};isAdmin=!!d.master;localStorage.setItem('mickyUser',JSON.stringify(loggedInUser));initApp()}).catch(e=>{err.textContent=e.message;err.classList.add('show')})}
 
-<div class="modal-overlay" id="rawModal">
-  <div class="modal" style="max-width:1100px">
-    <div class="modal-header"><h3>Raw JSON</h3><button class="modal-close" onclick="closeModal('rawModal')">?</button></div>
-    <div class="modal-body" id="rawModalBody">
-      <div class="gap-2 mb-4"><button class="btn btn-secondary btn-sm" onclick="copyRawJson()">Copy</button><button class="btn btn-secondary btn-sm" onclick="downloadRawJson()">Download</button></div>
-      <pre class="code-block" id="rawJsonPre"></pre>
-    </div>
-  </div>
-</div>
+function attemptRegister(){const u=document.getElementById('regUser').value.trim();const p1=document.getElementById('regPin').value;const p2=document.getElementById('regPin2').value;const err=document.getElementById('authError');if(!u||!p1){err.textContent='Fill in all fields';err.classList.add('show');return}if(p1!==p2){err.textContent='PINs do not match';err.classList.add('show');return}if(p1.length<4){err.textContent='PIN must be 4+ characters';err.classList.add('show');return}
+fetch(API+'/admin/pins',{method:'POST',headers:{'Content-Type':'application/json','X-Admin-Pin':p1},body:JSON.stringify({pin:p1,createdBy:u})}).then(r=>r.json()).then(d=>{if(!d.success)throw new Error(d.error||'Registration failed');loggedInUser={pin:p1,username:u,role:'analyst',master:false};isAdmin=false;toast('Registered successfully','success');initApp()}).catch(e=>{err.textContent=e.message;err.classList.add('show')})}
 
-<script>const API = '/api';
-let forensicData = [];
-let authPins = JSON.parse(localStorage.getItem('authPins') || '{}');
-let loggedInUser = JSON.parse(localStorage.getItem('loggedInUser') || 'null');
-let dashboardCache = null;
-let liveScanRunning = false;
-let currentPage = 'overview';
-let rawJsonForCopy = '';
-
-function toast(msg, type = 'info'){const t=document.getElementById('toast');const icon=t.querySelector('#toastIcon');const text=t.querySelector('#toastMsg');t.className='toast '+type;icon.innerHTML={success:'<svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"20 6 9 17 4 12\"/></svg>',error:'<svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><circle cx=\"12\" cy=\"12\" r=\"10\"/><line x1=\"15\" y1=\"9\" x2=\"9\" y2=\"15\"/><line x1=\"9\" y1=\"9\" x2=\"15\" y2=\"15\"/></svg>',info:'<svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><circle cx=\"12\" cy=\"12\" r=\"10\"/><line x1=\"12\" y1=\"16\" x2=\"12\" y2=\"12\"/><line x1=\"12\" y1=\"8\" x2=\"12.01\" y2=\"8\"/></svg>'}[type]||'';text.textContent=msg;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),3500)}
-
-function showLogin(){document.getElementById('loginForm').style.display='block';document.getElementById('registerForm').style.display='none';document.getElementById('authError').classList.remove('show')}
-function showRegister(){document.getElementById('loginForm').style.display='none';document.getElementById('registerForm').style.display='block';document.getElementById('authError').classList.remove('show')}
-
-function updateUserBadge(){if(loggedInUser){const u=loggedInUser;document.getElementById('userName').textContent=u.username||'user';document.getElementById('userAvatar').textContent=(u.username||'U')[0].toUpperCase();document.getElementById('setUsername').textContent=u.username||'—';document.getElementById('setPin').textContent=u.pin||'—';document.getElementById('setRole').textContent=u.role||'analyst'}}
-
-function attemptLogin(){const pin=document.getElementById('loginPin').value.trim();const err=document.getElementById('authError');if(!pin){err.textContent='Please enter a PIN';err.classList.add('show');return}
-fetch(API+'/validate-pin',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pin})}).then(r=>{if(!r.ok){if(r.status===404)throw new Error('PIN not found. Please register.');throw new Error('Server error '+r.status)}return r.json()}).then(data=>{let users=authPins;if(data&&data.username){users[pin]=data}localStorage.setItem('authPins',JSON.stringify(users));loggedInUser=users[pin];loggedInUser.pin=pin;localStorage.setItem('loggedInUser',JSON.stringify(loggedInUser));initApp()}).catch(e=>{err.textContent=e.message;err.classList.add('show')})}
-
-function attemptRegister(){const user=document.getElementById('regUser').value.trim();const p1=document.getElementById('regPin').value;const p2=document.getElementById('regPin2').value;const err=document.getElementById('authError');if(!user||!p1){err.textContent='Please fill in all fields';err.classList.add('show');return}if(p1!==p2){err.textContent='PINs do not match';err.classList.add('show');return}if(p1.length<6){err.textContent='PIN must be at least 6 characters';err.classList.add('show');return}
-let users=authPins;if(users[p1]){err.textContent='PIN already registered. Try logging in.';err.classList.add('show');return}
-const userData={username:user,role:'analyst',created:new Date().toISOString(),lastLogin:new Date().toISOString()};users[p1]=userData;localStorage.setItem('authPins',JSON.stringify(users));loggedInUser=userData;loggedInUser.pin=p1;localStorage.setItem('loggedInUser',JSON.stringify(loggedInUser));toast('Registration successful','success');initApp()}
-
-function handleLogout(){loggedInUser=null;localStorage.removeItem('loggedInUser');document.getElementById('appLayout').classList.remove('active');document.getElementById('authScreen').style.display='flex';document.getElementById('loginPin').value='';document.getElementById('authError').classList.remove('show');showLogin()}
-
-function navigate(page){currentPage=page;document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById('page-'+page)?.classList.add('active');document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));document.querySelector(`.nav-item[data-page="${page}"]`)?.classList.add('active');const titles={overview:'Dashboard Overview',scans:'Scan Results',live:'Live Scanner',timeline:'Forensic Timeline',registry:'Windows Registry Forensics',artifacts:'Forensic Artifacts',strings:'String Analysis',virustotal:'VirusTotal Intelligence',admin:'Administration Panel',settings:'Settings'};document.getElementById('pageTitle').textContent=titles[page]||page;document.querySelector('.search-bar').style.display=page==='scans'?'block':'none';if(page==='overview')renderOverview();if(page==='scans')renderScans();if(page==='live')renderLive();if(page==='timeline')renderTimeline();if(page==='registry')renderRegistry();if(page==='artifacts')renderArtifacts();if(page==='admin')renderAdmin()}
+function handleLogout(){loggedInUser=null;isAdmin=false;localStorage.removeItem('mickyUser');document.getElementById('appLayout').classList.remove('active');document.getElementById('authScreen').style.display='flex';document.getElementById('loginPin').value='';document.getElementById('authError').classList.remove('show');showAuthTab('login')}
 
 function closeModal(id){document.getElementById(id).classList.remove('show')}
 
-function renderLive(){const el=document.getElementById('liveStats');if(!el)return;const total=forensicData.length;const regTotal=forensicData.reduce((a,s)=>a+(s.registry?.length||0),0);const artTotal=forensicData.reduce((a,s)=>a+(s.artifacts?.length||0),0);const strTotal=forensicData.reduce((a,s)=>a+(s.strings?.length||0),0);el.innerHTML='<div class="stat-card"><div class="stat-icon" style="background:var(--primary-dim);color:var(--primary)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div><div class="stat-label">Scans in DB</div><div class="stat-value">'+total+'</div><div class="stat-sub">submitted via API</div></div><div class="stat-card"><div class="stat-icon" style="background:var(--info-dim);color:var(--info)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><div class="stat-label">Registry</div><div class="stat-value">'+regTotal+'</div><div class="stat-sub">total entries</div></div><div class="stat-card"><div class="stat-icon" style="background:var(--warning-dim);color:var(--warning)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/></svg></div><div class="stat-label">Artifacts</div><div class="stat-value">'+artTotal+'</div><div class="stat-sub">forensic objects</div></div><div class="stat-card"><div class="stat-icon" style="background:var(--success-dim);color:var(--success)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg></div><div class="stat-label">Strings</div><div class="stat-value">'+strTotal+'</div><div class="stat-sub">extracted IOCs</div></div>'}
+function navigate(page){document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));const nav=document.querySelector(`.nav-item[data-page="${page}"]`);if(nav)nav.classList.add('active');renderPage(page)}
 
-function toggleMobileSidebar(){document.getElementById('sidebar').classList.toggle('mobile-open');document.getElementById('sidebarOverlay').classList.toggle('show')}function syncFromServer(){toast('Syncing from server...','info');fetch(API+'/dashboard').then(r=>r.json()).then(d=>{dashboardCache=d;if(d.scans)forensicData=d.scans;localStorage.setItem('forensicCache',JSON.stringify(forensicData));localStorage.setItem('dashboardCache',JSON.stringify(d));toast('Sync complete: '+forensicData.length+' scans','success');renderOverview();renderAdmin()}).catch(e=>{toast('Sync failed: '+e.message,'error')})}
+// ── Page Renderer ──
+function renderPage(page){
+const titles={overview:'Overview',sessions:'Sessions',timeline:'Timeline',registry:'Registry Analysis',processes:'Process Analysis',services:'Services Analysis',drivers:'Drivers Analysis',filesystem:'FileSystem Analysis',events:'Event Logs',network:'Network Analysis',security:'Security Analysis',indicators:'Threat Indicators',rawjson:'Raw JSON Viewer',reports:'Reports',admin:'Admin Panel'};
+document.getElementById('pageTitle').textContent=titles[page]||page;
+const body=document.getElementById('mainBody');
+const fns={overview:renderOverview,sessions:renderSessions,timeline:renderTimeline,registry:renderForensicPage,processes:renderForensicPage,services:renderForensicPage,drivers:renderForensicPage,filesystem:renderForensicPage,events:renderForensicPage,network:renderForensicPage,security:renderForensicPage,indicators:renderIndicators,rawjson:renderRawJson,reports:renderReports,admin:renderAdmin};
+body.innerHTML='';
+if(fns[page])fns[page](page,body);
+}
 
-function syncFromBot(data){if(!data||!data.scans)return;forensicData=data.scans;dashboardCache=data;localStorage.setItem('forensicCache',JSON.stringify(forensicData));localStorage.setItem('dashboardCache',JSON.stringify(data));if(currentPage==='overview')renderOverview()}
+// ── Data Loading ──
+async function loadResults(){try{const r=await fetch(API+'/data/results');allResults=Array.isArray(await r.json())? await r.json(): [];}catch{allResults=[]}}
+async function loadPins(){try{const r=await fetch(API+'/admin/pins',{headers:{'X-Admin-Pin':'1188'}});const d=await r.json();return d.pins||[]}catch{return[]}}
 
-function getScanSeverity(scan){if(scan.severity)return scan.severity;if(scan.registry?.length>20||scan.artifacts?.length>20)return'high';if(scan.registry?.length>10||scan.artifacts?.length>10)return'medium';return'low'}
-function getScanStatus(scan){return scan.status||'completed'}
-function getHostname(scan){return scan.hostname||scan.host||'unknown'}
-function getUsername(scan){return scan.username||scan.user||'unknown'}
-function getOs(scan){return scan.os||scan.platform||'unknown'}
+function getRiskLevel(score){if(score>=80)return{text:'CRITICAL',cls:'critical'};if(score>=50)return{text:'HIGH',cls:'high'};if(score>=20)return{text:'MEDIUM',cls:'medium'};return{text:'LOW',cls:'low'}}
 
-function logAdd(containerId,msg,level='info'){const el=document.getElementById(containerId);if(!el)return;const d=new Date();const ts='['+d.toLocaleTimeString()+']';const line=document.createElement('div');line.className='log-line';line.innerHTML='<span class="time">'+ts+'</span><span class="level-'+level+'">'+level.toUpperCase()+'</span> '+msg;el.appendChild(line);el.scrollTop=el.scrollHeight}
+// ── 1. OVERVIEW ──
+async function renderOverview(page,body){
+body.innerHTML=`<div class="grid-4" id="ovCards"></div><div class="card" style="margin-top:14px"><div class="card-header">Recent Activity</div><div id="ovActivity"><div class="empty"><p>No recent activity</p></div></div></div>`;
+try{const r=await fetch(API+'/dashboard');const d=await r.json();document.getElementById('ovCards').innerHTML=
+`<div class="card"><div class="card-header">Total Scans</div><div class="card-value">${d.totalScans||0}</div><div class="card-label">Completed analyses</div></div>
+<div class="card"><div class="card-header">Detections</div><div class="card-value red">${d.totalDetections||0}</div><div class="card-label">Threats identified</div></div>
+<div class="card"><div class="card-header">Active PINs</div><div class="card-value green">${d.activePins||0}</div><div class="card-label">Ready for use</div></div>
+<div class="card"><div class="card-header">Avg Risk</div><div class="card-value orange">${d.avgRiskScore||'0.0'}</div><div class="card-label">Risk score average</div></div>`;
+document.getElementById('mainBadge').innerHTML=d.totalScans?`<span class="badge">${d.totalScans} scans</span>`:'';
+await loadResults();const recent=allResults.slice(-5).reverse();if(recent.length){document.getElementById('ovActivity').innerHTML=recent.map(r=>`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:12px"><span style="font-family:var(--mono);color:var(--text3)">${(r.scanId||'').slice(0,8)}</span><span>${r.computerName||'—'}</span><span class="risk-badge ${getRiskLevel(r.riskScore).cls}">${getRiskLevel(r.riskScore).text}</span><span style="color:var(--text3)">${r.pin||'—'}</span><span style="color:var(--text3);font-size:11px">${new Date(r.scanDate).toLocaleString()}</span></div>`).join('')}}catch{}}
 
-function renderOverview(){const el=document.getElementById('ovStats');if(!el)return;const regCount=forensicData.reduce((a,s)=>a+(s.registry?.length||0),0);const artCount=forensicData.reduce((a,s)=>a+(s.artifacts?.length||0),0);const strCount=forensicData.reduce((a,s)=>a+(s.strings?.length||s.extractedStrings?.length||0),0);const userCount=Object.keys(authPins).length;const critical=forensicData.filter(s=>getScanSeverity(s)==='critical'||getScanSeverity(s)==='high').length;const pending=forensicData.filter(s=>getScanStatus(s)==='pending'||getScanStatus(s)==='running').length
-el.innerHTML='<div class="stat-card"><div class="stat-icon" style="background:var(--primary-dim);color:var(--primary)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div><div class="stat-label">Total Scans</div><div class="stat-value">'+forensicData.length+'</div><div class="stat-sub">'+critical+' critical/high</div></div><div class="stat-card"><div class="stat-icon" style="background:var(--info-dim);color:var(--info)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><div class="stat-label">Registry Entries</div><div class="stat-value">'+regCount+'</div><div class="stat-sub">across all scans</div></div><div class="stat-card"><div class="stat-icon" style="background:var(--warning-dim);color:var(--warning)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/></svg></div><div class="stat-label">Artifacts</div><div class="stat-value">'+artCount+'</div><div class="stat-sub">'+strCount+' strings extracted</div></div><div class="stat-card"><div class="stat-icon" style="background:var(--success-dim);color:var(--success)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><div class="stat-label">Registered Users</div><div class="stat-value">'+userCount+'</div><div class="stat-sub">'+pending+' pending scans</div></div>'
-logAdd('ovLog','Dashboard initialized. '+forensicData.length+' scans loaded.','success')}
+// ── 2. SESSIONS ──
+async function renderSessions(page,body){
+body.innerHTML=`<div class="grid-2" style="margin-bottom:14px"><div class="card"><div class="card-header">Total Sessions</div><div class="card-value" id="sesTotal">0</div></div><div class="card"><div class="card-header">Detections</div><div class="card-value red" id="sesDetections">0</div></div></div><div class="card"><div class="card-header">Scan Sessions</div><div class="table-wrap"><table><thead><tr><th>Scan ID</th><th>PIN</th><th>Computer</th><th>Date</th><th>Detections</th><th>Risk</th><th></th></tr></thead><tbody id="sesBody"></tbody></table></div></div>`;
+await loadResults();const scans=allResults;document.getElementById('sesTotal').textContent=scans.length;document.getElementById('sesDetections').textContent=scans.reduce((a,s)=>a+(s.detections?.length||0),0);
+const tb=document.getElementById('sesBody');if(!scans.length){tb.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:20px">No sessions yet</td></tr>';return}
+tb.innerHTML=scans.slice().reverse().map(s=>`<tr><td style="font-family:var(--mono);font-size:11px">${(s.scanId||'').slice(0,8)}</td><td style="font-family:var(--mono)">${s.pin||'—'}</td><td>${s.computerName||'—'}</td><td style="font-size:11px;color:var(--text3)">${new Date(s.scanDate).toLocaleString()}</td><td><span class="status-badge ${(s.detections?.length||0)>0?'active':'disabled'}">${s.detections?.length||0}</span></td><td><span class="risk-badge ${getRiskLevel(s.riskScore).cls}">${getRiskLevel(s.riskScore).text}</span></td><td><button class="btn btn-sm btn-outline" onclick='viewJson(${JSON.stringify(JSON.stringify(s,null,2)).replace(/'/g,"\\'")})'>JSON</button></td></tr>`).join('')}
 
-function renderAdmin(){const users=Object.entries(authPins);document.getElementById('adminUserCount').textContent=users.length;const tbody=document.getElementById('adminUsersBody');if(!tbody)return;if(!users.length){tbody.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--text3);padding:28px">No registered users</td></tr>';return}
-tbody.innerHTML=users.map(([pin,u])=>{const created=u.created?new Date(u.created).toLocaleDateString():'—';const lastLogin=u.lastLogin?new Date(u.lastLogin).toLocaleDateString():'—';return '<tr><td><span style="font-weight:600">'+(u.username||'unknown')+'</span></td><td style="font-family:var(--font-mono);font-size:12px;color:var(--text3)">'+pin.slice(0,4)+'****</td><td><span class="badge '+(u.role==='admin'?'badge-purple':'badge-blue')+'">'+(u.role||'analyst')+'</span></td><td class="timestamp-cell">'+created+'</td><td class="timestamp-cell">'+lastLogin+'</td><td><button class="btn btn-xs btn-secondary" onclick="toast(\'Edit user: coming soon\',\'info\')">Edit</button></td></tr>'}).join('');document.getElementById('adminTotalScans').textContent=forensicData.length;document.getElementById('adminSchemaVer').textContent=dashboardCache?.schemaVersion||'—';document.getElementById('adminStorage').textContent='LocalStorage + Server'}
+// ── 3. TIMELINE ──
+async function renderTimeline(page,body){
+await loadResults();const events=[];allResults.forEach(r=>{const base=new Date(r.scanDate);events.push({timestamp:r.scanDate,type:'scan',category:'System',description:`Scan: ${r.computerName||'—'}`,severity:'info',source:(r.scanId||'').slice(0,8),details:`PIN: ${r.pin} | Score: ${r.riskScore}`});if(r.detections)r.detections.forEach(d=>{events.push({timestamp:r.scanDate,type:'detection',category:d.type||'Detection',description:d.name||d.description||'Unknown',severity:(d.severity||'medium').toLowerCase(),source:(r.scanId||'').slice(0,8),details:d.description||''})})});
+events.sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp));
+const sevIcon={critical:'🚨',high:'🔴',medium:'🟡',low:'🟢',info:'🔵'};
+body.innerHTML=`<div class="grid-2" style="margin-bottom:14px"><div class="card"><div class="card-header">Total Events</div><div class="card-value" id="tlTotal">${events.length}</div></div><div class="card"><div class="card-header">Time Range</div><div class="card-value" style="font-size:14px">${events.length?new Date(events[events.length-1].timestamp).toLocaleDateString()+' — '+new Date(events[0].timestamp).toLocaleDateString():'—'}</div></div></div>
+<div class="card"><div class="card-header">Unified Timeline</div><div id="tlBody">${events.slice(0,100).map(e=>`<div style="display:flex;gap:12px;padding:8px 0;border-bottom:1px solid var(--border);font-size:12px;align-items:center"><span style="font-size:11px;color:var(--text3);width:130px;flex-shrink:0;font-family:var(--mono)">${new Date(e.timestamp).toLocaleString()}</span><span style="width:24px;text-align:center">${sevIcon[e.severity]||'🔵'}</span><span style="width:80px;flex-shrink:0"><span class="risk-badge ${e.severity==='critical'||e.severity==='high'?'critical':e.severity==='medium'?'medium':e.severity==='low'?'low':'low'}">${e.severity.toUpperCase()}</span></span><span style="width:100px;flex-shrink:0;color:var(--text3);font-size:10px;font-family:var(--mono)">${e.source||''}</span><span style="flex:1;color:var(--text2)">${e.description}</span></div>`).join('')}</div></div>`}
 
-function clearLocalData(){if(!confirm('Clear all local forensic data? This cannot be undone.'))return;localStorage.removeItem('forensicCache');localStorage.removeItem('dashboardCache');forensicData=[];dashboardCache=null;toast('Local data cleared','success');renderOverview()}
+// ── 4-10. FORENSIC PAGES (registry, processes, services, drivers, filesystem, events, network, security) ──
+async function renderForensicPage(page,body){
+const labels={registry:'Registry Analysis',processes:'Process Analysis',services:'Services Analysis',drivers:'Drivers Analysis',filesystem:'FileSystem Analysis',events:'Event Logs',network:'Network Analysis',security:'Security Analysis'};
+const headers={registry:['Key','Value','Last Modified','Data'],processes:['PID','Name','Parent PID','Path','User'],services:['Name','Display Name','Status','Start Type','Account'],drivers:['Driver','Type','Status','Signed','Path'],filesystem:['Path','Size','Modified','Attributes','Hash'],events:['Event ID','Source','Level','Time','Message'],network:['Protocol','Local','Remote','State','PID'],security:['Product','Status','Version','Definition','Enabled']};
+body.innerHTML=`<div class="card"><div class="card-header">${labels[page]}</div><div class="table-wrap"><table><thead><tr>${headers[page].map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody id="${page}Body"><tr><td colspan="${headers[page].length}" style="text-align:center;color:var(--text3);padding:32px">Select a session to view forensic data</td></tr></tbody></table></div></div><div class="card" style="margin-top:12px"><div class="card-header">Select Session</div><div style="display:flex;gap:8px;flex-wrap:wrap" id="${page}Sessions"></div></div>`;
+await loadResults();const container=document.getElementById(page+'Sessions');allResults.slice().reverse().forEach(r=>{const b=document.createElement('button');b.className='btn btn-sm btn-outline';b.textContent=`${(r.scanId||'').slice(0,8)} — ${r.computerName||'—'}`;b.onclick=()=>renderForensicDetails(page,r);container.appendChild(b)})}
 
-function exportAllData(){rawJsonForCopy=JSON.stringify({scans:forensicData,users:authPins,pins:Object.keys(authPins),exportedAt:new Date().toISOString()},null,2);document.getElementById('rawJsonPre').textContent=rawJsonForCopy;document.getElementById('rawModal').classList.add('show')}
+function renderForensicDetails(page,scan){
+const tb=document.getElementById(page+'Body');const detections=scan.detections||[];
+// Generate mock forensic data based on the page type
+const data=detections.length?detections.map(d=>({name:d.name||d.type||'Item',details:d.description||'',severity:d.severity||'info',source:scan.computerName})):[];
+if(!data.length){tb.innerHTML=`<tr><td colspan="10" style="text-align:center;color:var(--text3);padding:24px">No forensic data available for this session</td></tr>`;return}
+tb.innerHTML=data.slice(0,20).map(d=>`<tr><td style="font-family:var(--mono);font-size:11px">${d.name}</td><td>${d.details||'—'}</td><td><span class="risk-badge ${d.severity==='critical'||d.severity==='high'?'critical':d.severity==='medium'?'medium':'low'}">${(d.severity||'info').toUpperCase()}</span></td><td style="font-size:11px;color:var(--text3)">${d.source||'—'}</td><td style="font-size:11px;font-family:var(--mono);color:var(--text3)">—</td></tr>`).join('')}
 
-function copyRawJson(){navigator.clipboard?.writeText(rawJsonForCopy).then(()=>toast('Copied to clipboard','success')).catch(()=>toast('Copy failed','error'))}
-function downloadRawJson(){const blob=new Blob([rawJsonForCopy],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='forensic-export-'+(new Date().toISOString().slice(0,10))+'.json';a.click();URL.revokeObjectURL(a.href);toast('Download started','success')}function renderScans(){const tbody=document.getElementById('scansBody');if(!tbody)return;if(!forensicData.length){tbody.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:40px">No scans found. Sync from server or submit a scan.</td></tr>';return}
-const filt=document.getElementById('scansFilter')?.value?.toLowerCase()||'';const sevFilt=document.getElementById('scansSeverityFilter')?.value||'';const statFilt=document.getElementById('scansStatusFilter')?.value||''
-let filtered=forensicData.filter(s=>{const sev=getScanSeverity(s);const st=getScanStatus(s);if(sevFilt&&sev!==sevFilt)return false;if(statFilt&&st!==statFilt)return false;if(filt&&!JSON.stringify(s).toLowerCase().includes(filt))return false;return true})
-filtered.sort((a,b)=>new Date(b.timestamp||b.date||0)-new Date(a.timestamp||a.date||0))
-tbody.innerHTML=filtered.map(s=>{const sev=getScanSeverity(s);const st=getScanStatus(s);const ts=s.timestamp||s.date||'—';const host=getHostname(s);const user=getUsername(s);const os=getOs(s);return '<tr><td class="timestamp-cell">'+new Date(ts).toLocaleString()+'</td><td style="font-weight:500">'+host+'</td><td>'+user+'</td><td style="color:var(--text2);font-size:12px">'+os+'</td><td><span class="severity-indicator '+sev+'"></span><span class="badge badge-'+sev.toUpperCase()+'">'+sev+'</span></td><td><span class="badge '+(st==='completed'?'badge-completed':st==='running'?'badge-running':st==='pending'?'badge-pending':'badge-failed')+'">'+st+'</span></td><td><div class="gap-2"><button class="btn btn-xs btn-primary" onclick="openScanModal('+forensicData.indexOf(s)+')">View</button><button class="btn btn-xs btn-secondary" onclick="openRawJson('+forensicData.indexOf(s)+')">JSON</button></div></td></tr>'}).join('')}
+// ── 11. THREAT INDICATORS ──
+async function renderIndicators(page,body){
+await loadResults();const iocs=[];allResults.forEach(r=>{if(r.detections)r.detections.forEach(d=>{iocs.push({...d,scanId:r.scanId,computerName:r.computerName,date:r.scanDate,riskScore:r.riskScore})})});
+const bySeverity={};iocs.forEach(i=>{const s=(i.severity||'low').toLowerCase();if(!bySeverity[s])bySeverity[s]=[];bySeverity[s].push(i)});
+body.innerHTML=`<div class="grid-4" style="margin-bottom:14px">
+<div class="card"><div class="card-header">Critical</div><div class="card-value red">${(bySeverity.critical||[]).length}</div></div>
+<div class="card"><div class="card-header">High</div><div class="card-value orange">${(bySeverity.high||[]).length}</div></div>
+<div class="card"><div class="card-header">Medium</div><div class="card-value yellow">${(bySeverity.medium||[]).length}</div></div>
+<div class="card"><div class="card-header">Low</div><div class="card-value green">${(bySeverity.low||[]).length}</div></div>
+</div><div class="card"><div class="card-header">All Indicators</div><div class="table-wrap"><table><thead><tr><th>Type</th><th>Description</th><th>Severity</th><th>Session</th><th>Computer</th><th>Date</th></tr></thead><tbody>${iocs.length?iocs.slice(-50).reverse().map(i=>`<tr><td style="font-family:var(--mono);font-size:11px">${i.type||i.name||'—'}</td><td>${(i.description||'').slice(0,60)}</td><td><span class="risk-badge ${(i.severity||'low').toLowerCase()==='critical'?'critical':(i.severity||'low').toLowerCase()==='high'?'high':(i.severity||'low').toLowerCase()==='medium'?'medium':'low'}">${(i.severity||'low').toUpperCase()}</span></td><td style="font-size:11px;font-family:var(--mono);color:var(--text3)">${(i.scanId||'').slice(0,8)}</td><td>${i.computerName||'—'}</td><td style="font-size:11px;color:var(--text3)">${new Date(i.date).toLocaleString()}</td></tr>`).join(''):'<tr><td colspan="6" style="text-align:center;color:var(--text3);padding:24px">No indicators detected</td></tr>'}</tbody></table></div></div>`}
 
-function filterScansTable(){renderScans()}
+// ── 12. RAW JSON ──
+async function renderRawJson(page,body){
+await loadResults();body.innerHTML=`<div style="display:flex;gap:8px;margin-bottom:12px"><select id="rjSelector" style="padding:8px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:12px;outline:none">${allResults.map((r,i)=>`<option value="${i}">${(r.scanId||'').slice(0,8)} — ${r.computerName||'—'} (${new Date(r.scanDate).toLocaleString()})</option>`).join('')}</select><button class="btn btn-outline" onclick="updateRawJson()">View</button><button class="btn btn-outline" onclick="copyRawJson()">Copy All</button></div><div class="card"><div class="json-viewer" id="rjContent">Select a session and click View</div></div>`;
+window.updateRawJson=function(){const i=parseInt(document.getElementById('rjSelector').value);if(isNaN(i))return;const data=allResults[i];if(!data){document.getElementById('rjContent').textContent='No data';return}
+document.getElementById('rjContent').innerHTML=syntaxHighlight(JSON.stringify(data,null,2))};
+window.copyRawJson=function(){const i=parseInt(document.getElementById('rjSelector').value);if(isNaN(i))return;navigator.clipboard.writeText(JSON.stringify(allResults[i],null,2));toast('Copied to clipboard','success')};
+if(allResults.length){document.getElementById('rjSelector').value='0';updateRawJson()}}
 
-function openRawJson(index){const s=forensicData[index];if(!s){toast('Scan not found','error');return}
-rawJsonForCopy=JSON.stringify(s,null,2);document.getElementById('rawJsonPre').textContent=rawJsonForCopy;document.getElementById('rawModal').classList.add('show')}
+function syntaxHighlight(json){return json.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/("(?:[^"\\]|\\.)*")\s*:/g,'<span class="json-key">$1</span>:').replace(/:(\s*)"((?:[^"\\]|\\.)*)"/g,':<span class="json-string">"$2"</span>').replace(/:(\s*)(true|false)/g,':<span class="json-boolean">$1$2</span>').replace(/:(\s*)(null)/g,':<span class="json-null">$1$2</span>').replace(/:(\s*)(-?\d+(?:\.\d+)?)/g,':<span class="json-number">$1$2</span>')}
 
-function openScanModal(index){const s=forensicData[index];if(!s){toast('Scan not found','error');return}
-document.getElementById('scanModalTitle').textContent='Scan: '+getHostname(s);const body=document.getElementById('scanModalBody')
-const regCount=s.registry?.length||0;const artCount=s.artifacts?.length||0;const strCount=s.strings?.length||s.extractedStrings?.length||0
-body.innerHTML='<div class="detail-grid"><div class="detail-item"><label>Hostname</label><span>'+getHostname(s)+'</span></div><div class="detail-item"><label>User</label><span>'+getUsername(s)+'</span></div><div class="detail-item"><label>OS</label><span>'+getOs(s)+'</span></div><div class="detail-item"><label>Timestamp</label><span class="timestamp-cell">'+new Date(s.timestamp||s.date||'').toLocaleString()+'</span></div><div class="detail-item"><label>Severity</label><span><span class="severity-indicator '+getScanSeverity(s)+'"></span><span class="badge badge-'+getScanSeverity(s).toUpperCase()+'">'+getScanSeverity(s)+'</span></span></div><div class="detail-item"><label>Status</label><span class="badge badge-completed">'+getScanStatus(s)+'</span></div><div class="detail-item"><label>Registry</label><span style="font-weight:600">'+regCount+' entries</span></div><div class="detail-item"><label>Artifacts</label><span style="font-weight:600">'+artCount+' items</span></div><div class="detail-item"><label>Strings</label><span style="font-weight:600">'+strCount+' matches</span></div></div>'
-if(s.registry?.length){body.innerHTML+='<div class="section-divider"></div><h4 style="margin-bottom:10px;font-size:13px;color:var(--text2)">Registry Highlights</h4><div style="max-height:120px;overflow-y:auto"><table><thead><tr><th>Key</th><th>Value</th></tr></thead><tbody>'+s.registry.slice(0,20).map(r=>'<tr><td class="key-cell">'+(r.key||r.path||r.name||'')+'</td><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px">'+(r.value||'')+'</td></tr>').join('')+'</tbody></table></div>'}
-if(s.artifacts?.length){body.innerHTML+='<div class="section-divider"></div><h4 style="margin-bottom:10px;font-size:13px;color:var(--text2)">Artifact Samples</h4><div style="max-height:120px;overflow-y:auto"><table><thead><tr><th>Type</th><th>Path</th></tr></thead><tbody>'+s.artifacts.slice(0,20).map(a=>'<tr><td><span class="badge '+(a.type==='file'?'badge-blue':a.type==='registry'?'badge-purple':'badge-info')+'">'+(a.type||'unknown')+'</span></td><td class="path-cell">'+(a.path||a.name||'')+'</td></tr>').join('')+'</tbody></table></div>'}
-document.getElementById('scanModal').classList.add('show')}
+function viewJson(str){document.getElementById('jsonViewerContent').innerHTML=syntaxHighlight(str);document.getElementById('jsonViewerModal').classList.add('show')}
+function copyJsonViewer(){const t=document.getElementById('jsonViewerContent');navigator.clipboard.writeText(t.textContent);toast('Copied','success')}
 
-function renderTimeline(){const el=document.getElementById('timelineContent');if(!el)return;const sevFilt=document.getElementById('tlSeverity')?.value||'';const catFilt=document.getElementById('tlCategory')?.value||'';const limit=parseInt(document.getElementById('tlLimit')?.value||200)
-let events=[];forensicData.forEach(scan=>{const base={ts:scan.timestamp||scan.date||new Date().toISOString(),host:getHostname(scan)};if(scan.registry)scan.registry.forEach(r=>{const sev=r.severity||'info';if(sevFilt&&sev!==sevFilt)return;if(catFilt&&catFilt!=='registry')return;events.push({ts:base.ts,host:base.host,category:'registry',severity:sev,desc:'Registry: '+(r.key||r.path||r.name||''),detail:r.value||''})});if(scan.artifacts)scan.artifacts.forEach(a=>{const sev=a.severity||'info';if(sevFilt&&sev!==sevFilt)return;const cat=a.type||'filesystem';if(catFilt&&catFilt!==cat&&catFilt!=='filesystem')return;events.push({ts:base.ts,host:base.host,category:cat,severity:sev,desc:'Artifact: '+(a.path||a.name||''),detail:a.type||''})});if(scan.strings)scan.strings.forEach(str=>{if(sevFilt&&sevFilt!=='info')return;if(catFilt&&catFilt!=='ioc')return;events.push({ts:base.ts,host:base.host,category:'ioc',severity:'info',desc:'String: '+(str.substring(0,80)||''),detail:''})})})
-if(!events.length){el.innerHTML='<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><h4>No events</h4><p>Timeline will populate after scans are submitted</p></div>';return}
-events.sort((a,b)=>new Date(b.ts)-new Date(a.ts));events=events.slice(0,limit)
-el.innerHTML='';events.forEach(e=>{const sev=e.severity||'info';const d=document.createElement('div');d.className='tl-line';d.innerHTML='<div class="tl-time">'+new Date(e.ts).toLocaleString()+'</div><div class="tl-dot" style="background:'+{critical:'var(--danger)',high:'#ff6b6b',medium:'var(--warning)',low:'var(--success)',info:'var(--info)'}[sev]+'"></div><div class="tl-content"><div class="tl-category" style="color:'+{critical:'var(--danger)',high:'#ff6b6b',medium:'var(--warning)',low:'var(--success)',info:'var(--info)'}[sev]+'">['+e.category.toUpperCase()+'] '+e.host+'</div><div class="tl-desc">'+e.desc+'</div>'+(e.detail?'<div class="tl-detail">'+e.detail+'</div>':'')+'</div>';el.appendChild(d)})}
+// ── 13. REPORTS ──
+async function renderReports(page,body){
+await loadResults();body.innerHTML=`<div class="grid-2" style="margin-bottom:14px"><div class="card"><div class="card-header">Data Available</div><div class="card-value">${allResults.length}</div><div class="card-label">Scan results for export</div></div><div class="card"><div class="card-header">Detections</div><div class="card-value red">${allResults.reduce((a,s)=>a+(s.detections?.length||0),0)}</div><div class="card-label">Total indicators</div></div></div>
+<div style="display:flex;gap:8px;margin-bottom:14px;"><button class="btn btn-red" onclick="exportJSON()">Export All JSON</button><button class="btn btn-outline" onclick="exportCSV()">Export CSV</button></div>
+<div class="card"><div class="card-header">Export Preview</div><pre id="exportPreview" style="font-family:var(--mono);font-size:11px;color:var(--text3);max-height:300px;overflow:auto;padding:12px;background:#050505;border-radius:var(--radius);margin-top:8px">No data to preview</pre></div>`}
 
-function refreshTimeline(){renderTimeline();toast('Timeline refreshed','success')}function getRegCategory(r){const k=(r.key||r.path||r.name||'').toLowerCase();if(k.includes('networklist')||k.includes('network list'))return'NetworkList';if(k.includes('network')&&(k.includes('card')||k.includes('adapter')))return'NetworkCards';if(k.includes('usb')||k.includes('portable')||k.includes('device'))return'USB';if(k.includes('rdp')||k.includes('remote')||k.includes('terminal'))return'RDP';if(k.includes('shimcache')||k.includes('appcompat'))return'ShimCache';if(k.includes('prefetch'))return'Prefetch';if(k.includes('amcache')||k.includes('am_cache'))return'AmCache';if(k.includes('userassist')||k.includes('user assist'))return'UserAssist';if(k.includes('archistory')||k.includes('arc_history')||k.includes('arc history'))return'ArcHistory';if(k.includes('cidsizemru')||k.includes('cid_size'))return'CIDSizeMRU';if(k.includes('store')&&(k.includes('microsoft')||k.includes('windows')))return'Store';if(k.includes('startmenu')||k.includes('start menu'))return'StartMenuInternet';if(k.includes('hkid')||k.includes('hklm')||k.includes('hkcu')||k.includes('hkey'))return'HKIDs';return'Other'}
+function exportJSON(){const data=JSON.stringify(allResults,null,2);const blob=new Blob([data],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`mickyac-export-${new Date().toISOString().slice(0,10)}.json`;a.click();document.getElementById('exportPreview').textContent=data.slice(0,2000);toast('JSON exported','success')}
+function exportCSV(){if(!allResults.length){toast('No data to export','error');return}
+const headers=['scanId','pin','computerName','scanDate','riskScore','detectionCount'];const rows=allResults.map(r=>[r.scanId||'',r.pin||'',r.computerName||'',r.scanDate||'',r.riskScore||0,(r.detections||[]).length]);const csv=[headers.join(','),...rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(','))].join('\n');const blob=new Blob([csv],{type:'text/csv'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`mickyac-export-${new Date().toISOString().slice(0,10)}.csv`;a.click();document.getElementById('exportPreview').textContent=csv.slice(0,2000);toast('CSV exported','success')}
 
-function renderRegistry(){const el=document.getElementById('registryContent');if(!el)return;const activeTab=document.querySelector('#registryTabs .tab.active')?.getAttribute('data-tab')||'reg-NetworkList'
-const entries=[];forensicData.forEach(s=>{if(s.registry)s.registry.forEach(r=>{entries.push(r)})})
-if(!entries.length){el.innerHTML='<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><h4>No registry data</h4><p>No registry entries found in cached scans</p></div>';return}
-const categorized={};entries.forEach(r=>{const cat=getRegCategory(r);if(!categorized[cat])categorized[cat]=[];categorized[cat].push(r)})
-const cats=['NetworkList','NetworkCards','USB','RDP','ShimCache','Prefetch','AmCache','UserAssist','ArcHistory','CIDSizeMRU','Store','StartMenuInternet','HKIDs','Other']
-el.innerHTML=cats.map(cat=>{const items=categorized[cat]||[];const tabId='reg-'+cat;const isActive=tabId===activeTab;return '<div class="tab-content'+(isActive?' active':'')+'" id="tab-'+tabId+'">'+(items.length?'<div class="table-wrap"><table><thead><tr><th>Key</th><th>Value</th><th>Source</th></tr></thead><tbody>'+items.map(r=>'<tr><td class="key-cell">'+(r.key||r.path||r.name||'')+'</td><td style="max-width:250px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px">'+(r.value||'')+'</td><td class="timestamp-cell">'+(r.source||r.host||'')+'</td></tr>').join('')+'</tbody></table></div>':'<div class="empty-state" style="padding:30px"><h4>No '+cat+' entries</h4></div>')+'</div>'}).join('');setupTabs('registryTabs','tab-')}
+// ── 14. ADMIN ──
+async function renderAdmin(page,body){
+body.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><h3 style="font-size:14px;font-weight:600">PIN Management</h3><button class="btn btn-red btn-sm" onclick="showCreatePinModal()">+ Create PIN</button></div>
+<div class="card"><div class="table-wrap"><table><thead><tr><th>PIN</th><th>Session</th><th>Status</th><th>Uses</th><th>Created</th><th>Actions</th></tr></thead><tbody id="adminPinsBody"></tbody></table></div></div>
+<div class="card" style="margin-top:12px"><div class="card-header">Server Statistics</div><div id="adminStats" class="empty"><p>Loading...</p></div></div>`;
+try{const p=await fetch(API+'/admin/pins',{headers:{'X-Admin-Pin':'1188'}});const pd=await p.json();const pins=pd.pins||[];const tb=document.getElementById('adminPinsBody');if(!pins.length){tb.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--text3);padding:20px">No PINs created. Use + Create PIN above.</td></tr>'}else{tb.innerHTML=pins.map(p=>`<tr><td style="font-family:var(--mono);font-weight:600">${p.pin}</td><td style="font-family:var(--mono);font-size:11px;color:var(--text3)">${p.sessionId||'—'}</td><td><span class="status-badge ${p.active?'active':'disabled'}">${p.active?'Active':'Disabled'}</span></td><td style="font-family:var(--mono)">${p.usesRemaining??1}</td><td style="font-size:11px;color:var(--text3)">${new Date(p.createdAt).toLocaleDateString()}</td><td><div style="display:flex;gap:4px"><button class="btn btn-sm ${p.active?'btn-outline':'btn-red'}" onclick="togglePin('${p.pin}')">${p.active?'Disable':'Enable'}</button><button class="btn btn-sm btn-outline" onclick="deletePin('${p.pin}')" style="color:var(--red)">Delete</button></div></td></tr>`).join('')}
+const s=await fetch(API+'/admin/stats',{headers:{'X-Admin-Pin':'1188'}});const sd=await s.json();document.getElementById('adminStats').innerHTML=`<div class="grid-4" style="margin-top:8px"><div class="card"><div class="card-header">Total PINs</div><div class="card-value">${sd.totalPins||0}</div></div><div class="card"><div class="card-header">Active</div><div class="card-value green">${sd.activePins||0}</div></div><div class="card"><div class="card-header">Scans</div><div class="card-value">${sd.totalScans||0}</div></div><div class="card"><div class="card-header">Avg Risk</div><div class="card-value orange">${sd.avgRiskScore||'0.0'}</div></div></div>`}catch(e){document.getElementById('adminStats').innerHTML=`<div class="empty"><p>Error loading data: ${e.message}</p></div>`}}
 
-function setupTabs(containerId,prefix){const container=document.getElementById(containerId);if(!container)return;container.querySelectorAll('.tab').forEach(tab=>{tab.onclick=function(){container.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));this.classList.add('active');const tabId=this.getAttribute('data-tab');document.querySelectorAll('[id^="'+prefix+'"]').forEach(c=>c.classList.remove('active'));const target=document.getElementById(prefix+tabId);if(target)target.classList.add('active')}})}
+function showCreatePinModal(){document.getElementById('newPinValue').value='';document.getElementById('newPinUses').value='1';document.getElementById('createPinModal').classList.add('show')}
+async function createPin(){const pin=document.getElementById('newPinValue').value.trim();const uses=parseInt(document.getElementById('newPinUses').value)||1;if(!pin||pin.length<4){toast('PIN must be 4+ characters','error');return}
+try{const r=await fetch(API+'/admin/pins',{method:'POST',headers:{'Content-Type':'application/json','X-Admin-Pin':'1188'},body:JSON.stringify({pin,usesRemaining:uses})});const d=await r.json();if(d.success){toast(`PIN ${pin} created`,'success');closeModal('createPinModal');renderAdmin('admin',document.getElementById('mainBody'))}else{toast(d.error||'Failed','error')}}catch(e){toast('Error: '+e.message,'error')}}
+async function togglePin(pin){try{const r=await fetch(API+'/admin/pins/toggle',{method:'POST',headers:{'Content-Type':'application/json','X-Admin-Pin':'1188'},body:JSON.stringify({pin})});const d=await r.json();if(d.success){toast(`PIN ${d.active?'activated':'disabled'}`,'success');renderAdmin('admin',document.getElementById('mainBody'))}else{toast(d.error||'Failed','error')}}catch(e){toast('Error: '+e.message,'error')}}
+async function deletePin(pin){if(!confirm(`Delete PIN ${pin}?`))return;try{const r=await fetch(API+'/admin/pins',{method:'DELETE',headers:{'Content-Type':'application/json','X-Admin-Pin':'1188'},body:JSON.stringify({pin})});const d=await r.json();if(d.success){toast(`PIN ${pin} deleted`,'success');renderAdmin('admin',document.getElementById('mainBody'))}else{toast(d.error||'Failed','error')}}catch(e){toast('Error: '+e.message,'error')}}
 
-function renderArtifacts(){const el=document.getElementById('artifactContent');if(!el)return;const activeTab=document.querySelector('#artifactTabs .tab.active')?.getAttribute('data-tab')||'art-files'
-const all=[];forensicData.forEach(s=>{if(s.artifacts)s.artifacts.forEach(a=>{all.push(a)})})
-if(!all.length){el.innerHTML='<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="12 2 2 7 12 12 22 7 12 2"/></svg><h4>No artifacts</h4><p>No forensic artifacts found in cached scans</p></div>';return}
-const cats={files:[],registry:[],processes:[],strings:[],eventlog:[],unicode:[],steganography:[],minecraft:[],feather:[],alts:[],velociraptor:[],shellbags:[],evtx:[],permissions:[]}
-all.forEach(a=>{const t=(a.type||'').toLowerCase();if(t.includes('file')||t==='filesystem')cats.files.push(a);else if(t.includes('registry'))cats.registry.push(a);else if(t.includes('process'))cats.processes.push(a);else if(t.includes('string'))cats.strings.push(a);else if(t.includes('event')||t.includes('log'))cats.eventlog.push(a);else if(t.includes('unicode'))cats.unicode.push(a);else if(t.includes('steg')||t.includes('image'))cats.steganography.push(a);else if(t.includes('minecraft')||t.includes('mc'))cats.minecraft.push(a);else if(t.includes('feather'))cats.feather.push(a);else if(t.includes('alt'))cats.alts.push(a);else if(t.includes('velociraptor'))cats.velociraptor.push(a);else if(t.includes('shellbag'))cats.shellbags.push(a);else if(t.includes('evtx'))cats.evtx.push(a);else if(t.includes('perm')||t.includes('ntfs'))cats.permissions.push(a);else cats.files.push(a)})
-const artKeys=Object.keys(cats);
-el.innerHTML=artKeys.map(key=>{const items=cats[key];const tabId='art-'+key;const isActive=tabId===activeTab;return '<div class="tab-content'+(isActive?' active':'')+'" id="tab-'+tabId+'">'+(items.length?'<div class="table-wrap"><table><thead><tr><th>Type</th><th>Path / Name</th><th>Source</th></tr></thead><tbody>'+items.map(a=>'<tr><td><span class="badge '+(a.type==='file'?'badge-blue':'badge-purple')+'">'+(a.type||'unknown')+'</span></td><td class="path-cell">'+(a.path||a.name||'')+'</td><td class="timestamp-cell">'+(a.source||a.host||'')+'</td></tr>').join('')+'</tbody></table></div>':'<div class="empty-state" style="padding:30px"><h4>No '+(key.charAt(0).toUpperCase()+key.slice(1))+' artifacts</h4></div>')+'</div>'}).join('');setupTabs('artifactTabs','tab-')}function analyzeStringsLocally(text){const patterns=[{name:'emails',re:/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g},{name:'urls',re:/(https?:\/\/[^\s"'<>\]]+)/gi},{name:'domains',re:/(?:(?:[a-zA-Z][a-zA-Z0-9-]*\.)+[a-zA-Z]{2,})(?:\/\S*)?/g},{name:'ipv4',re:/\b(?:(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\b/g},{name:'ipv6',re:/(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|(?:[0-9a-fA-F]{1,4}:){1,7}:|(?:[0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|(?:[0-9a-fA-F]{1,4}:){1,5}(?::[0-9a-fA-F]{1,4}){1,2}/g},{name:'discordIds',re:/(\d{17,19})/g},{name:'usernames',re:/(?:@|u\/)([a-zA-Z0-9_-]{2,32})/g}]
-const results={};let total=0;patterns.forEach(p=>{const matches=text.match(p.re)||[];const unique=[...new Set(matches)];results[p.name]=unique;total+=unique.length});return{results,total}}
-
-function analyzeStrings(){const text=document.getElementById('stringInput')?.value?.trim();const el=document.getElementById('stringContent');if(!text){if(el)el.innerHTML='<div class="empty-state" style="padding:30px"><h4>No input</h4><p>Paste text to analyze</p></div>';return}
-const{results,total}=analyzeStringsLocally(text);const activeTab=document.querySelector('#stringTabs .tab.active')?.getAttribute('data-tab')||'str-all'
-const cats=['all','emails','urls','domains','ipv4','ipv6','discordIds','usernames']
-if(el)el.innerHTML=cats.map(cat=>{let items=cat==='all'?[]:results[cat]||[];if(cat==='all'){cats.forEach(c=>{if(c!=='all')items=items.concat(results[c]||[])})}const tabId='str-'+cat;const isActive=tabId===activeTab;return '<div class="tab-content'+(isActive?' active':'')+'" id="tab-'+tabId+'">'+(items.length?'<div style="margin-bottom:8px;color:var(--text2);font-size:12px">Found <span style="color:var(--text);font-weight:600">'+items.length+'</span> '+(cat==='all'?'total matches':cat)+'</div><div class="table-wrap"><table><thead><tr><th>#</th><th>Match</th></tr></thead><tbody>'+items.map((m,i)=>'<tr><td style="color:var(--text3);width:40px">'+(i+1)+'</td><td><span class="string-match">'+m+'</span></td></tr>').join('')+'</tbody></table></div>':'<div class="empty-state" style="padding:30px"><h4>No '+(cat==='all'?'matches':cat)+' found</h4></div>')+'</div>'}).join('');setupTabs('stringTabs','tab-');toast('Found '+total+' matches','success')}
-
-function checkVTBulk(){const input=document.getElementById('vtInput')?.value?.trim();const el=document.getElementById('vtResults');if(!input){if(el)el.querySelector('.card-body').innerHTML='<div class="empty-state"><h4>No input</h4><p>Enter hashes to check</p></div>';return}
-const hashes=input.split('\n').map(h=>h.trim()).filter(h=>h.length>0&&/^[a-fA-F0-9]{32,64}$/.test(h));if(!hashes.length){toast('No valid hashes found (MD5/SHA1/SHA256)','error');return}
-if(hashes.length>10){toast('Maximum 10 hashes at a time','error');return}
-toast('Checking '+hashes.length+' hashes...','info');Promise.all(hashes.map(h=>fetch(API+'/virustotal/'+h).then(r=>r.json()).catch(()=>({hash:h,error:'Request failed'})))).then(results=>{if(el){el.innerHTML='<div class="card-body"><div class="table-wrap"><table><thead><tr><th>Hash</th><th>Score</th><th>Malicious</th><th>Suspicious</th><th>Details</th></tr></thead><tbody>'+results.map(r=>{const mal=r.malicious||0;const sus=r.suspicious||0;const total=r.total||0;const score=total>0?(mal/total*100).toFixed(0):'—';return '<tr><td class="hash-cell">'+(r.hash||'')+'</td><td><span class="vt-score'+(mal>0?' vt-mal':mal>0?' vt-sus':' vt-clean')+'">'+score+'%</span></td><td><span style="color:'+(mal>0?'var(--danger)':'var(--text3)')+'">'+mal+'</span></td><td><span style="color:'+(sus>0?'var(--warning)':'var(--text3)')+'">'+sus+'</span></td><td>'+(r.permalink?'<a href="'+r.permalink+'" target="_blank" class="btn btn-xs btn-primary">Open VT</a>':'<span class="text-muted">'+(r.error||'No data')+'</span>')+'</td></tr>'}).join('')+'</tbody></table></div></div>'}}).catch(e=>{toast('VT check failed: '+e.message,'error')})}
-
-function startLiveScan(){if(liveScanRunning){toast('Scan already running','warning');return}
-const host=document.getElementById('liveHost')?.value||'unknown';const user=document.getElementById('liveUser')?.value||'unknown';const os=document.getElementById('liveOs')?.value||'unknown';const jsonInput=document.getElementById('liveJsonInput')?.value?.trim()
-if(!jsonInput){toast('Enter forensic data in JSON field, or load a template','error');return}
-let parsed;try{parsed=JSON.parse(jsonInput)}catch(e){toast('Invalid JSON: '+e.message,'error');return}
-if(!loggedInUser||!loggedInUser.pin){toast('You must be logged in to submit scans','error');return}
-liveScanRunning=true;document.getElementById('liveStatusBadge').textContent='Submitting';document.getElementById('liveStatusBadge').className='card-badge badge-running'
-logAdd('liveLog','Building scan payload...','info')
-const payload={pin:loggedInUser.pin,sessionId:'MCK-LIVE-'+Date.now().toString(36).toUpperCase(),hostname:host,username:user,os:os,timestamp:new Date().toISOString(),schemaVersion:'2.0',...parsed};const totalItems=(parsed.registry?.length||0)+(parsed.artifacts?.length||0)+(parsed.strings?.length||0)+(parsed.processes?.length||0);payload.totalItems=totalItems
-logAdd('liveLog','Total items: '+totalItems,'info')
-logAdd('liveLog','Submitting to POST /api/upload-scan...','warn')
-fetch(API+'/upload-scan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}).then(r=>{if(!r.ok)throw new Error('API error: '+r.status);return r.json()}).then(data=>{liveScanRunning=false;document.getElementById('liveStatusBadge').textContent='Completed';document.getElementById('liveStatusBadge').className='card-badge badge-completed';document.getElementById('liveLastScan').textContent=new Date().toLocaleTimeString();logAdd('liveLog','Scan submitted successfully. ID: '+(data.id||'?'),'success');logAdd('liveLog','Timeline events generated: '+(data.timelineEvents||'?'),'success')
-if(payload.sessionId){logAdd('liveLog','Session: '+payload.sessionId,'info')}
-showLiveResults(parsed,data,totalItems);syncFromServer();toast('Scan submitted successfully','success')}).catch(e=>{liveScanRunning=false;document.getElementById('liveStatusBadge').textContent='Failed';document.getElementById('liveStatusBadge').className='card-badge badge-failed';logAdd('liveLog','Submission failed: '+e.message,'error');toast('Submission failed: '+e.message,'error')})}
-
-function showLiveResults(parsed,apiResponse,totalItems){const el=document.getElementById('liveResults');const body=document.getElementById('liveResultsBody');if(!el||!body)return;el.style.display='block';document.getElementById('liveResultBadge').textContent=totalItems+' items'
-let html='<div class="detail-grid"><div class="detail-item"><label>Items Submitted</label><span style="font-weight:700;font-size:20px">'+totalItems+'</span></div><div class="detail-item"><label>API ID</label><span class="hash-cell">'+(apiResponse.id||'—')+'</span></div><div class="detail-item"><label>Timeline Events</label><span style="font-weight:600">'+(apiResponse.timelineEvents||'0')+'</span></div><div class="detail-item"><label>Schema Version</label><span class="badge badge-completed">'+(apiResponse.schemaVersion||'2.0')+'</span></div></div>'
-if(parsed.registry?.length){html+='<div class="info-row"><span class="info-label">Registry Entries</span><span class="info-value" style="font-weight:600">'+parsed.registry.length+'</span></div>';const cats={};parsed.registry.forEach(r=>{const cat=r.category||getRegCategory(r)||'Other';if(!cats[cat])cats[cat]=0;cats[cat]++});Object.keys(cats).forEach(c=>{html+='<div class="info-row" style="padding-left:16px"><span class="info-label" style="color:var(--text3)">'+c+'</span><span class="info-value" style="color:var(--text3)">'+cats[c]+'</span></div>'})}
-if(parsed.artifacts?.length){html+='<div class="info-row"><span class="info-label">Artifacts</span><span class="info-value" style="font-weight:600">'+parsed.artifacts.length+'</span></div>'}
-if(parsed.strings?.length){html+='<div class="info-row"><span class="info-label">Strings / IOCs</span><span class="info-value" style="font-weight:600">'+parsed.strings.length+'</span></div>'}
-if(parsed.processes?.length){html+='<div class="info-row"><span class="info-label">Processes</span><span class="info-value" style="font-weight:600">'+parsed.processes.length+'</span></div>'}
-html+='<div class="section-divider"></div><div class="gap-2"><button class="btn btn-secondary btn-sm" onclick="navigate(\'scans\')">View All Scans</button><button class="btn btn-secondary btn-sm" onclick="navigate(\'timeline\')">View Timeline</button></div>'
-body.innerHTML=html}
-
-function stopLiveScan(){if(!liveScanRunning){toast('No scan running','info');return}
-liveScanRunning=false;document.getElementById('liveStatusBadge').textContent='Cancelled';document.getElementById('liveStatusBadge').className='card-badge badge-failed';logAdd('liveLog','Submission cancelled by user','error')}
-
-function clearLiveLog(){document.getElementById('liveLog').innerHTML='<div class="log-line"><span class="time">['+new Date().toLocaleTimeString()+']</span><span class="level-info">INFO</span> Log cleared</div>';document.getElementById('liveLastScan').textContent='-';document.getElementById('liveStatusBadge').textContent='Idle';document.getElementById('liveStatusBadge').className='card-badge';document.getElementById('liveResults').style.display='none';liveScanRunning=false}
-
-function loadTemplate(type){const templates={files:{registry:[],artifacts:[{type:'file',path:'C:\\Users\\analyst\\Desktop\\suspicious.exe',name:'suspicious.exe',size:245760,sha256:'a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b',timestamp:new Date().toISOString()},{type:'file',path:'C:\\Users\\analyst\\Downloads\\document.pdf',name:'document.pdf',size:102400,sha256:'b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c',timestamp:new Date().toISOString()}],strings:['suspicious.exe','malware','C2-server.com','192.168.1.100','admin@evil.com']},registry:{registry:[{key:'HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run',value:'C:\\Users\\analyst\\AppData\\Roaming\\malware.exe',category:'Startup'},{key:'HKLM\\SYSTEM\\CurrentControlSet\\Services\\BadDriver',value:'Driver for malicious activity',category:'Services'},{key:'HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\UserAssist\\{CEBFF5CD-ACE2-4F4F-9178-9926F41749C3}\\Count\\HRZR_EHACVQY',value:'C:\\Users\\analyst\\Desktop\\tool.exe',category:'UserAssist'}],artifacts:[],strings:[]},strings:{registry:[],artifacts:[],strings:['admin@example.com','https://evil-c2.example.com','malware.example.com','192.168.1.50','2001:db8::1','12345678901234567','@bad_actor','C:\\Users\\analyst\\AppData\\Local\\Temp\\payload.dll']},full:{registry:[{key:'HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run',value:'C:\\Users\\analyst\\AppData\\Roaming\\startup.exe',category:'Run'},{key:'HKLM\\SYSTEM\\ControlSet001\\Enum\\USBSTOR\\Ven_Prod\\Device',value:'USB Device',category:'USB'},{key:'HKCU\\Software\\Microsoft\\Terminal Server Client\\Servers\\192.168.1.200',value:'RDP Connection',category:'RDP'}],artifacts:[{type:'file',path:'C:\\Users\\analyst\\Desktop\\evidence.zip',name:'evidence.zip',size:5242880,sha256:'d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4'},{type:'process',name:'svchost.exe',pid:1234,user:'SYSTEM',memory:45000},{type:'network',local:'192.168.1.100:49512',remote:'203.0.113.5:443',protocol:'TCP'}],strings:['Compromised','C2: 203.0.113.5','mimikatz','Invoke-Command','backdoor.exe'],processes:[{name:'explorer.exe',pid:1234,user:'analyst',cpu:'0.5%',memory:'45MB'},{name:'malware.exe',pid:5678,user:'analyst',cpu:'12%',memory:'128MB',severity:'high'}]}};const t=templates[type];if(!t){toast('Template not found','error');return}
-document.getElementById('liveJsonInput').value=JSON.stringify(t,null,2);toast('Loaded template: '+(type==='full'?'Full Scan':type.charAt(0).toUpperCase()+type.slice(1)),'success')}function exportScansCSV(){if(!forensicData.length){toast('No data to export','error');return}
-const headers=['Timestamp','Hostname','User','OS','Severity','Status','Registry Count','Artifact Count','Strings'];let csv=headers.join(',')+'\n';forensicData.forEach(s=>{const sev=getScanSeverity(s);const st=getScanStatus(s);const row=[s.timestamp||s.date||'',getHostname(s),getUsername(s),getOs(s),sev,st,s.registry?.length||0,s.artifacts?.length||0,s.strings?.length||s.extractedStrings?.length||0];csv+=row.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')+'\n'})
-const blob=new Blob([csv],{type:'text/csv'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='forensic-scans-'+(new Date().toISOString().slice(0,10))+'.csv';a.click();URL.revokeObjectURL(a.href);toast('CSV exported','success')}function applySettings(){const tlLimit=document.getElementById('setTlLimit')?.value;if(tlLimit){const sel=document.getElementById('tlLimit');if(sel)sel.value=tlLimit}toast('Settings saved','success')}
-
-function checkApiStatus(){fetch(API+'/health').then(r=>r.json()).then(d=>{const dot=document.getElementById('statusDot');const text=document.getElementById('statusText');const badge=document.getElementById('apiStatus');if(d&&d.status==='ok'){dot.className='status-dot online';text.textContent='Connected v'+(d.schemaVersion||'1');badge.className='status-badge active'}else{dot.className='status-dot warning';text.textContent='Degraded';badge.className='status-badge'}}).catch(()=>{const dot=document.getElementById('statusDot');dot.className='status-dot offline';document.getElementById('statusText').textContent='Offline';document.getElementById('apiStatus').className='status-badge'})}
-
-function initApp(){document.getElementById('authScreen').style.display='none';document.getElementById('appLayout').classList.add('active');updateUserBadge();const cached=localStorage.getItem('forensicCache');if(cached)try{forensicData=JSON.parse(cached)}catch(e){forensicData=[]};const dc=localStorage.getItem('dashboardCache');if(dc)try{dashboardCache=JSON.parse(dc)}catch(e){dashboardCache=null};renderOverview();renderAdmin();checkApiStatus();setInterval(checkApiStatus,30000);if(forensicData.length===0){fetch(API+'/dashboard').then(r=>r.json()).then(d=>{dashboardCache=d;if(d.scans)forensicData=d.scans;localStorage.setItem('forensicCache',JSON.stringify(forensicData));localStorage.setItem('dashboardCache',JSON.stringify(d));renderOverview();renderAdmin()}).catch(()=>{})}
-navigate('overview')}
-
-document.addEventListener('DOMContentLoaded',()=>{if(loggedInUser){initApp()}else if(Object.keys(authPins).length>0){showLogin()}const cached=localStorage.getItem('forensicCache');if(cached)try{forensicData=JSON.parse(cached)}catch(e){};const dc=localStorage.getItem('dashboardCache');if(dc)try{dashboardCache=JSON.parse(dc)}catch(e){};if(!loggedInUser&&!document.getElementById('authScreen').style.display){document.getElementById('authScreen').style.display='flex'}})
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelectorAll('.modal-overlay.show').forEach(m=>m.classList.remove('show'))}})
-document.getElementById('loginPin')?.addEventListener('keydown',e=>{if(e.key==='Enter')attemptLogin()})
+// ── Init ──
+function initApp(){document.getElementById('authScreen').style.display='none';document.getElementById('appLayout').classList.add('active');document.getElementById('userAvatar').textContent=(loggedInUser.username||'U')[0].toUpperCase();document.getElementById('userName').textContent=loggedInUser.username||'user';document.getElementById('userRole').textContent=loggedInUser.role||'analyst';document.getElementById('adminSection').style.display=isAdmin?'block':'none';document.getElementById('adminPinsNav').style.display=isAdmin?'':'none';navigate('overview')}
+document.addEventListener('DOMContentLoaded',()=>{const stored=localStorage.getItem('mickyUser');if(stored){try{const u=JSON.parse(stored);loggedInUser=u;isAdmin=u.master===true;initApp()}catch{}}})
 </script>
 </body>
 </html>

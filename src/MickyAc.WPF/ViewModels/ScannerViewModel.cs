@@ -101,27 +101,65 @@ public partial class ScannerViewModel : ObservableObject
 
     private static readonly string[] ArtifactNames =
     {
-        "Scanning Registry...",
-        "Scanning Event Logs...",
-        "Analyzing File System...",
-        "Scanning BAM...",
-        "Parsing AmCache...",
-        "Scanning Recent Documents...",
-        "Analyzing Processes...",
-        "Scanning MFT...",
-        "Building Timeline...",
-        "Correlating Artifacts...",
-        "Scanning Network Connections...",
-        "Scanning Threat Indicators...",
-        "Generating Report...",
+        "System Information",
+        "Windows Version & Build Info",
+        "Users & Groups",
+        "Uptime Analysis",
+        "Running Processes",
+        "Parent Process & Command Lines",
+        "Loaded Modules & Unsigned Processes",
+        "Installed Services",
+        "Auto Services & Disabled Services",
+        "Loaded Drivers & Installed Drivers",
+        "Unsigned Drivers",
+        "BAM",
+        "UserAssist",
+        "MUICache & RecentDocs",
+        "OpenSavePidlMRU & LastVisitedPidlMRU",
+        "Explorer MRU & TypedPaths",
+        "Run Keys & RunOnce",
+        "ShellBags",
+        "Startup Folder",
+        "Scheduled Tasks & WMI Persistence",
+        "Event Logs: Security",
+        "Event Logs: System",
+        "Event Logs: Application",
+        "Event Logs: PowerShell",
+        "Event Logs: Task Scheduler",
+        "Recent Executables",
+        "Recent DLLs & Recent Drivers",
+        "Downloads & Temporary Files",
+        "Hidden Files & Alternate Data Streams",
+        "AmCache & AppCompatCache",
+        "Jump Lists & SRUM",
+        "Recycle Bin & LNK Files",
+        "Active Connections & Open Ports",
+        "DNS Cache & ARP Table",
+        "Adapters & Network Interfaces",
+        "Chrome History & Downloads",
+        "Edge History & Downloads",
+        "Firefox History & Downloads",
+        "PSReadLine History",
+        "PowerShell Operational Logs",
+        "CMD History & Console Activity",
+        "Defender Status & Exclusions",
+        "Installed Security Products",
+        "Firewall Status",
+        "SHA256 & MD5 Hashing",
+        "Building Timeline",
+        "Correlating Artifacts",
+        "Risk Assessment",
         "Uploading Results..."
     };
 
     private static readonly string[] ModuleNames =
     {
-        "System Information", "Registry Analysis", "BAM", "AmCache",
-        "RecentDocs", "Event Logs", "Processes", "MFT",
-        "Timeline", "Threat Indicators"
+        "System Information", "Processes", "Services", "Drivers",
+        "BAM", "UserAssist", "MUICache", "RecentDocs",
+        "ShellBags", "Run Keys", "Persistence", "Event Logs",
+        "FileSystem", "AmCache", "Jump Lists", "Recycle Bin",
+        "Network", "Browser History", "PowerShell", "CMD History",
+        "Security Products", "Hashing", "Timeline", "Risk Engine"
     };
 
     public ScannerViewModel(
@@ -191,6 +229,13 @@ public partial class ScannerViewModel : ObservableObject
         SessionId = validation.SessionId;
         StatusMessage = "PIN Validated";
         _verifiedShown = true;
+
+        if (!validation.Master)
+        {
+            AddConsole("Consuming PIN usage...", "#ff8c00");
+            var used = await _api.UsePinAsync(rawPin);
+            if (!used) AddConsole("Warning: Could not update PIN usage", "#ff1f3d");
+        }
 
         await Task.Delay(400);
         CurrentState = ScannerState.Scanning;
@@ -328,14 +373,15 @@ public partial class ScannerViewModel : ObservableObject
         {
             sessionId = SessionId,
             pin = _sessionPin,
+            computerName = Environment.MachineName,
             scanType = "Full System Scan",
             startedAt = _scanStartTime,
             completedAt = DateTime.UtcNow,
             totalItems = result.TotalItems,
             iocsDetected = result.IoCsDetected,
-            status = result.Status.ToString(),
-            hostname = Environment.MachineName,
-            username = Environment.UserName
+            detections = new object[] { },
+            riskScore = IocsDetected > 0 ? IocsDetected * 10 : 0,
+            status = result.Status.ToString()
         };
 
         var success = await _api.UploadScanAsync(payload);

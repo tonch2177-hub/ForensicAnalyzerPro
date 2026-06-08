@@ -218,9 +218,9 @@ app.get('/api/dashboard', (req, res) => {
 // â”€â”€â”€ Start â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 app.listen(PORT, () => {
     const config = loadConfig();
-    console.log(`MickyAc Dashboard running on https://mickyac.netlify.app:${PORT}`);
-    console.log(`API: http://localhost:${PORT}/api/`);
-    console.log(`Dashboard: http://localhost:${PORT}/`);
+    console.log(`MickyAc Dashboard running`);
+    console.log(`API: https://mickyac.netlify.app/api/`);
+    console.log(`Dashboard: https://mickyac.netlify.app/`);
     if (config.discordWebhook) {
         console.log('Discord webhook configured âœ“');
     } else {

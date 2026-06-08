@@ -6,6 +6,6 @@ public class PinValidationResult
     public string SessionId { get; set; } = string.Empty;
     public string ScanType { get; set; } = string.Empty;
     public string ErrorMessage { get; set; } = string.Empty;
-    public DateTime ExpiresAt { get; set; }
-    public int RemainingUses { get; set; }
+    public string Username { get; set; } = string.Empty;
+    public bool Master { get; set; }
 }

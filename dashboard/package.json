@@ -1,5 +1,5 @@
 ﻿{
-  "name": "forensic-analyzer-dashboard",
+  "name": "mickyac-dashboard-server",
   "version": "1.0.0",
   "description": "MickyAc Dashboard Server â€” handles PIN validation, scan uploads, and Discord webhook notifications",
   "main": "server.js",

@@ -30,12 +30,12 @@ fi
 
 echo ""
 echo "Starting with PM2..."
-pm2 start server.js --name forensic-dashboard
+pm2 start server.js --name mickyac-dashboard
 pm2 save
 
 # 5. Setup auto-start on reboot
 pm2 startup | tail -1
 echo ""
 echo "=== Done! Dashboard running on https://mickyac.netlify.app ==="
-echo "Use: pm2 logs forensic-dashboard  â€” to see logs"
-echo "Use: pm2 restart forensic-dashboard â€” to restart"
+echo "Use: pm2 logs mickyac-dashboard -- to see logs"
+echo "Use: pm2 restart mickyac-dashboard -- to restart"
