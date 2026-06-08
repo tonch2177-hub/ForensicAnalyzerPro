@@ -1,10 +1,10 @@
-#!/bin/bash
-# ForensicAnalyzer Dashboard — VPS Deployment
+﻿#!/bin/bash
+# MickyAc Dashboard â€” VPS Deployment
 # Usage: bash deploy-vps.sh
 
 set -e
 
-echo "=== ForensicAnalyzer Dashboard VPS Setup ==="
+echo "=== MickyAc Dashboard VPS Setup ==="
 
 # 1. Install Node.js if missing
 if ! command -v node &> /dev/null; then
@@ -37,5 +37,5 @@ pm2 save
 pm2 startup | tail -1
 echo ""
 echo "=== Done! Dashboard running on https://mickyac.netlify.app ==="
-echo "Use: pm2 logs forensic-dashboard  — to see logs"
-echo "Use: pm2 restart forensic-dashboard — to restart"
+echo "Use: pm2 logs forensic-dashboard  â€” to see logs"
+echo "Use: pm2 restart forensic-dashboard â€” to restart"

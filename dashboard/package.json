@@ -1,7 +1,7 @@
-{
+﻿{
   "name": "forensic-analyzer-dashboard",
   "version": "1.0.0",
-  "description": "ForensicAnalyzer Dashboard Server — handles PIN validation, scan uploads, and Discord webhook notifications",
+  "description": "MickyAc Dashboard Server â€” handles PIN validation, scan uploads, and Discord webhook notifications",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"

@@ -1,4 +1,4 @@
-const express = require('express');
+﻿const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
@@ -7,7 +7,7 @@ const crypto = require('crypto');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// ─── Config ───────────────────────────────────────────────
+// â”€â”€â”€ Config â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const CONFIG_PATH = path.join(__dirname, 'config.json');
 const PINS_PATH = path.join(__dirname, 'data', 'pins.json');
 const SCANS_PATH = path.join(__dirname, 'data', 'scans.json');
@@ -15,12 +15,12 @@ const SCANS_PATH = path.join(__dirname, 'data', 'scans.json');
 function loadConfig() {
     try {
         if (!fs.existsSync(CONFIG_PATH)) {
-            const def = { apiUrl: `http://localhost:${PORT}`, discordWebhook: '' };
+            const def = { apiUrl: `https://mickyac.netlify.app`, discordWebhook: '' };
             fs.writeFileSync(CONFIG_PATH, JSON.stringify(def, null, 2));
             return def;
         }
         return JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8'));
-    } catch { return { apiUrl: `http://localhost:${PORT}`, discordWebhook: '' }; }
+    } catch { return { apiUrl: `https://mickyac.netlify.app`, discordWebhook: '' }; }
 }
 
 function loadJSON(file) {
@@ -34,31 +34,31 @@ function saveJSON(file, data) {
     fs.writeFileSync(file, JSON.stringify(data, null, 2));
 }
 
-// ─── Discord Webhook ──────────────────────────────────────
+// â”€â”€â”€ Discord Webhook â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function sendWebhook(event, data) {
     const config = loadConfig();
     if (!config.discordWebhook) return;
 
     const embeds = {
-        pinCreated: { title: '🔑 New PIN Generated', color: 0xE8102D, fields: [
+        pinCreated: { title: 'ðŸ”‘ New PIN Generated', color: 0xff1f3d, fields: [
             { name: 'PIN', value: `||${data.pin}||`, inline: true },
             { name: 'Session', value: data.sessionId, inline: true }
         ], timestamp: new Date().toISOString() },
 
-        pinUsed: { title: '🔍 PIN Used', color: 0xFF8800, fields: [
+        pinUsed: { title: 'ðŸ” PIN Used', color: 0xFF8800, fields: [
             { name: 'PIN', value: `||${data.pin}||`, inline: true },
             { name: 'Session', value: data.sessionId, inline: true },
             { name: 'Hostname', value: data.hostname || 'Unknown', inline: true }
         ], timestamp: new Date().toISOString() },
 
-        scanComplete: { title: '✅ Scan Completed', color: 0x22C55E, fields: [
+        scanComplete: { title: 'âœ… Scan Completed', color: 0x22C55E, fields: [
             { name: 'Session', value: data.sessionId, inline: true },
             { name: 'Items', value: String(data.totalItems || 0), inline: true },
             { name: 'IOCs', value: String(data.iocsDetected || 0), inline: true },
             { name: 'Status', value: data.status || 'completed', inline: true }
         ], timestamp: new Date().toISOString() },
 
-        error: { title: '❌ System Error', color: 0xEF4444, fields: [
+        error: { title: 'âŒ System Error', color: 0xff1f3d, fields: [
             { name: 'Error', value: data.message || 'Unknown error' }
         ], timestamp: new Date().toISOString() }
     };
@@ -76,7 +76,7 @@ async function sendWebhook(event, data) {
     }
 }
 
-// ─── PIN Management ────────────────────────────────────────
+// â”€â”€â”€ PIN Management â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function generatePin() {
     const num = crypto.randomInt(1000, 9999);
     return String(num);
@@ -91,14 +91,14 @@ function nextSessionId(pins, scans) {
     return 'MCK-' + String(max + 1).padStart(3, '0');
 }
 
-// ─── Middleware ─────────────────────────────────────────────
+// â”€â”€â”€ Middleware â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 app.use(cors());
 app.use(express.json());
 
 // Serve static files (index.html, etc.)
 app.use(express.static(path.join(__dirname, '..')));
 
-// ─── API Routes ────────────────────────────────────────────
+// â”€â”€â”€ API Routes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 // Health
 app.get('/api/health', (req, res) => {
@@ -215,15 +215,15 @@ app.get('/api/dashboard', (req, res) => {
     });
 });
 
-// ─── Start ─────────────────────────────────────────────────
+// â”€â”€â”€ Start â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 app.listen(PORT, () => {
     const config = loadConfig();
-    console.log(`ForensicAnalyzer Dashboard running on http://localhost:${PORT}`);
+    console.log(`MickyAc Dashboard running on https://mickyac.netlify.app:${PORT}`);
     console.log(`API: http://localhost:${PORT}/api/`);
     console.log(`Dashboard: http://localhost:${PORT}/`);
     if (config.discordWebhook) {
-        console.log('Discord webhook configured ✓');
+        console.log('Discord webhook configured âœ“');
     } else {
-        console.log('No Discord webhook — set discordWebhook in config.json');
+        console.log('No Discord webhook â€” set discordWebhook in config.json');
     }
 });

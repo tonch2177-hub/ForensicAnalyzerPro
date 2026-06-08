@@ -1,11 +1,11 @@
-<Solution>
+﻿<Solution>
   <Folder Name="/src/">
-    <Project Path="src/ForensicAnalyzerPro.Application/ForensicAnalyzerPro.Application.csproj" />
-    <Project Path="src/ForensicAnalyzerPro.Domain/ForensicAnalyzerPro.Domain.csproj" />
-    <Project Path="src/ForensicAnalyzerPro.Infrastructure/ForensicAnalyzerPro.Infrastructure.csproj" />
-    <Project Path="src/ForensicAnalyzerPro.WPF/ForensicAnalyzerPro.WPF.csproj" />
+    <Project Path="src/MickyAc.Application/MickyAc.Application.csproj" />
+    <Project Path="src/MickyAc.Domain/MickyAc.Domain.csproj" />
+    <Project Path="src/MickyAc.Infrastructure/MickyAc.Infrastructure.csproj" />
+    <Project Path="src/MickyAc.WPF/MickyAc.WPF.csproj" />
   </Folder>
   <Folder Name="/tests/">
-    <Project Path="tests/ForensicAnalyzerPro.Tests/ForensicAnalyzerPro.Tests.csproj" />
+    <Project Path="tests/MickyAc.Tests/MickyAc.Tests.csproj" />
   </Folder>
 </Solution>

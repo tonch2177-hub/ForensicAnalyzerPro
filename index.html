@@ -1,133 +1,150 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ForensicAnalyzer � DFIR Console</title>
+<title>MICKY.AC — Forensic Investigation Platform</title>
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-:root{--bg:#0a0a0a;--bg2:#0f0f0f;--bg3:#141414;--bg4:#1a1a1a;--border:#1f1f1f;--text:#e0e0e0;--text2:#888;--text3:#555;--primary:#b91c1c;--primary-hover:#991b1b;--primary-dim:rgba(185,28,28,0.12);--primary-glow:rgba(185,28,28,0.25);--success:#22c55e;--success-dim:rgba(34,197,94,0.12);--warning:#f59e0b;--warning-dim:rgba(245,158,11,0.12);--danger:#ef4444;--danger-dim:rgba(239,68,68,0.12);--info:#3b82f6;--info-dim:rgba(59,130,246,0.12);--purple:#8b5cf6;--purple-dim:rgba(139,92,246,0.12);--radius:8px;--transition:0.25s cubic-bezier(0.4,0,0.2,1)}
-html{font-size:15px}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;line-height:1.5}
-a{color:var(--primary);text-decoration:none}
-input,select,textarea{font:inherit;color:var(--text);background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:0 12px;height:40px;width:100%;outline:none;transition:border var(--transition)}
+:root{--bg:#090909;--bg2:#111111;--bg3:#161616;--bg4:#1c1c1c;--bg5:#232323;--border:#232323;--border-light:#2a2a2a;--text:#ffffff;--text2:#9a9a9a;--text3:#666666;--primary:#ff1f3d;--primary-hover:#d6002a;--primary-dim:rgba(255,31,61,0.1);--primary-glow:rgba(255,31,61,0.2);--primary-subtle:rgba(255,31,61,0.06);--success:#00d26a;--success-dim:rgba(0,210,106,0.12);--warning:#ff8c00;--warning-dim:rgba(255,140,0,0.12);--danger:#ff2e4d;--danger-dim:rgba(255,46,77,0.12);--info:#3b82f6;--info-dim:rgba(59,130,246,0.12);--purple:#8b5cf6;--purple-dim:rgba(139,92,246,0.12);--radius:6px;--radius-lg:10px;--shadow:0 4px 24px rgba(0,0,0,0.4);--shadow-card:0 2px 8px rgba(0,0,0,0.3);--font:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;--font-mono:JetBrains Mono,Consolas,'Courier New',monospace;--transition:0.2s cubic-bezier(0.4,0,0.2,1);--sidebar-w:260px}
+html{font-size:14px;scroll-behavior:smooth}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;line-height:1.6;-webkit-font-smoothing:antialiased}
+::selection{background:var(--primary-dim);color:var(--primary)}
+a{color:var(--primary);text-decoration:none;transition:color var(--transition)}
+a:hover{color:var(--primary-hover)}
+input,select,textarea{font:inherit;color:var(--text);background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:0 14px;height:42px;width:100%;outline:none;transition:all var(--transition)}
 input:focus,select:focus,textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-dim)}
-textarea{padding:10px 12px;height:auto}
-button{font:inherit;cursor:pointer;border:none;border-radius:var(--radius);transition:all var(--transition)}
+textarea{padding:12px 14px;height:auto}
+button{font:inherit;cursor:pointer;border:none;border-radius:var(--radius);transition:all var(--transition);font-weight:500}
 button:active{transform:scale(0.97)}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:40px;padding:0 20px;font-size:14px;font-weight:600;border-radius:var(--radius)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:42px;padding:0 22px;font-size:13px;font-weight:600;border-radius:var(--radius);letter-spacing:0.2px}
 .btn-primary{background:var(--primary);color:#fff}
-.btn-primary:hover{background:var(--primary-hover);box-shadow:0 0 20px var(--primary-glow)}
+.btn-primary:hover{background:var(--primary-hover);box-shadow:0 0 24px var(--primary-glow)}
 .btn-secondary{background:var(--bg4);color:var(--text);border:1px solid var(--border)}
-.btn-secondary:hover{background:var(--border)}
+.btn-secondary:hover{background:var(--bg5);border-color:var(--border-light)}
 .btn-ghost{background:transparent;color:var(--text2)}
 .btn-ghost:hover{background:var(--bg4);color:var(--text)}
-.btn-sm{height:32px;padding:0 12px;font-size:13px}
-::-webkit-scrollbar{width:5px;height:5px}
+.btn-sm{height:34px;padding:0 14px;font-size:12px}
+.btn-xs{height:28px;padding:0 10px;font-size:11px}
+.btn-icon{width:36px;height:36px;padding:0;display:inline-flex;align-items:center;justify-content:center}
+::-webkit-scrollbar{width:6px;height:6px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--text3);border-radius:3px}
-.auth-screen{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at center,var(--bg2),var(--bg));z-index:1000}
-.auth-card{background:var(--bg3);border:1px solid var(--border);border-radius:12px;width:100%;max-width:400px;padding:32px;animation:fadeIn 0.4s ease-out}
-.auth-card h1{font-size:22px;font-weight:700;margin-bottom:4px;text-align:center}
-.auth-card .sub{color:var(--text2);font-size:13px;text-align:center;margin-bottom:24px}
-.auth-logo{width:48px;height:48px;border-radius:50%;background:var(--primary-dim);display:flex;align-items:center;justify-content:center;margin:0 auto 16px}
-.auth-logo svg{width:24px;height:24px;color:var(--primary)}
-.auth-card .field{margin-bottom:16px}
-.auth-card label{display:block;font-size:12px;font-weight:600;color:var(--text2);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px}
-.auth-card .error{background:var(--danger-dim);color:var(--danger);border:1px solid rgba(239,68,68,0.2);border-radius:var(--radius);padding:8px 12px;font-size:13px;margin-bottom:16px;display:none}
+::-webkit-scrollbar-thumb:hover{background:#888}
+.auth-screen{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:var(--bg);z-index:1000}
+.auth-screen::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(ellipse at 30% 20%,rgba(255,31,61,0.03) 0%,transparent 60%),radial-gradient(ellipse at 70% 80%,rgba(255,31,61,0.02) 0%,transparent 50%);pointer-events:none}
+.auth-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);width:100%;max-width:420px;padding:36px;position:relative;animation:fadeIn 0.5s ease-out;box-shadow:var(--shadow)}
+.auth-card .brand{text-align:center;margin-bottom:28px}
+.auth-card .brand .logo{width:52px;height:52px;border-radius:12px;background:var(--primary-dim);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;border:1px solid rgba(255,31,61,0.15)}
+.auth-card .brand h1{font-size:20px;font-weight:700;letter-spacing:-0.5px}
+.auth-card .brand .sub{color:var(--text2);font-size:12px;margin-top:2px}
+.auth-card .brand .sub span{color:var(--primary);font-weight:600}
+.auth-card .field{margin-bottom:14px}
+.auth-card label{display:block;font-size:11px;font-weight:600;color:var(--text2);margin-bottom:5px;text-transform:uppercase;letter-spacing:0.8px}
+.auth-card .error{background:var(--danger-dim);color:var(--danger);border:1px solid rgba(255,46,77,0.2);border-radius:var(--radius);padding:10px 14px;font-size:12px;margin-bottom:14px;display:none}
 .auth-card .error.show{display:block}
-.auth-card .foot{text-align:center;margin-top:20px;font-size:13px;color:var(--text2)}
-.auth-card .foot a{color:var(--primary);cursor:pointer}
+.auth-card .foot{text-align:center;margin-top:20px;font-size:12px;color:var(--text2)}
+.auth-card .foot a{color:var(--primary);cursor:pointer;font-weight:600}
 .app-layout{display:none;min-height:100vh}
 .app-layout.active{display:flex}
-.sidebar{width:240px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;transition:width var(--transition)}
-.sidebar.collapsed{width:60px}
-.sidebar-header{height:56px;display:flex;align-items:center;padding:0 16px;border-bottom:1px solid var(--border);gap:10px;overflow:hidden}
-.sidebar-header .brand-icon{width:28px;height:28px;border-radius:6px;background:var(--primary-dim);display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.sidebar-header .brand-icon svg{width:16px;height:16px;color:var(--primary)}
-.sidebar-header .brand-text{font-size:14px;font-weight:700;white-space:nowrap}
+.sidebar{width:var(--sidebar-w);background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;transition:all var(--transition);overflow:hidden}
+.sidebar.collapsed{width:68px}
+.sidebar-header{height:60px;display:flex;align-items:center;padding:0 16px;border-bottom:1px solid var(--border);gap:10px;flex-shrink:0}
+.sidebar-header .logo{width:34px;height:34px;border-radius:8px;background:var(--primary);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;font-weight:800;color:#fff;letter-spacing:0.5px}
+.sidebar-header .brand-text{font-size:15px;font-weight:700;white-space:nowrap;letter-spacing:-0.3px}
+.sidebar-header .brand-text span{color:var(--primary)}
 .sidebar.collapsed .sidebar-header .brand-text{opacity:0;width:0;overflow:hidden}
-.sidebar-nav{flex:1;padding:12px 8px;overflow-y:auto;display:flex;flex-direction:column;gap:2px}
-.sidebar-nav .nav-section{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;padding:8px 12px 4px}
+.sidebar-nav{flex:1;padding:10px 8px;overflow-y:auto;display:flex;flex-direction:column;gap:1px}
+.sidebar-nav .nav-section{font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1.2px;padding:12px 14px 6px}
 .sidebar.collapsed .sidebar-nav .nav-section{display:none}
-.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--radius);color:var(--text2);font-size:13px;font-weight:500;cursor:pointer;transition:all var(--transition);white-space:nowrap;overflow:hidden;text-decoration:none}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--radius);color:var(--text2);font-size:13px;font-weight:450;cursor:pointer;transition:all var(--transition);white-space:nowrap;overflow:hidden;text-decoration:none;position:relative}
 .nav-item:hover{background:var(--bg4);color:var(--text)}
-.nav-item.active{background:var(--primary-dim);color:var(--primary)}
+.nav-item.active{background:var(--primary-subtle);color:var(--primary)}
+.nav-item.active::before{content:'';position:absolute;left:0;top:6px;bottom:6px;width:2px;background:var(--primary);border-radius:0 2px 2px 0}
 .nav-item svg{width:18px;height:18px;flex-shrink:0}
-.sidebar.collapsed .nav-item{padding:10px;justify-content:center}
+.sidebar.collapsed .nav-item{padding:9px;justify-content:center}
 .sidebar.collapsed .nav-item span{opacity:0;width:0;overflow:hidden}
-.sidebar-footer{padding:12px 8px;border-top:1px solid var(--border)}
+.sidebar-footer{padding:10px 8px;border-top:1px solid var(--border)}
 .sidebar-overlay{display:none}
-.main{flex:1;margin-left:240px;min-height:100vh;display:flex;flex-direction:column;transition:margin-left var(--transition)}
-.sidebar.collapsed+.main{margin-left:60px}
-.topbar{height:56px;border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:12px;background:var(--bg2);position:sticky;top:0;z-index:50}
-.topbar .menu-btn{display:none;background:none;border:none;color:var(--text2);cursor:pointer;padding:4px}
-.topbar h2{font-size:16px;font-weight:600}
+.main{flex:1;margin-left:var(--sidebar-w);min-height:100vh;display:flex;flex-direction:column;transition:margin-left var(--transition)}
+.sidebar.collapsed + .main{margin-left:68px}
+.topbar{height:60px;border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 28px;gap:14px;background:var(--bg2);position:sticky;top:0;z-index:50}
+.topbar .menu-btn{display:none;background:none;border:none;color:var(--text2);cursor:pointer;padding:6px;border-radius:var(--radius)}
+.topbar .menu-btn:hover{background:var(--bg4)}
+.topbar h2{font-size:16px;font-weight:600;letter-spacing:-0.3px}
 .topbar .spacer{flex:1}
-.topbar .user-badge{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text2)}
-.topbar .user-badge .avatar{width:30px;height:30px;border-radius:50%;background:var(--primary-dim);color:var(--primary);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
-.topbar .user-badge .role-badge{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;padding:2px 8px;border-radius:99px;background:var(--warning-dim);color:var(--warning);display:none}
-.content{padding:24px;flex:1}
+.topbar .topbar-status{display:flex;align-items:center;gap:10px}
+.topbar .status-dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+.topbar .status-dot.online{background:var(--success);box-shadow:0 0 8px rgba(0,210,106,0.4)}
+.topbar .status-dot.offline{background:var(--text3)}
+.topbar .status-dot.warning{background:var(--warning);box-shadow:0 0 8px rgba(255,140,0,0.4)}
+.topbar .status-badge{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;padding:4px 10px;border-radius:99px;background:var(--bg4);border:1px solid var(--border);color:var(--text2)}
+.topbar .status-badge.active{background:var(--success-dim);border-color:rgba(0,210,106,0.2);color:var(--success)}
+.topbar .search-bar{position:relative;max-width:280px}
+.topbar .search-bar svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:15px;height:15px;color:var(--text3);pointer-events:none}
+.topbar .search-bar input{padding-left:36px;height:36px;font-size:13px;background:var(--bg3);border-color:var(--border)}
+.topbar .user-badge{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text2);padding:4px 10px;border-radius:99px;background:var(--bg3);border:1px solid var(--border)}
+.topbar .user-badge .avatar{width:28px;height:28px;border-radius:50%;background:var(--primary-dim);color:var(--primary);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
+.content{padding:28px;flex:1}
 .page{display:none;animation:fadeIn 0.3s ease-out}
 .page.active{display:block}
-.card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius)}
-.card-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
-.card-header h3{font-size:14px;font-weight:600}
-.card-body{padding:20px}
-.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:24px}
-.stat-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:20px;display:flex;flex-direction:column;gap:4px;transition:all var(--transition)}
-.stat-card:hover{border-color:var(--text3);transform:translateY(-1px)}
-.stat-card .stat-label{font-size:12px;color:var(--text2);font-weight:500;text-transform:uppercase;letter-spacing:0.5px}
-.stat-card .stat-value{font-size:28px;font-weight:700;line-height:1.2}
-.stat-card .stat-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:8px}
+.card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow-card)}
+.card-header{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.card-header h3{font-size:14px;font-weight:600;letter-spacing:-0.2px}
+.card-header .card-badge{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;padding:3px 10px;border-radius:99px;background:var(--bg4);color:var(--text2);border:1px solid var(--border)}
+.card-body{padding:22px}
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:28px}
+.stat-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-lg);padding:22px;display:flex;flex-direction:column;gap:6px;transition:all var(--transition);cursor:default;position:relative;overflow:hidden}
+.stat-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--border)}
+.stat-card:hover{border-color:var(--border-light);transform:translateY(-2px);box-shadow:var(--shadow)}
+.stat-card:hover::after{background:var(--primary)}
+.stat-card .stat-icon{width:38px;height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:6px;font-size:16px}
+.stat-card .stat-label{font-size:11px;color:var(--text2);font-weight:500;text-transform:uppercase;letter-spacing:0.6px}
+.stat-card .stat-value{font-size:30px;font-weight:700;line-height:1.1;letter-spacing:-1px}
+.stat-card .stat-sub{font-size:12px;color:var(--text3);margin-top:2px}
 .table-wrap{overflow-x:auto}
 table{width:100%;border-collapse:collapse;font-size:13px}
-thead th{padding:10px 14px;text-align:left;font-weight:600;color:var(--text2);font-size:11px;text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px solid var(--border);white-space:nowrap}
-tbody td{padding:10px 14px;border-bottom:1px solid rgba(31,31,31,0.5);font-size:13px}
+thead th{padding:12px 16px;text-align:left;font-weight:600;color:var(--text2);font-size:11px;text-transform:uppercase;letter-spacing:0.7px;border-bottom:1px solid var(--border);white-space:nowrap;background:var(--bg4)}
+tbody td{padding:12px 16px;border-bottom:1px solid rgba(35,35,35,0.6);font-size:13px;color:var(--text)}
 tbody tr{transition:background var(--transition)}
 tbody tr:hover{background:var(--bg4)}
-.badge{display:inline-flex;align-items:center;padding:2px 10px;border-radius:99px;font-size:11px;font-weight:600}
-.badge-completed,.badge-active,.badge-ok,.badge-LOW{background:var(--success-dim);color:var(--success);border:1px solid rgba(34,197,94,0.2)}
-.badge-running,.badge-expired,.badge-MEDIUM{background:var(--warning-dim);color:var(--warning);border:1px solid rgba(245,158,11,0.2)}
-.badge-pending,.badge-info{background:var(--primary-dim);color:var(--primary);border:1px solid rgba(185,28,28,0.2)}
-.badge-failed,.badge-danger,.badge-disabled,.badge-tampered,.badge-HIGH,.badge-CRITICAL{background:var(--danger-dim);color:var(--danger);border:1px solid rgba(239,68,68,0.2)}
-.badge-super{background:var(--warning-dim);color:var(--warning);border:1px solid rgba(245,158,11,0.2);font-size:9px;padding:1px 6px}
+tbody tr:last-child td{border-bottom:none}
+.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:99px;font-size:10px;font-weight:700;letter-spacing:0.3px;text-transform:uppercase}
+.badge-completed,.badge-active,.badge-ok,.badge-LOW,.badge-low{background:var(--success-dim);color:var(--success);border:1px solid rgba(0,210,106,0.2)}
+.badge-running,.badge-expired,.badge-MEDIUM,.badge-medium,.badge-warning{background:var(--warning-dim);color:var(--warning);border:1px solid rgba(255,140,0,0.2)}
+.badge-pending,.badge-info{background:var(--primary-dim);color:var(--primary);border:1px solid rgba(255,31,61,0.2)}
+.badge-failed,.badge-danger,.badge-disabled,.badge-tampered,.badge-HIGH,.badge-high,.badge-CRITICAL,.badge-critical{background:var(--danger-dim);color:var(--danger);border:1px solid rgba(255,46,77,0.2)}
 .badge-blue{background:var(--info-dim);color:var(--info);border:1px solid rgba(59,130,246,0.2)}
 .badge-purple{background:var(--purple-dim);color:var(--purple);border:1px solid rgba(139,92,246,0.2)}
-.search-bar{position:relative;max-width:320px}
-.search-bar svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--text3)}
-.search-bar input{padding-left:36px}
-.filter-row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
-.filter-row select{width:auto;min-width:150px}
-.tabs{display:flex;gap:2px;border-bottom:1px solid var(--border);margin-bottom:20px;overflow-x:auto}
-.tab{padding:10px 18px;font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;transition:all var(--transition);background:none;white-space:nowrap}
-.tab:hover{color:var(--text)}
-.tab.active{color:var(--primary);border-bottom-color:var(--primary)}
+.filter-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:18px}
+.filter-row select{width:auto;min-width:140px;height:36px;font-size:12px}
+.filter-row .search-bar{position:relative;max-width:260px}
+.filter-row .search-bar svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);width:14px;height:14px;color:var(--text3);pointer-events:none}
+.filter-row .search-bar input{padding-left:34px;height:36px;font-size:12px}
+.tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:22px;overflow-x:auto}
+.tab{padding:12px 20px;font-size:12px;font-weight:500;color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;transition:all var(--transition);background:none;white-space:nowrap;letter-spacing:0.2px}
+.tab:hover{color:var(--text);background:var(--bg4)}
+.tab.active{color:var(--primary);border-bottom-color:var(--primary);background:var(--primary-subtle)}
 .tab-content{display:none}
 .tab-content.active{display:block;animation:fadeIn 0.25s ease-out}
-.detail-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:20px}
+.detail-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-bottom:22px}
 .detail-item{background:var(--bg4);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px}
-.detail-item label{display:block;font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px}
-.detail-item span{font-size:13px;font-weight:500}
-.pin-area{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:24px;text-align:center;max-width:400px;margin:0 auto 24px}
-.pin-area h3{font-size:16px;margin-bottom:4px}
-.pin-area p{font-size:13px;color:var(--text2);margin-bottom:16px}
-.pin-input{width:160px;text-align:center;font-size:24px;letter-spacing:8px;font-weight:700;margin:0 auto 16px;height:50px}
-.pin-result{margin-top:12px;font-size:14px;font-weight:600;display:none}
-.pin-result.success{color:var(--success);display:block}
-.pin-result.error{color:var(--danger);display:block}
-.empty-state{text-align:center;padding:48px 20px;color:var(--text2)}
-.empty-state svg{width:40px;height:40px;margin-bottom:12px;opacity:0.4}
-.empty-state h4{font-size:15px;color:var(--text);margin-bottom:4px}
-.empty-state p{font-size:13px}
-.toast{position:fixed;bottom:24px;right:24px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:14px 20px;font-size:13px;font-weight:500;z-index:9999;display:none;align-items:center;gap:10px;box-shadow:0 8px 32px rgba(0,0,0,0.5);max-width:360px}
+.detail-item label{display:block;font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:0.7px;margin-bottom:3px}
+.detail-item span{font-size:13px;font-weight:500;color:var(--text)}
+.empty-state{text-align:center;padding:56px 20px;color:var(--text2)}
+.empty-state svg{width:44px;height:44px;margin-bottom:14px;opacity:0.3}
+.empty-state h4{font-size:15px;color:var(--text);margin-bottom:4px;font-weight:600}
+.empty-state p{font-size:13px;color:var(--text3)}
+.toast{position:fixed;bottom:28px;right:28px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px 22px;font-size:13px;font-weight:500;z-index:9999;display:none;align-items:center;gap:12px;box-shadow:0 12px 48px rgba(0,0,0,0.6);max-width:380px;animation:slideUp 0.3s ease-out}
 .toast.show{display:flex}
-.toast.success{border-color:rgba(34,197,94,0.3)}
+.toast.success{border-color:rgba(0,210,106,0.3)}
 .toast.success svg{color:var(--success)}
-.toast.error{border-color:rgba(239,68,68,0.3)}
+.toast.error{border-color:rgba(255,46,77,0.3)}
 .toast.error svg{color:var(--danger)}
-.log-line{padding:4px 0;font-size:12px;font-family:Consolas,monospace;color:var(--text2);border-bottom:1px solid rgba(31,31,31,0.3)}
-.log-line .time{color:var(--text3);margin-right:8px}
+.toast.info{border-color:rgba(59,130,246,0.3)}
+.toast.info svg{color:var(--info)}
+.log-line{padding:5px 0;font-size:12px;font-family:var(--font-mono);color:var(--text2);border-bottom:1px solid rgba(35,35,35,0.4)}
+.log-line .time{color:var(--text3);margin-right:10px}
 .log-line .level-info{color:var(--primary)}
 .log-line .level-warn{color:var(--warning)}
 .log-line .level-error{color:var(--danger)}
@@ -139,1157 +156,578 @@ tbody tr:hover{background:var(--bg4)}
 .mt-2{margin-top:8px}
 .mb-4{margin-bottom:16px}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.code-block{background:var(--bg4);border:1px solid var(--border);border-radius:var(--radius);padding:16px;font-family:Consolas,monospace;font-size:12px;overflow-x:auto;white-space:pre;max-height:400px}
-.widget-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;margin-bottom:24px}
-.risk-bar{display:flex;gap:4px;align-items:center}
-.risk-bar .bar{height:6px;border-radius:3px;flex:1}
-.risk-bar .bar.critical{background:var(--danger)}
-.risk-bar .bar.high{background:#dc2626}
-.risk-bar .bar.medium{background:var(--warning)}
-.risk-bar .bar.low{background:var(--success)}
-.severity-indicator{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px}
+.code-block{background:var(--bg4);border:1px solid var(--border);border-radius:var(--radius);padding:18px;font-family:var(--font-mono);font-size:12px;overflow-x:auto;white-space:pre;max-height:420px;line-height:1.7}
+.widget-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px;margin-bottom:24px}
+.severity-indicator{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:6px;vertical-align:middle}
 .severity-indicator.critical{background:var(--danger);box-shadow:0 0 6px var(--danger)}
-.severity-indicator.high{background:#dc2626;box-shadow:0 0 6px #dc2626}
+.severity-indicator.high{background:#ff6b6b;box-shadow:0 0 6px #ff6b6b}
 .severity-indicator.medium{background:var(--warning);box-shadow:0 0 6px var(--warning)}
 .severity-indicator.low{background:var(--success);box-shadow:0 0 6px var(--success)}
 .severity-indicator.info{background:var(--info);box-shadow:0 0 6px var(--info)}
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;display:none;align-items:center;justify-content:center}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:9999;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
 .modal-overlay.show{display:flex}
-.modal{background:var(--bg3);border:1px solid var(--border);border-radius:12px;width:90%;max-width:900px;max-height:80vh;display:flex;flex-direction:column;animation:fadeIn 0.2s ease-out}
-.modal-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
-.modal-header h3{font-size:16px;font-weight:600}
-.modal-body{padding:20px;overflow-y:auto;flex:1}
-.modal-close{background:var(--bg4);border:1px solid var(--border);color:var(--text2);width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px}
-.modal-close:hover{background:var(--border);color:var(--text)}
-.path-cell{font-family:Consolas,monospace;font-size:12px;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.key-cell{font-family:Consolas,monospace;font-size:12px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.timestamp-cell{font-family:Consolas,monospace;font-size:11px;color:var(--text2)}
-.hash-cell{font-family:Consolas,monospace;font-size:11px;color:var(--text3)}
-.tl-line{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid rgba(31,31,31,0.3);align-items:flex-start}
-.tl-line .tl-time{font-family:Consolas,monospace;font-size:11px;color:var(--text3);white-space:nowrap;min-width:130px;padding-top:2px}
-.tl-line .tl-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.modal{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);width:90%;max-width:920px;max-height:82vh;display:flex;flex-direction:column;animation:fadeIn 0.2s ease-out;box-shadow:0 24px 64px rgba(0,0,0,0.5)}
+.modal-header{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.modal-header h3{font-size:15px;font-weight:600}
+.modal-body{padding:22px;overflow-y:auto;flex:1}
+.modal-close{background:var(--bg4);border:1px solid var(--border);color:var(--text2);width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;transition:all var(--transition)}
+.modal-close:hover{background:var(--bg5);color:var(--text);border-color:var(--border-light)}
+.path-cell{font-family:var(--font-mono);font-size:12px;max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.key-cell{font-family:var(--font-mono);font-size:12px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text2)}
+.timestamp-cell{font-family:var(--font-mono);font-size:11px;color:var(--text3)}
+.hash-cell{font-family:var(--font-mono);font-size:11px;color:var(--text3)}
+.tl-line{display:flex;gap:14px;padding:12px 0;border-bottom:1px solid rgba(35,35,35,0.4);align-items:flex-start;transition:background var(--transition)}
+.tl-line:hover{background:var(--bg4);margin:0 -12px;padding:12px 12px;border-radius:var(--radius)}
+.tl-line .tl-time{font-family:var(--font-mono);font-size:11px;color:var(--text3);white-space:nowrap;min-width:140px;padding-top:3px}
+.tl-line .tl-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:4px;position:relative}
+.tl-line .tl-dot::after{content:'';position:absolute;top:14px;left:50%;transform:translateX(-50%);width:1px;height:calc(100% + 14px);background:var(--border)}
+.tl-line:last-child .tl-dot::after{display:none}
 .tl-line .tl-content{flex:1;min-width:0}
-.tl-line .tl-category{font-size:11px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:0.5px}
-.tl-line .tl-desc{font-size:13px;margin-top:1px}
-.tl-line .tl-detail{font-size:11px;color:var(--text3);margin-top:2px}
-.vt-score{font-family:Consolas,monospace;font-size:12px}
+.tl-line .tl-category{font-size:10px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:0.7px}
+.tl-line .tl-desc{font-size:13px;margin-top:2px;color:var(--text)}
+.tl-line .tl-detail{font-size:11px;color:var(--text3);margin-top:3px}
+.vt-score{font-family:var(--font-mono);font-size:12px}
 .vt-score .vt-mal{color:var(--danger);font-weight:700}
 .vt-score .vt-sus{color:var(--warning)}
 .vt-score .vt-clean{color:var(--success)}
-.string-match{font-family:Consolas,monospace;font-size:12px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.string-match{font-family:var(--font-mono);font-size:12px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.section-title{font-size:18px;font-weight:700;margin-bottom:4px;letter-spacing:-0.3px}
+.section-sub{font-size:13px;color:var(--text2);margin-bottom:22px}
+.risk-bar{display:flex;gap:4px;align-items:center;height:6px}
+.risk-bar .bar{height:6px;border-radius:3px;flex:1;transition:width 0.6s ease-out}
+.risk-bar .bar.critical{background:var(--danger)}
+.risk-bar .bar.high{background:#ff6b6b}
+.risk-bar .bar.medium{background:var(--warning)}
+.risk-bar .bar.low{background:var(--success)}
+.card-row{display:flex;gap:8px;flex-wrap:wrap}
+.tool-card{background:var(--bg4);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;display:flex;align-items:center;gap:12px;flex:1;min-width:200px;transition:all var(--transition)}
+.tool-card:hover{border-color:var(--border-light);transform:translateY(-1px)}
+.tool-card .tool-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.tool-card .tool-info{flex:1;min-width:0}
+.tool-card .tool-info .tool-name{font-size:13px;font-weight:600}
+.tool-card .tool-info .tool-meta{font-size:11px;color:var(--text3);margin-top:2px}
+.tool-card .tool-status{flex-shrink:0}
+.section-divider{height:1px;background:var(--border);margin:24px 0}
+.info-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(35,35,35,0.4);font-size:13px}
+.info-row:last-child{border-bottom:none}
+.info-row .info-label{color:var(--text2)}
+.info-row .info-value{font-weight:500;text-align:right}
 @media(max-width:768px){
-.sidebar{width:240px;transform:translateX(-100%)}
+:root{--sidebar-w:260px}
+.sidebar{transform:translateX(-100%)}
 .sidebar.mobile-open{transform:translateX(0)}
-.sidebar.collapsed.collapsed{width:240px;transform:translateX(-100%)}
-.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99}
+.sidebar.collapsed.collapsed{width:260px;transform:translateX(-100%)}
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:99}
 .sidebar-overlay.show{display:block}
 .main{margin-left:0!important}
 .topbar .menu-btn{display:block}
+.topbar h2{font-size:14px}
+.topbar .search-bar{max-width:160px}
 .stat-grid{grid-template-columns:1fr 1fr}
 .widget-grid{grid-template-columns:1fr}
 .form-row{grid-template-columns:1fr}
+.content{padding:16px}
+.detail-grid{grid-template-columns:1fr 1fr}
 }
-@media(max-width:480px){.stat-grid{grid-template-columns:1fr}.content{padding:16px}}
-@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:480px){.stat-grid{grid-template-columns:1fr}.content{padding:12px}.detail-grid{grid-template-columns:1fr}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
+.pulse{animation:pulse 2s ease-in-out infinite}
 </style>
 </head>
-<body>
-
-<div class="toast" id="toast"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg><span id="toastMsg"></span></div>
-
-<div class="auth-screen" id="authScreen">
-  <div class="auth-card" id="loginForm">
-    <div class="auth-logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
-    <h1>ForensicAnalyzer</h1>
-    <p class="sub">DFIR Console � Incident Response Dashboard</p>
-    <div class="error" id="loginError"></div>
-    <div class="field"><label>Email</label><input type="email" id="loginEmail" placeholder="you@example.com" autocomplete="email"></div>
-    <div class="field"><label>Password</label><input type="password" id="loginPassword" placeholder="password" autocomplete="current-password"></div>
-    <button class="btn btn-primary" style="width:100%" onclick="handleLogin()">Sign in</button>
-    <div class="foot">Don't have an account? <a onclick="showRegister()">Register</a></div>
+<body><div class="auth-screen" id="authScreen">
+  <div class="auth-card">
+    <div class="brand">
+      <div class="logo">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ff1f3d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </div>
+      <h1>MICKY<span style="color:var(--primary)">.AC</span></h1>
+      <div class="sub">Forensic Investigation Platform <span>v2.0</span></div>
+    </div>
+    <div class="error" id="authError"></div>
+    <div id="loginForm">
+      <div class="field"><label>PIN</label><input type="password" id="loginPin" placeholder="Enter investigation PIN" maxlength="16" autocomplete="off"></div>
+      <button class="btn btn-primary" style="width:100%;margin-top:6px" onclick="attemptLogin()">Authenticate</button>
+      <div class="foot">Need access? <a onclick="showRegister()">Request registration</a></div>
+    </div>
+    <div id="registerForm" style="display:none">
+      <div class="field"><label>Choose a Username</label><input type="text" id="regUser" placeholder="username" maxlength="24"></div>
+      <div class="field"><label>Set a PIN (6-16 chars)</label><input type="password" id="regPin" placeholder="••••••••" maxlength="16"></div>
+      <div class="field"><label>Confirm PIN</label><input type="password" id="regPin2" placeholder="••••••••" maxlength="16"></div>
+      <button class="btn btn-primary" style="width:100%;margin-top:6px" onclick="attemptRegister()">Register</button>
+      <div class="foot">Already registered? <a onclick="showLogin()">Sign in</a></div>
+    </div>
   </div>
-  <div class="auth-card" id="registerForm" style="display:none">
-    <div class="auth-logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
-    <h1>Create Account</h1>
-    <p class="sub">Join ForensicAnalyzer DFIR Console</p>
-    <div class="error" id="registerError"></div>
-    <div class="field"><label>Username</label><input type="text" id="regUsername" placeholder="johndoe"></div>
-    <div class="field"><label>Email</label><input type="email" id="regEmail" placeholder="you@example.com" autocomplete="email"></div>
-    <div class="field"><label>Password</label><input type="password" id="regPassword" placeholder="password" autocomplete="new-password"></div>
-    <button class="btn btn-primary" style="width:100%" onclick="handleRegister()">Create account</button>
-    <div class="foot">Already have an account? <a onclick="showLogin()">Sign in</a></div>
-  </div>
-</div><div class="app-layout" id="appLayout">
-  <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+</div>
+
+<div class="toast" id="toast"><span id="toastIcon"></span><span id="toastMsg"></span></div>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleMobileSidebar()"></div><div class="app-layout" id="appLayout">
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
-      <div class="brand-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
-      <span class="brand-text">ForensicAnalyzer</span>
+      <div class="logo">MA</div>
+      <div class="brand-text">MICKY<span>.AC</span></div>
     </div>
-    <nav class="sidebar-nav" id="sidebarNav">
+    <nav class="sidebar-nav">
       <div class="nav-section">General</div>
       <a class="nav-item active" data-page="overview" onclick="navigate('overview')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg><span>Overview</span></a>
-      <a class="nav-item" data-page="sessions" onclick="navigate('sessions')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><span>Sessions</span></a>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        <span>Overview</span>
+      </a>
       <a class="nav-item" data-page="scans" onclick="navigate('scans')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><span>Scan Results</span></a>
-      <div class="nav-section">Forensic Artifacts</div>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        <span>Scans</span>
+      </a>
+      <a class="nav-item" data-page="live" onclick="navigate('live')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <span>Live Scanner</span>
+      </a>
       <a class="nav-item" data-page="timeline" onclick="navigate('timeline')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>Timeline</span></a>
-      <a class="nav-item" data-page="filesystem" onclick="navigate('filesystem')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><span>File System</span></a>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        <span>Timeline</span>
+      </a>
+      <div class="nav-section">Forensics</div>
       <a class="nav-item" data-page="registry" onclick="navigate('registry')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg><span>Registry</span></a>
-      <a class="nav-item" data-page="eventlogs" onclick="navigate('eventlogs')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg><span>Event Logs</span></a>
-      <a class="nav-item" data-page="processes" onclick="navigate('processes')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg><span>Processes</span></a>
-      <div class="nav-section">Analysis</div>
-      <a class="nav-item" data-page="strings" onclick="navigate('strings')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg><span>String Analysis</span></a>
-      <a class="nav-item" data-page="securitytools" onclick="navigate('securitytools')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg><span>Security Tools</span></a>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        <span>Registry</span>
+      </a>
       <a class="nav-item" data-page="artifacts" onclick="navigate('artifacts')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg><span>Artifacts</span></a>
-      <a class="nav-item" data-page="threats" onclick="navigate('threats')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><span>Threat Indicators</span></a>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+        <span>Artifacts</span>
+      </a>
+      <a class="nav-item" data-page="strings" onclick="navigate('strings')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+        <span>String Analysis</span>
+      </a>
+      <a class="nav-item" data-page="virustotal" onclick="navigate('virustotal')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="2" x2="12" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
+        <span>VirusTotal</span>
+      </a>
       <div class="nav-section">Administration</div>
-      <a class="nav-item nav-admin" data-page="admin" onclick="navigate('admin')" style="display:none">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg><span>Admin Panel</span></a>
-      <a class="nav-item" data-page="profile" onclick="navigate('profile')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Profile</span></a>
+      <a class="nav-item" data-page="admin" onclick="navigate('admin')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <span>Admin Panel</span>
+      </a>
+      <a class="nav-item" data-page="settings" onclick="navigate('settings')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <span>Settings</span>
+      </a>
     </nav>
     <div class="sidebar-footer">
       <a class="nav-item" onclick="handleLogout()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg><span>Sign out</span></a>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        <span>Logout</span>
+      </a>
     </div>
   </aside>
 
-  <div class="main" id="main">
-    <div class="topbar">
-      <button class="menu-btn" onclick="toggleSidebar()"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+  <div class="main" id="mainContent">
+    <header class="topbar">
+      <button class="menu-btn" onclick="toggleMobileSidebar()">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
       <h2 id="pageTitle">Overview</h2>
       <div class="spacer"></div>
-      <div class="user-badge"><span id="topbarUser"></span><span class="role-badge" id="topbarRole"></span><span class="badge badge-api" id="apiBadge" style="display:none">Server</span><span class="badge badge-purple" id="schemaBadge" style="display:none">v2.0</span><div class="avatar" id="topbarAvatar">U</div></div>
+      <div class="search-bar" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="globalSearch" placeholder="Search scans..." oninput="filterScansTable()"></div>
+      <div class="topbar-status">
+        <div class="status-badge active" id="apiStatus"><span class="status-dot online" id="statusDot"></span><span id="statusText">Connected</span></div>
+      </div>
+      <div class="user-badge" id="userBadge">
+        <div class="avatar" id="userAvatar">U</div>
+        <span id="userName">user</span>
+      </div>
+    </header>
+
+    <div class="content" id="contentArea"><div class="page active" id="page-overview">
+  <div class="section-title">Dashboard Overview</div>
+  <div class="section-sub" id="ovSub">Real-time forensic investigation overview</div>
+  <div class="stat-grid" id="ovStats"></div>
+  <div class="widget-grid">
+    <div class="card">
+      <div class="card-header"><h3>Recent Activity</h3><span class="card-badge">Live</span></div>
+      <div class="card-body" style="padding:12px 22px;max-height:300px;overflow-y:auto" id="ovLog"><div class="log-line"><span class="time">[--:--:--]</span><span class="level-info">INFO</span> Awaiting data...</div></div>
     </div>
-
-    <div class="content">
-      <!-- OVERVIEW -->
-      <div class="page active" id="pageOverview">
-        <div style="margin-bottom:24px"><h2 style="font-size:20px;font-weight:700">Overview</h2><p class="text-muted text-sm" style="margin-top:2px">Forensic analysis dashboard � incident summary</p></div>
-        <div class="stat-grid" id="overviewStats">
-          <div class="stat-card"><div class="stat-icon" style="background:var(--primary-dim)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--primary)"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></div><div class="stat-label">Total Scans</div><div class="stat-value" id="ovStatScans">0</div></div>
-          <div class="stat-card"><div class="stat-icon" style="background:var(--info-dim)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--info)"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><div class="stat-label">Active Sessions</div><div class="stat-value" id="ovStatSessions">0</div></div>
-          <div class="stat-card"><div class="stat-icon" style="background:var(--success-dim)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--success)"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><div class="stat-label">Total Artifacts</div><div class="stat-value" id="ovStatArtifacts">0</div></div>
-          <div class="stat-card"><div class="stat-icon" style="background:var(--danger-dim)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--danger)"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg></div><div class="stat-label">IOCs Detected</div><div class="stat-value" id="ovStatIocs">0</div></div>
+    <div class="card">
+      <div class="card-header"><h3>Quick Actions</h3><span class="card-badge">Tools</span></div>
+      <div class="card-body">
+        <div class="card-row">
+          <div class="tool-card" onclick="navigate('live')"><div class="tool-icon" style="background:var(--primary-dim);color:var(--primary)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div class="tool-info"><div class="tool-name">New Scan</div><div class="tool-meta">Launch live forensic scan</div></div><div class="tool-status"><span class="badge badge-info">Run</span></div></div>
+          <div class="tool-card" onclick="navigate('timeline')"><div class="tool-icon" style="background:var(--warning-dim);color:var(--warning)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div><div class="tool-info"><div class="tool-name">Timeline</div><div class="tool-meta">View forensic timeline</div></div><div class="tool-status"><span class="badge badge-blue">View</span></div></div>
         </div>
-        <div class="widget-grid">
-          <div class="card"><div class="card-header"><h3>Recent Scans</h3></div><div class="card-body" id="ovRecentScans"><div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><h4>No scans yet</h4><p>Results appear after the scanner runs</p></div></div></div>
-          <div class="card"><div class="card-header"><h3>Detection Summary</h3></div><div class="card-body" id="ovDetectionSummary"><div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><h4>No detections</h4></div></div></div>
-          <div class="card"><div class="card-header"><h3>Tools Detected</h3></div><div class="card-body" id="ovToolsDetected"><div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><h4>No tools detected</h4></div></div></div>
-          <div class="card"><div class="card-header"><h3>Risk Distribution</h3></div><div class="card-body" id="ovRiskDist"><div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><h4>No data</h4></div></div></div>
+        <div class="card-row mt-2">
+          <div class="tool-card" onclick="navigate('strings')"><div class="tool-icon" style="background:var(--success-dim);color:var(--success)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg></div><div class="tool-info"><div class="tool-name">String Analysis</div><div class="tool-meta">Extract IOCs from text</div></div><div class="tool-status"><span class="badge badge-purple">Analyze</span></div></div>
+          <div class="tool-card" onclick="navigate('virustotal')"><div class="tool-icon" style="background:var(--danger-dim);color:var(--danger)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="2" x2="12" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/></svg></div><div class="tool-info"><div class="tool-name">VirusTotal</div><div class="tool-meta">Hash reputation lookup</div></div><div class="tool-status"><span class="badge badge-info">Check</span></div></div>
         </div>
       </div>
+    </div>
+  </div>
+</div><div class="page" id="page-scans">
+  <div class="section-title">Scan Results</div>
+  <div class="section-sub">Browse all forensic scan submissions</div>
+  <div class="filter-row">
+    <div class="search-bar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="scansFilter" placeholder="Filter scans..." oninput="filterScansTable()"></div>
+    <select id="scansSeverityFilter" onchange="filterScansTable()"><option value="">All severities</option><option value="critical">Critical</option><option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option></select>
+    <select id="scansStatusFilter" onchange="filterScansTable()"><option value="">All status</option><option value="completed">Completed</option><option value="running">Running</option><option value="pending">Pending</option><option value="failed">Failed</option></select>
+    <button class="btn btn-secondary btn-sm" onclick="exportScansCSV()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Export CSV</button>
+  </div>
+  <div class="card">
+    <div class="card-body" style="padding:0">
+      <div class="table-wrap"><table><thead><tr><th>Timestamp</th><th>Hostname</th><th>User</th><th>OS</th><th>Severity</th><th>Status</th><th>Actions</th></tr></thead><tbody id="scansBody"></tbody></table></div>
+    </div>
+  </div>
+</div>
 
-      <!-- SESSIONS -->
-      <div class="page" id="pageSessions">
-        <div style="margin-bottom:24px"><h2 style="font-size:20px;font-weight:700">Sessions</h2><p class="text-muted text-sm" style="margin-top:2px">PIN-based scanning sessions</p></div>
-        <div class="filter-row">
-          <div class="search-bar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input type="text" placeholder="Search session ID, PIN..." id="sessionSearch" oninput="renderSessions()"></div>
-          <select id="sessionFilter" onchange="renderSessions()"><option value="">All</option><option value="active">Active</option><option value="in_use">In Use</option><option value="used">Used</option></select>
+<div class="page" id="page-live">
+  <div class="section-title">Live Scanner</div>
+  <div class="section-sub">Real-time forensic evidence submission — fully coordinated with the API</div>
+  <div class="stat-grid" id="liveStats"></div>
+  <div class="widget-grid">
+    <div class="card">
+      <div class="card-header"><h3>Console Output</h3><span class="card-badge" id="liveStatusBadge">Idle</span></div>
+      <div class="card-body" style="padding:12px 22px;max-height:360px;overflow-y:auto;font-family:var(--font-mono);font-size:12px;line-height:1.7" id="liveLog"><div class="log-line"><span class="time">[--:--:--]</span><span class="level-info">INFO</span> Live scanner ready</div></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><h3>Scan Controls</h3><span class="card-badge">v2.0</span></div>
+      <div class="card-body">
+        <div class="form-row">
+          <div class="field"><label>Hostname</label><input type="text" id="liveHost" placeholder="WORKSTATION-01" value="WORKSTATION-01"></div>
+          <div class="field"><label>Username</label><input type="text" id="liveUser" placeholder="analyst" value="analyst"></div>
         </div>
-        <div class="card"><div class="card-body" style="padding:0">
-          <div class="table-wrap"><table><thead><tr><th>Session ID</th><th>PIN</th><th>Status</th><th>Created</th><th>Used</th><th>Notes</th><th>Actions</th></tr></thead><tbody id="sessionsTable"></tbody></table></div>
-          <div id="sessionsEmpty" class="empty-state" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><h4>No sessions</h4><p>Generate PINs from Admin Panel to create sessions</p></div>
-        </div></div>
+        <div class="field"><label>OS / Platform</label><input type="text" id="liveOs" placeholder="Windows 11" value="Windows 11"></div>
+        <div class="field"><label>Forensic Data (JSON)</label><textarea id="liveJsonInput" rows="7" placeholder="Paste forensic evidence as JSON, or use a template below."></textarea></div>
+        <div class="gap-2 mb-4">
+          <button class="btn btn-xs btn-secondary" onclick="loadTemplate('files')" type="button">File System</button>
+          <button class="btn btn-xs btn-secondary" onclick="loadTemplate('registry')" type="button">Registry</button>
+          <button class="btn btn-xs btn-secondary" onclick="loadTemplate('strings')" type="button">Strings</button>
+          <button class="btn btn-xs btn-secondary" onclick="loadTemplate('full')" type="button">Full Scan</button>
+          <button class="btn btn-xs btn-secondary" onclick="document.getElementById('liveJsonInput').value='';toast('Cleared','info')" type="button">Clear</button>
+        </div>
+        <div class="gap-2">
+          <button class="btn btn-primary" onclick="startLiveScan()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>Submit to API</button>
+          <button class="btn btn-secondary" onclick="stopLiveScan()" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>Stop</button>
+          <button class="btn btn-secondary" onclick="clearLiveLog()" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Clear</button>
+        </div>
+        <div class="section-divider"></div>
+        <div class="info-row"><span class="info-label">Last submission</span><span class="info-value" id="liveLastScan">-</span></div>
+        <div class="info-row"><span class="info-label">API Status</span><span class="info-value" id="liveApiStatus"><span class="badge badge-completed">Ready</span></span></div>
       </div>
+    </div>
+  </div>
+  <div id="liveResults" style="display:none" class="card">
+    <div class="card-header"><h3>Scan Results</h3><span class="card-badge" id="liveResultBadge">Complete</span></div>
+    <div class="card-body" id="liveResultsBody"></div>
+  </div>
+</div><div class="page" id="page-timeline">
+  <div class="section-title">Forensic Timeline</div>
+  <div class="section-sub">Chronological event timeline across all scans</div>
+  <div class="filter-row">
+    <select id="tlSeverity" onchange="renderTimeline()"><option value="">All severities</option><option value="critical">Critical</option><option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option><option value="info">Info</option></select>
+    <select id="tlCategory" onchange="renderTimeline()"><option value="">All categories</option><option value="filesystem">File System</option><option value="registry">Registry</option><option value="process">Process</option><option value="network">Network</option><option value="eventlog">Event Log</option><option value="ioc">IOC</option></select>
+    <select id="tlLimit" onchange="renderTimeline()"><option value="50">50 events</option><option value="100">100 events</option><option value="200" selected>200 events</option><option value="500">500 events</option></select>
+    <button class="btn btn-secondary btn-sm" onclick="refreshTimeline()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>Refresh</button>
+  </div>
+  <div class="card">
+    <div class="card-body" id="timelineContent"><div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><h4>No events</h4><p>Timeline will populate after scans are submitted</p></div></div>
+  </div>
+</div><div class="page" id="page-registry">
+  <div class="section-title">Windows Registry Forensics</div>
+  <div class="section-sub">Analyze registry hives and forensic artifacts</div>
+  <div class="tabs" id="registryTabs">
+    <button class="tab active" data-tab="reg-NetworkList">NetworkList</button>
+    <button class="tab" data-tab="reg-NetworkCards">NetworkCards</button>
+    <button class="tab" data-tab="reg-USB">USB</button>
+    <button class="tab" data-tab="reg-RDP">RDP</button>
+    <button class="tab" data-tab="reg-ShimCache">ShimCache</button>
+    <button class="tab" data-tab="reg-Prefetch">Prefetch</button>
+    <button class="tab" data-tab="reg-AmCache">AmCache</button>
+    <button class="tab" data-tab="reg-UserAssist">UserAssist</button>
+    <button class="tab" data-tab="reg-ArcHistory">ArcHistory</button>
+    <button class="tab" data-tab="reg-CIDSizeMRU">CIDSizeMRU</button>
+    <button class="tab" data-tab="reg-Store">Store</button>
+    <button class="tab" data-tab="reg-StartMenuInternet">StartMenuInternet</button>
+    <button class="tab" data-tab="reg-HKIDs">HKIDs</button>
+  </div>
+  <div id="registryContent"></div>
+</div>
 
-      <!-- SCAN RESULTS -->
-      <div class="page" id="pageScans">
-        <div style="margin-bottom:24px"><h2 style="font-size:20px;font-weight:700">Scan Results</h2><p class="text-muted text-sm" style="margin-top:2px" id="scansSubtitle">Forensic scan reports</p></div>
-        <div class="filter-row">
-          <div class="search-bar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input type="text" placeholder="Search session ID, PIN, hostname..." id="scanSearch" oninput="renderScans()"></div>
-          <select id="scanFilter" onchange="renderScans()"><option value="">All</option><option value="completed">Completed</option><option value="running">Running</option></select>
-          <select id="scanIocFilter" onchange="renderScans()"><option value="">IOC Level</option><option value="0">None</option><option value="1-5">Low (1-5)</option><option value="5-20">Medium (5-20)</option><option value="20+">High (20+)</option></select>
-        </div>
-        <div class="card"><div class="card-body" style="padding:0">
-          <div class="table-wrap"><table><thead><tr><th>Session ID</th><th>PIN</th><th>Hostname</th><th>User</th><th>Date</th><th>Duration</th><th>Schema</th><th>Status</th><th>IOCs</th><th>Artifacts</th><th></th></tr></thead><tbody id="scansTable"></tbody></table></div>
-          <div id="scansEmpty" class="empty-state" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><h4>No scans yet</h4><p>Results appear after the scanner runs with a valid PIN</p></div>
-        </div></div>
+<div class="page" id="page-artifacts">
+  <div class="section-title">Forensic Artifacts</div>
+  <div class="section-sub">Categorized forensic evidence collection</div>
+  <div class="tabs" id="artifactTabs">
+    <button class="tab active" data-tab="art-files">Files</button>
+    <button class="tab" data-tab="art-registry">Registry</button>
+    <button class="tab" data-tab="art-processes">Processes</button>
+    <button class="tab" data-tab="art-strings">Strings</button>
+    <button class="tab" data-tab="art-eventlog">Event Logs</button>
+    <button class="tab" data-tab="art-unicode">Unicode</button>
+    <button class="tab" data-tab="art-steganography">Steganography</button>
+    <button class="tab" data-tab="art-minecraft">Minecraft</button>
+    <button class="tab" data-tab="art-feather">Feather</button>
+    <button class="tab" data-tab="art-alts">Alts</button>
+    <button class="tab" data-tab="art-velociraptor">Velociraptor</button>
+    <button class="tab" data-tab="art-shellbags">Shellbags</button>
+    <button class="tab" data-tab="art-evtx">EVTX</button>
+    <button class="tab" data-tab="art-permissions">Permissions</button>
+  </div>
+  <div id="artifactContent"></div>
+</div>
+
+<div class="page" id="page-strings">
+  <div class="section-title">String Analysis</div>
+  <div class="section-sub">Extract and analyze forensic strings and IOCs</div>
+  <div class="card mb-4">
+    <div class="card-body">
+      <div class="field"><label>Input Text</label><textarea id="stringInput" rows="6" placeholder="Paste forensic text data here for analysis..."></textarea></div>
+      <div class="gap-2"><button class="btn btn-primary" onclick="analyzeStrings()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Analyze</button><button class="btn btn-secondary" onclick="document.getElementById('stringInput').value=''">Clear</button></div>
+    </div>
+  </div>
+  <div class="tabs" id="stringTabs">
+    <button class="tab active" data-tab="str-all">All</button>
+    <button class="tab" data-tab="str-emails">Emails</button>
+    <button class="tab" data-tab="str-urls">URLs</button>
+    <button class="tab" data-tab="str-domains">Domains</button>
+    <button class="tab" data-tab="str-ipv4">IPv4</button>
+    <button class="tab" data-tab="str-ipv6">IPv6</button>
+    <button class="tab" data-tab="str-discordIds">Discord IDs</button>
+    <button class="tab" data-tab="str-usernames">Usernames</button>
+  </div>
+  <div id="stringContent"></div>
+</div>
+
+<div class="page" id="page-virustotal">
+  <div class="section-title">VirusTotal Intelligence</div>
+  <div class="section-sub">Hash reputation and IOC validation</div>
+  <div class="card mb-4">
+    <div class="card-body">
+      <div class="field"><label>Enter hashes (one per line, max 10)</label><textarea id="vtInput" rows="4" placeholder="SHA256, SHA1, or MD5 hashes...&#10;e.g.: d41d8cd98f00b204e9800998ecf8427e"></textarea></div>
+      <div class="gap-2"><button class="btn btn-primary" onclick="checkVTBulk()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="2" x2="12" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/></svg>Check Hashes</button><button class="btn btn-secondary" onclick="document.getElementById('vtInput').value=''">Clear</button></div>
+    </div>
+  </div>
+  <div id="vtResults" class="card"><div class="card-body"><div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="2" x2="12" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/></svg><h4>No results yet</h4><p>Enter hashes above and click Check Hashes</p></div></div></div>
+</div><div class="page" id="page-admin">
+  <div class="section-title">Administration Panel</div>
+  <div class="section-sub">User management and system configuration</div>
+  <div class="stat-grid" id="adminStats"></div>
+  <div class="widget-grid">
+    <div class="card">
+      <div class="card-header"><h3>Registered Users</h3><span class="card-badge" id="adminUserCount">0</span></div>
+      <div class="card-body" style="padding:0">
+        <div class="table-wrap"><table><thead><tr><th>Username</th><th>PIN</th><th>Role</th><th>Created</th><th>Last Login</th><th>Actions</th></tr></thead><tbody id="adminUsersBody"></tbody></table></div>
       </div>
-
-      <!-- SCAN DETAIL -->
-      <div class="page" id="pageDetail">
-        <div style="margin-bottom:20px">
-          <a style="cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--text2);margin-bottom:12px" onclick="navigate('scans')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>Back to scans</a>
-          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><h2 style="font-size:20px;font-weight:700">Scan Report</h2><span class="badge" id="detailStatusBadge"></span><span class="badge badge-blue" id="detailSessionLabel"></span><button class="btn btn-sm btn-ghost" onclick="viewRawJson()" style="color:var(--info)">View Raw JSON</button></div>
-          <p class="text-muted text-sm" style="margin-top:2px" id="detailId"></p>
-        </div>
-        <div class="detail-grid" id="detailInfo"></div>
-        <div class="tabs">
-          <button class="tab active" data-tab="artifacts" onclick="switchDetailTab('artifacts')">Artifacts</button>
-          <button class="tab" data-tab="ioc" onclick="switchDetailTab('ioc')">IOCs</button>
-          <button class="tab" data-tab="evidence" onclick="switchDetailTab('evidence')">Evidence</button>
-          <button class="tab" data-tab="logs" onclick="switchDetailTab('logs')">Logs</button>
-        </div>
-        <div class="tab-content active" id="tabArtifacts"><div class="table-wrap"><table><thead><tr><th>Name</th><th>Type</th><th>Source</th><th>Hash</th><th>VT</th></tr></thead><tbody id="artifactsTable"></tbody></table></div></div>
-        <div class="tab-content" id="tabIoc"><div class="table-wrap"><table><thead><tr><th>Name</th><th>Value</th><th>Type</th><th>Risk Level</th></tr></thead><tbody id="iocTable"></tbody></table></div></div>
-        <div class="tab-content" id="tabEvidence"><div class="table-wrap"><table><thead><tr><th>Name</th><th>Description</th><th>Source</th><th>Size</th></tr></thead><tbody id="evidenceTable"></tbody></table></div></div>
-        <div class="tab-content" id="tabLogs"><div id="logsContainer"></div></div>
-      </div>
-
-      <!-- TIMELINE -->
-      <div class="page" id="pageTimeline">
-        <div style="margin-bottom:24px"><h2 style="font-size:20px;font-weight:700">Forensic Timeline</h2><p class="text-muted text-sm" style="margin-top:2px">Chronological event view across all scans</p></div>
-        <div class="filter-row">
-          <div class="search-bar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input type="text" placeholder="Search events..." id="tlSearch" oninput="renderTimeline()"></div>
-          <select id="tlCategory" onchange="renderTimeline()"><option value="">All Categories</option><option value="System">System</option><option value="file">File System</option><option value="registry">Registry</option><option value="process">Process</option><option value="eventlog">Event Log</option><option value="threat">Threat</option><option value="tool">Security Tool</option></select>
-          <select id="tlSeverity" onchange="renderTimeline()"><option value="">All Severities</option><option value="critical">Critical</option><option value="warning">Warning</option><option value="info">Info</option></select>
-        </div>
-        <div class="card"><div class="card-body" id="timelineContainer"></div></div>
-      </div>
-
-      <!-- FILE SYSTEM -->
-      <div class="page" id="pageFilesystem">
-        <div style="margin-bottom:24px"><h2 style="font-size:20px;font-weight:700">File System Artifacts</h2><p class="text-muted text-sm" style="margin-top:2px">MFT, Amcache, Prefetch, Downloads, and file operations</p></div>
-        <div class="filter-row">
-          <div class="search-bar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input type="text" placeholder="Search paths, hashes..." id="fsSearch" oninput="renderFilesystem()"></div>
-          <select id="fsFilter" onchange="renderFilesystem()"><option value="">All Categories</option><option value="mft">MFT</option><option value="downloads">Downloads Cache</option><option value="jar">Executed JARs</option><option value="folders">Visited Folders</option><option value="appcompat">AppCompatCache</option><option value="amcache">Amcache</option><option value="prefetch">Prefetch</option><option value="exitcode">Exit Code</option></select>
-        </div>
-        <div class="card"><div class="card-body" style="padding:0">
-          <div class="table-wrap"><table><thead><tr><th>Path</th><th>Category</th><th>Timestamp</th><th>SHA256</th><th>Size</th><th>VT</th><th>Source</th></tr></thead><tbody id="fsTable"></tbody></table></div>
-          <div id="fsEmpty" class="empty-state" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><h4>No file system artifacts</h4><p>Run a scan to collect file system data</p></div>
-        </div></div>
-      </div>
-
-      <!-- REGISTRY -->
-      <div class="page" id="pageRegistry">
-        <div style="margin-bottom:24px"><h2 style="font-size:20px;font-weight:700">Registry Artifacts</h2><p class="text-muted text-sm" style="margin-top:2px">Windows registry forensic data</p></div>
-        <div class="filter-row">
-          <div class="search-bar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input type="text" placeholder="Search registry keys..." id="regSearch" oninput="renderRegistry(_activeRegTab)"></div>
-        </div>
-        <div class="tabs" id="registryTabs">
-          <button class="tab active" data-tab="bam" onclick="switchRegTab('bam')">BAM</button>
-          <button class="tab" data-tab="muicache" onclick="switchRegTab('muicache')">MUICache</button>
-          <button class="tab" data-tab="recentdocs" onclick="switchRegTab('recentdocs')">RecentDocs</button>
-          <button class="tab" data-tab="opensave" onclick="switchRegTab('opensave')">OpenSavePidlMRU</button>
-          <button class="tab" data-tab="lastvisited" onclick="switchRegTab('lastvisited')">LastVisitedPidlMRU</button>
-          <button class="tab" data-tab="cmdproc" onclick="switchRegTab('cmdproc')">Command Processor</button>
-          <button class="tab" data-tab="appsswitched" onclick="switchRegTab('appsswitched')">AppsSwitched</button>
-          <button class="tab" data-tab="directinput" onclick="switchRegTab('directinput')">DirectInput</button>
-          <button class="tab" data-tab="archistory" onclick="switchRegTab('archistory')">ArcHistory</button>
-          <button class="tab" data-tab="cidsizemru" onclick="switchRegTab('cidsizemru')">CIDSizeMRU</button>
-          <button class="tab" data-tab="store" onclick="switchRegTab('store')">Store</button>
-          <button class="tab" data-tab="startmenu" onclick="switchRegTab('startmenu')">StartMenuInternet</button>
-          <button class="tab" data-tab="hkids" onclick="switchRegTab('hkids')">HKIDs</button>
-        </div>
-        <div class="card"><div class="card-body" style="padding:0">
-          <div class="table-wrap"><table><thead><tr><th>Registry Key</th><th>Value</th><th>Timestamp</th><th>User</th></tr></thead><tbody id="registryTable"></tbody></table></div>
-          <div id="registryEmpty" class="empty-state" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg><h4>No registry artifacts</h4><p>Run a scan to collect registry data</p></div>
-        </div></div>
-      </div>      <!-- EVENT LOGS -->
-      <div class="page" id="pageEventlogs">
-        <div style="margin-bottom:24px"><h2 style="font-size:20px;font-weight:700">Event Logs</h2><p class="text-muted text-sm" style="margin-top:2px">Windows event log analysis</p></div>
-        <div class="filter-row">
-          <select id="elLog" onchange="renderEventLogs()"><option value="">All Logs</option><option value="application">Application</option><option value="security">Security</option><option value="system">System</option></select>
-          <select id="elLevel" onchange="renderEventLogs()"><option value="">All Levels</option><option value="critical">Critical</option><option value="error">Error</option><option value="warning">Warning</option><option value="information">Information</option></select>
-          <div class="search-bar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input type="text" placeholder="Search events..." id="elSearch" oninput="renderEventLogs()"></div>
-        </div>
-        <div class="card"><div class="card-body" style="padding:0">
-          <div class="table-wrap"><table><thead><tr><th>Level</th><th>Log</th><th>Event ID</th><th>Source</th><th>Message</th><th>Timestamp</th></tr></thead><tbody id="eventLogsTable"></tbody></table></div>
-          <div id="eventLogsEmpty" class="empty-state" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg><h4>No event logs</h4><p>Run a scan to collect event logs</p></div>
-        </div></div>
-      </div>
-
-      <!-- PROCESSES -->
-      <div class="page" id="pageProcesses">
-        <div style="margin-bottom:24px"><h2 style="font-size:20px;font-weight:700">Process Analysis</h2><p class="text-muted text-sm" style="margin-top:2px">Detected processes, commands, and exit codes</p></div>
-        <div class="filter-row">
-          <div class="search-bar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input type="text" placeholder="Search processes..." id="procSearch" oninput="renderProcesses()"></div>
-        </div>
-        <div class="card"><div class="card-body" style="padding:0">
-          <div class="table-wrap"><table><thead><tr><th>Process</th><th>PID</th><th>User</th><th>Command Line</th><th>Exit Code</th><th>Timestamp</th><th>Source Scan</th></tr></thead><tbody id="processesTable"></tbody></table></div>
-          <div id="processesEmpty" class="empty-state" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg><h4>No process data</h4><p>Run a scan to collect process information</p></div>
-        </div></div>
-      </div>
-
-      <!-- STRING ANALYSIS -->
-      <div class="page" id="pageStrings">
-        <div style="margin-bottom:24px"><h2 style="font-size:20px;font-weight:700">String Analysis</h2><p class="text-muted text-sm" style="margin-top:2px">Pattern matching across all scan data � emails, URLs, IPs, domains, Discord IDs</p></div>
-        <div class="tabs" id="stringTabs">
-          <button class="tab active" data-tab="all" onclick="switchStringTab('all')">All Findings</button>
-          <button class="tab" data-tab="email" onclick="switchStringTab('email')">Emails</button>
-          <button class="tab" data-tab="url" onclick="switchStringTab('url')">URLs</button>
-          <button class="tab" data-tab="domain" onclick="switchStringTab('domain')">Domains</button>
-          <button class="tab" data-tab="ipv4" onclick="switchStringTab('ipv4')">IPv4</button>
-          <button class="tab" data-tab="ipv6" onclick="switchStringTab('ipv6')">IPv6</button>
-          <button class="tab" data-tab="discord_id" onclick="switchStringTab('discord_id')">Discord IDs</button>
-          <button class="tab" data-tab="username" onclick="switchStringTab('username')">Usernames</button>
-        </div>
-        <div class="card"><div class="card-body" style="padding:0">
-          <div class="table-wrap"><table><thead><tr><th>Type</th><th>Value</th><th>Context</th><th>Source Scan</th></tr></thead><tbody id="stringsTable"></tbody></table></div>
-          <div id="stringsEmpty" class="empty-state" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg><h4>No string matches found</h4><p>Run a scan to generate string analysis data</p></div>
-        </div></div>
-      </div>
-
-      <!-- SECURITY TOOLS -->
-      <div class="page" id="pageSecuritytools">
-        <div style="margin-bottom:24px"><h2 style="font-size:20px;font-weight:700">Security Tools</h2><p class="text-muted text-sm" style="margin-top:2px">Detected security and forensic tools</p></div>
-        <div class="card"><div class="card-body" style="padding:0">
-          <div class="table-wrap"><table><thead><tr><th>Tool</th><th>Category</th><th>Version</th><th>Install Path</th><th>Status</th><th>Last Seen</th><th>Source Scan</th></tr></thead><tbody id="secToolsTable"></tbody></table></div>
-          <div id="secToolsEmpty" class="empty-state" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg><h4>No security tools detected</h4></div>
-        </div></div>
-      </div>
-
-      <!-- ARTIFACTS -->
-      <div class="page" id="pageArtifacts">
-        <div style="margin-bottom:24px"><h2 style="font-size:20px;font-weight:700">Artifact Analysis</h2><p class="text-muted text-sm" style="margin-top:2px">Hidden characters, steganography, Minecraft artifacts, forensic tool traces</p></div>
-        <div class="tabs" id="artifactTabs">
-          <button class="tab active" data-tab="unicode" onclick="switchArtifactTab('unicode')">Unicode Hidden</button>
-          <button class="tab" data-tab="stego" onclick="switchArtifactTab('stego')">Steganography</button>
-          <button class="tab" data-tab="minecraft" onclick="switchArtifactTab('minecraft')">Minecraft</button>
-          <button class="tab" data-tab="feather" onclick="switchArtifactTab('feather')">Feather</button>
-          <button class="tab" data-tab="alts" onclick="switchArtifactTab('alts')">Minecraft Alts</button>
-          <button class="tab" data-tab="velo" onclick="switchArtifactTab('velo')">Velociraptor</button>
-          <button class="tab" data-tab="shell" onclick="switchArtifactTab('shell')">ShellBags</button>
-          <button class="tab" data-tab="evtx" onclick="switchArtifactTab('evtx')">EVTX Analysis</button>
-          <button class="tab" data-tab="permissions" onclick="switchArtifactTab('permissions')">Folder Permissions</button>
-        </div>
-        <div class="card"><div class="card-body" style="padding:0">
-          <div class="table-wrap"><table><thead><tr><th>Category</th><th>Value</th><th>Context</th><th>Severity</th><th>Source Scan</th></tr></thead><tbody id="artifactsAnalysisTable"></tbody></table></div>
-          <div id="artifactsAnalysisEmpty" class="empty-state" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg><h4>No artifact findings</h4></div>
-        </div></div>
-      </div>
-
-      <!-- THREAT INDICATORS -->
-      <div class="page" id="pageThreats">
-        <div style="margin-bottom:24px"><h2 style="font-size:20px;font-weight:700">Threat Indicators</h2><p class="text-muted text-sm" style="margin-top:2px">Security threats and suspicious findings</p></div>
-        <div class="filter-row">
-          <select id="threatSeverity" onchange="renderThreats()"><option value="">All Severities</option><option value="CRITICAL">Critical</option><option value="HIGH">High</option><option value="MEDIUM">Medium</option><option value="LOW">Low</option></select>
-          <select id="threatCategory" onchange="renderThreats()"><option value="">All Categories</option><option value="suspicious">Suspicious Files</option><option value="unusual_tools">Unusual Tools</option><option value="recent_executions">Recent Executions</option><option value="findings">Relevant Findings</option><option value="malware">Malware</option><option value="persistence">Persistence</option></select>
-          <div class="search-bar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input type="text" placeholder="Search threats..." id="threatSearch" oninput="renderThreats()"></div>
-        </div>
-        <div class="card"><div class="card-body" style="padding:0">
-          <div class="table-wrap"><table><thead><tr><th>Severity</th><th>Category</th><th>Indicator</th><th>Description</th><th>Source</th><th>Scan</th></tr></thead><tbody id="threatsTable"></tbody></table></div>
-          <div id="threatsEmpty" class="empty-state" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><h4>No threats detected</h4></div>
-        </div></div>
-      </div>
-
-      <!-- ADMIN PANEL -->
-      <div class="page" id="pageAdmin">
-        <div style="margin-bottom:24px"><h2 style="font-size:20px;font-weight:700">Admin Panel</h2><p class="text-muted text-sm" style="margin-top:2px">Manage PINs, export data, import scan results</p></div>
-        <div class="tabs">
-          <button class="tab active" data-tab="gen" onclick="switchAdminTab('gen')">PIN Generator</button>
-          <button class="tab" data-tab="pins" onclick="switchAdminTab('pins')">PIN Management</button>
-          <button class="tab" data-tab="export" onclick="switchAdminTab('export')">Export</button>
-          <button class="tab" data-tab="import" onclick="switchAdminTab('import')">Import</button>
-        </div>
-        <div class="tab-content active" id="tabGen">
-          <div class="card" style="max-width:500px"><div class="card-header"><h3>Generate New PIN</h3></div><div class="card-body"><div class="field"><label>Notes</label><textarea id="pinNotes" rows="2" placeholder="For scanner deployment..."></textarea></div>
-            <button class="btn btn-primary" onclick="generatePin()">Generate PIN</button>
-            <div id="pinGenerateResult" style="margin-top:12px;display:none"></div>
-          </div></div>
-          <div style="margin-top:16px" class="card"><div class="card-header"><h3>How PINs Work</h3></div><div class="card-body text-sm text-muted">
-            <p>Each generated PIN is <strong>4 digits</strong> with a unique <strong>Session ID</strong> (e.g. MCK-001).</p>
-            <p style="margin-top:4px"><strong>All PIN validation is handled server-side.</strong> The scanner sends the PIN to <code>/api/validate-pin</code>, the server validates it, and sends a Discord webhook notification.</p>
-          </div></div>
-        </div>
-        <div class="tab-content" id="tabPins">
-          <div class="card"><div class="card-header"><h3>All PINs</h3><span class="text-muted text-sm" id="pinCount"></span></div><div class="card-body" style="padding:0">
-            <div class="table-wrap"><table><thead><tr><th>PIN</th><th>Session ID</th><th>Status</th><th>Created</th><th>Notes</th><th>Actions</th></tr></thead><tbody id="pinsTable"></tbody></table></div>
-            <div id="pinsEmpty" class="empty-state" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><h4>No PINs generated</h4><p>Use the PIN Generator to create PINs</p></div>
-          </div></div>
-        </div>
-        <div class="tab-content" id="tabExport">
-          <div class="card" style="margin-bottom:16px"><div class="card-header"><h3>Export Forensic Data</h3></div><div class="card-body">
-            <p class="text-sm text-muted mb-4">Download JSON files or generate a readable report.</p>
-            <div class="gap-3">
-              <button class="btn btn-secondary" onclick="exportJSON('pins')">Download pins.json</button>
-              <button class="btn btn-secondary" onclick="exportJSON('scans')">Download scans.json</button>
-              <button class="btn btn-secondary" onclick="exportJSON('timeline')">Download timeline.json</button>
-              <button class="btn btn-secondary" onclick="exportJSON('report')">Generate Report</button>
-            </div>
-            <div id="exportPreview" style="margin-top:16px;display:none">
-              <div class="card-header" style="padding:12px 0"><h3 style="font-size:13px">Preview</h3></div>
-              <div class="code-block" id="exportCode"></div>
-            </div>
-          </div></div>
-        </div>
-        <div class="tab-content" id="tabImport">
-          <div class="card" style="margin-bottom:16px"><div class="card-header"><h3>Import Scan Results</h3></div><div class="card-body">
-            <p class="text-sm text-muted mb-4">Paste JSON or upload a file with scan results.</p>
-            <div class="field"><label>Paste JSON or upload file</label>
-              <textarea id="importJsonInput" rows="8" placeholder='{"sessionId":"MCK-001","pin":"4832","hostname":"DESKTOP-ABC",...}'></textarea>
-            </div>
-            <div class="gap-2">
-              <button class="btn btn-primary" onclick="importScan()">Import Scan</button>
-              <input type="file" id="importFileInput" accept=".json" style="display:none" onchange="handleImportFile(event)">
-              <button class="btn btn-secondary" onclick="document.getElementById('importFileInput').click()">Upload .json</button>
-            </div>
-            <div id="importResult" style="margin-top:12px;display:none"></div>
-          </div></div>
-        </div>
-      </div>
-
-      <!-- PROFILE -->
-      <div class="page" id="pageProfile">
-        <div style="margin-bottom:24px"><h2 style="font-size:20px;font-weight:700">Profile</h2><p class="text-muted text-sm" style="margin-top:2px">Account information</p></div>
-        <div class="card" style="max-width:480px"><div class="card-header"><h3>Account Details</h3></div><div class="card-body"><div style="display:flex;flex-direction:column;gap:16px" id="profileFields"></div></div></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><h3>System Health</h3><span class="card-badge">Status</span></div>
+      <div class="card-body">
+        <div class="info-row"><span class="info-label">API Status</span><span class="info-value"><span class="badge badge-completed" id="adminApiStatus">Online</span></span></div>
+        <div class="info-row"><span class="info-label">Schema Version</span><span class="info-value" id="adminSchemaVer">—</span></div>
+        <div class="info-row"><span class="info-label">Total Scans</span><span class="info-value" id="adminTotalScans">0</span></div>
+        <div class="info-row"><span class="info-label">Data Storage</span><span class="info-value" id="adminStorage">LocalStorage</span></div>
+        <div class="section-divider"></div>
+        <div class="gap-2"><button class="btn btn-secondary btn-sm" onclick="syncFromServer()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>Sync from Server</button><button class="btn btn-secondary btn-sm" onclick="exportAllData()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Export All Data</button><button class="btn btn-secondary btn-sm" style="color:var(--danger)" onclick="clearLocalData()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Clear Local Data</button></div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- Raw JSON Modal -->
-<div class="modal-overlay" id="jsonModal">
+<div class="page" id="page-settings">
+  <div class="section-title">Settings</div>
+  <div class="section-sub">Application preferences and configuration</div>
+  <div class="widget-grid">
+    <div class="card">
+      <div class="card-header"><h3>Profile</h3></div>
+      <div class="card-body">
+        <div class="detail-item"><label>Username</label><span id="setUsername">—</span></div>
+        <div class="detail-item mt-2"><label>Role</label><span id="setRole">analyst</span></div>
+        <div class="detail-item mt-2"><label>Registration PIN</label><span id="setPin" style="font-family:var(--font-mono)">—</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><h3>Preferences</h3></div>
+      <div class="card-body">
+        <div class="field"><label>Theme</label><select id="setTheme" onchange="applySettings()"><option value="dark">Dark (default)</option></select></div>
+        <div class="field mt-2"><label>Timeline default limit</label><select id="setTlLimit" onchange="applySettings()"><option value="50">50</option><option value="100">100</option><option value="200" selected>200</option><option value="500">500</option></select></div>
+        <div class="section-divider"></div>
+        <button class="btn btn-secondary btn-sm" onclick="handleLogout()">Logout</button>
+      </div>
+    </div>
+  </div>
+</div></div></div></div>
+
+<div class="modal-overlay" id="scanModal">
   <div class="modal">
-    <div class="modal-header"><h3>Raw JSON � <span id="jsonModalTitle"></span></h3><button class="modal-close" onclick="closeJsonModal()">?</button></div>
-    <div class="modal-body"><pre class="code-block" id="jsonModalContent" style="max-height:none;white-space:pre-wrap"></pre></div>
+    <div class="modal-header"><h3 id="scanModalTitle">Scan Details</h3><button class="modal-close" onclick="closeModal('scanModal')">?</button></div>
+    <div class="modal-body" id="scanModalBody"></div>
   </div>
 </div>
 
-<!-- VirusTotal Modal -->
 <div class="modal-overlay" id="vtModal">
-  <div class="modal" style="max-width:600px">
-    <div class="modal-header"><h3>VirusTotal � <span id="vtModalHash"></span></h3><button class="modal-close" onclick="document.getElementById('vtModal').classList.remove('show')">?</button></div>
-    <div class="modal-body" id="vtModalBody"><div class="empty-state"><p>Loading...</p></div></div>
+  <div class="modal">
+    <div class="modal-header"><h3>VirusTotal Report</h3><button class="modal-close" onclick="closeModal('vtModal')">?</button></div>
+    <div class="modal-body" id="vtModalBody"></div>
   </div>
-</div><script>
-const API_BASE = '/api/';
-let _apiAvail = false;
-let _currentScanDetail = null;
-let _activeRegTab = 'bam';
-let _activeStringTab = 'all';
-let _registryData = [];
-let _fsData = [];
-let _procData = [];
-let _secToolsData = [];
-let _artifactAnalysisData = [];
-let _threatData = [];
-let _eventLogData = [];
-let _stringData = [];
-let _timelineData = [];
-let _vtCache = {};
-
-async function checkApi() {
-    try {
-        const r = await fetch(API_BASE + 'health');
-        if (r.ok) { const h = await r.json(); _apiAvail = true; updateApiBadge(); if (h.schemaVersion) document.getElementById('schemaBadge').style.display = 'inline-flex'; await syncFromBot(); }
-    } catch(e) { _apiAvail = false; }
-}
-checkApi();
-
-function updateApiBadge() {
-    const el = document.getElementById('apiBadge');
-    if (el) el.style.display = _apiAvail ? 'inline-flex' : 'none';
-}
-
-async function apiGet(endpoint) {
-    if (!_apiAvail) return null;
-    try { const r = await fetch(API_BASE + endpoint); return r.ok ? await r.json() : null; } catch(e) { return null; }
-}
-
-async function apiPost(endpoint, data) {
-    try { const r = await fetch(API_BASE + endpoint, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data) }); return r.ok ? await r.json() : null; } catch(e) { return null; }
-}
-
-async function apiPut(endpoint, data) {
-    try { const r = await fetch(API_BASE + endpoint, { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data) }); return r.ok ? await r.json() : null; } catch(e) { return null; }
-}
-
-async function apiDelete(endpoint) {
-    try { const r = await fetch(API_BASE + endpoint, { method:'DELETE' }); return r.ok ? await r.json() : null; } catch(e) { return null; }
-}
-
-async function syncFromBot() {
-    if (!_apiAvail) return;
-    const pins = await apiGet('pins');
-    if (pins && Array.isArray(pins)) localStorage.setItem('fa_pins', JSON.stringify(pins));
-    const scans = await apiGet('scans');
-    if (scans && Array.isArray(scans)) localStorage.setItem('fa_scans', JSON.stringify(scans));
-}
-
-const _K = { users:'fa_users', scans:'fa_scans', pins:'fa_pins', session:'fa_session' };
-const gu = () => JSON.parse(localStorage.getItem(_K.users) || '[]');
-const su = u => localStorage.setItem(_K.users, JSON.stringify(u));
-const gp = () => JSON.parse(localStorage.getItem(_K.pins) || '[]');
-const sp = p => localStorage.setItem(_K.pins, JSON.stringify(p));
-const gs = () => JSON.parse(localStorage.getItem(_K.scans) || '[]');
-const ss = s => localStorage.setItem(_K.scans, JSON.stringify(s));
-const gss = () => JSON.parse(localStorage.getItem(_K.session) || 'null');
-const sss = s => localStorage.setItem(_K.session, JSON.stringify(s));
-const cs = () => localStorage.removeItem(_K.session);
-const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,6);
-const now = () => new Date().toISOString();
-
-(function(){ const u = gu(); if (!u.find(x => x.username === 'tonch')) { u.push({ id: uid(), username: 'tonch', email: 'tonch@admin.com', password: 'admin123', role: 'SUPER_ADMIN', createdAt: now() }); su(u); } })();
-
-function showToast(m, t) { const e = document.getElementById('toast'), msg = document.getElementById('toastMsg'); e.className = 'toast show ' + t; msg.textContent = m; clearTimeout(e._timer); e._timer = setTimeout(() => e.classList.remove('show'), 3500); }
-
-function showRegister() { document.getElementById('loginForm').style.display='none'; document.getElementById('registerForm').style.display='block'; }
-function showLogin() { document.getElementById('registerForm').style.display='none'; document.getElementById('loginForm').style.display='block'; }
-
-function handleRegister() {
-  const u = document.getElementById('regUsername').value.trim(), e = document.getElementById('regEmail').value.trim(), p = document.getElementById('regPassword').value, er = document.getElementById('registerError');
-  if (!u || !e || !p) { er.textContent = 'All fields are required'; er.classList.add('show'); return; }
-  if (p.length < 6) { er.textContent = 'Password must be at least 6 characters'; er.classList.add('show'); return; }
-  const us = gu();
-  if (us.find(x => x.email === e)) { er.textContent = 'Email already registered'; er.classList.add('show'); return; }
-  if (us.find(x => x.username === u)) { er.textContent = 'Username already taken'; er.classList.add('show'); return; }
-  us.push({ id: uid(), username: u, email: e, password: p, role: 'USER', createdAt: now() }); su(us);
-  er.classList.remove('show'); showToast('Account created', 'success'); showLogin();
-  document.getElementById('loginEmail').value = e;
-}
-
-function handleLogin() {
-  const e = document.getElementById('loginEmail').value.trim(), p = document.getElementById('loginPassword').value, er = document.getElementById('loginError');
-  if (!e || !p) { er.textContent = 'Please enter email and password'; er.classList.add('show'); return; }
-  const user = gu().find(x => x.email === e && x.password === p);
-  if (!user) { er.textContent = 'Invalid email or password'; er.classList.add('show'); return; }
-  if (user.username === 'tonch' && user.role !== 'SUPER_ADMIN') { er.textContent = 'Account integrity violation'; er.classList.add('show'); return; }
-  er.classList.remove('show'); sss({ userId: user.id, username: user.username, email: user.email, role: user.role });
-  showToast('Welcome, ' + user.username, 'success'); enterApp();
-}
-
-function handleLogout() { cs(); document.getElementById('appLayout').classList.remove('active'); document.getElementById('authScreen').style.display='flex'; document.getElementById('loginPassword').value=''; }
-(function(){ const s = gss(); if (s && gu().find(x => x.id === s.userId)) enterApp(); })();
-
-function enterApp() {
-  document.getElementById('authScreen').style.display='none'; document.getElementById('appLayout').classList.add('active');
-  const s = gss(); document.getElementById('topbarUser').textContent = s.username;
-  document.getElementById('topbarAvatar').textContent = s.username.charAt(0).toUpperCase();
-  const rb = document.getElementById('topbarRole');
-  if (s.role === 'SUPER_ADMIN' && s.username === 'tonch') { rb.textContent = 'SUPER ADMIN'; rb.style.display='inline'; } else { rb.style.display='none'; }
-  document.querySelectorAll('.nav-admin').forEach(el => el.style.display = (s.username === 'tonch' && s.role === 'SUPER_ADMIN') ? 'flex' : 'none');
-  navigate('overview');
-}
-
-function navigate(page, data) {
-  if (page === 'detail' && data) { showDetail(data); return; }
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  const el = document.getElementById('page' + page.charAt(0).toUpperCase() + page.slice(1));
-  if (el) el.classList.add('active');
-  const nav = document.querySelector('[data-page="' + page + '"]');
-  if (nav) nav.classList.add('active');
-  const titles = { overview:'Overview', sessions:'Sessions', scans:'Scan Results', detail:'Scan Report', timeline:'Timeline', filesystem:'File System', registry:'Registry', eventlogs:'Event Logs', processes:'Processes', strings:'String Analysis', securitytools:'Security Tools', artifacts:'Artifacts', threats:'Threat Indicators', admin:'Admin Panel', profile:'Profile' };
-  document.getElementById('pageTitle').textContent = titles[page] || page;
-  if (page === 'overview') renderOverview();
-  if (page === 'sessions') renderSessions();
-  if (page === 'scans') renderScans();
-  if (page === 'timeline') renderTimeline();
-  if (page === 'filesystem') renderFilesystem();
-  if (page === 'registry') { switchRegTab('bam'); }
-  if (page === 'eventlogs') renderEventLogs();
-  if (page === 'processes') renderProcesses();
-  if (page === 'strings') { switchStringTab('all'); }
-  if (page === 'securitytools') renderSecTools();
-  if (page === 'artifacts') { switchArtifactTab('unicode'); }
-  if (page === 'threats') renderThreats();
-  if (page === 'admin') { switchAdminTab('gen'); }
-  if (page === 'profile') renderProfile();
-  if (window.innerWidth <= 768) closeSidebar();
-}
-
-function toggleSidebar() { const s = document.getElementById('sidebar'), o = document.getElementById('sidebarOverlay'); if (window.innerWidth > 768) s.classList.toggle('collapsed'); else { s.classList.toggle('mobile-open'); o.classList.toggle('show'); } }
-function closeSidebar() { if (window.innerWidth <= 768) { document.getElementById('sidebar').classList.remove('mobile-open'); document.getElementById('sidebarOverlay').classList.remove('show'); } }
-
-function badgeClass(s) {
-  const m = { completed:'badge-completed', active:'badge-ok', in_use:'badge-running', used:'badge-completed', running:'badge-running', expired:'badge-running', deactivated:'badge-disabled', failed:'badge-failed', CRITICAL:'badge-CRITICAL', HIGH:'badge-HIGH', MEDIUM:'badge-MEDIUM', LOW:'badge-LOW', low:'badge-LOW', medium:'badge-MEDIUM', high:'badge-HIGH', critical:'badge-CRITICAL', info:'badge-blue' };
-  return m[s] || 'badge-pending';
-}
-
-function severityDot(level) {
-  return '<span class="severity-indicator ' + (level||'low').toLowerCase() + '"></span>';
-}
-
-function extractResults(scan) {
-  const r = scan.results || {};
-  if (typeof r === 'string') { try { return JSON.parse(r); } catch { return {}; } }
-  return r;
-}
-
-function collectFsArtifacts() {
-  const scans = gs(); const arr = [];
-  scans.forEach(s => {
-    const res = extractResults(s);
-    const fs = res.fileSystem || {};
-    Object.keys(fs).forEach(cat => {
-      (fs[cat]||[]).forEach(item => {
-        arr.push({ ...item, category: cat, scanId: s.id, scanLabel: s.sessionId });
-      });
-    });
-  });
-  return arr;
-}
-
-function collectRegistryArtifacts() {
-  const scans = gs(); const arr = [];
-  scans.forEach(s => {
-    const res = extractResults(s);
-    const reg = res.registry || {};
-    Object.keys(reg).forEach(cat => {
-      (reg[cat]||[]).forEach(item => {
-        arr.push({ ...item, category: cat, scanId: s.id, scanLabel: s.sessionId });
-      });
-    });
-  });
-  return arr;
-}
-
-function collectProcesses() {
-  const scans = gs(); const arr = [];
-  scans.forEach(s => {
-    const res = extractResults(s);
-    (res.processes||[]).forEach(p => {
-      arr.push({ ...p, scanId: s.id, scanLabel: s.sessionId });
-    });
-  });
-  return arr;
-}
-
-function collectSecTools() {
-  const scans = gs(); const arr = [];
-  scans.forEach(s => {
-    const res = extractResults(s);
-    (res.securityTools||[]).forEach(t => {
-      arr.push({ ...t, scanId: s.id, scanLabel: s.sessionId });
-    });
-  });
-  return arr;
-}
-
-function collectArtifactAnalysis() {
-  const scans = gs(); const arr = [];
-  scans.forEach(s => {
-    const res = extractResults(s);
-    const aa = res.artifacts || {};
-    Object.keys(aa).forEach(cat => {
-      (aa[cat]||[]).forEach(item => {
-        arr.push({ ...item, category: cat, scanId: s.id, scanLabel: s.sessionId });
-      });
-    });
-  });
-  return arr;
-}
-
-function collectThreats() {
-  const scans = gs(); const arr = [];
-  scans.forEach(s => {
-    const res = extractResults(s);
-    (res.threatIndicators||[]).forEach(t => {
-      arr.push({ ...t, scanId: s.id, scanLabel: s.sessionId });
-    });
-  });
-  return arr;
-}
-
-function collectEventLogs() {
-  const scans = gs(); const arr = [];
-  scans.forEach(s => {
-    const res = extractResults(s);
-    const el = res.eventLogs || {};
-    Object.keys(el).forEach(logName => {
-      (el[logName]||[]).forEach(e => {
-        arr.push({ ...e, logName: logName, scanId: s.id, scanLabel: s.sessionId });
-      });
-    });
-  });
-  return arr;
-}
-
-function collectStrings() {
-  const scans = gs(); const arr = [];
-  const pats = [
-    { name: 'Email', regex: /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, type: 'email' },
-    { name: 'URL', regex: /https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&\/=]*)/g, type: 'url' },
-    { name: 'Domain', regex: /(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}/g, type: 'domain' },
-    { name: 'IPv4', regex: /\b(?:\d{1,3}\.){3}\d{1,3}\b/g, type: 'ipv4' },
-    { name: 'IPv6', regex: /\b(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}\b/g, type: 'ipv6' },
-    { name: 'Discord ID', regex: /\b\d{17,20}\b/g, type: 'discord_id' },
-    { name: 'Username', regex: /\b[a-zA-Z0-9_]{3,32}\b/g, type: 'username' }
-  ];
-  scans.forEach(s => {
-    const searchText = JSON.stringify(extractResults(s));
-    const seen = new Set();
-    pats.forEach(p => { p.regex.lastIndex = 0; let m; while ((m = p.regex.exec(searchText)) !== null) { const key = p.type + ':' + m[0]; if (!seen.has(key)) { seen.add(key); arr.push({ type: p.name, category: p.type, value: m[0], context: extractCtx(searchText, m.index), scanId: s.id, scanLabel: s.sessionId }); } } });
-  });
-  return arr;
-}
-
-function extractCtx(text, index, radius) {
-  radius = radius || 40;
-  const start = Math.max(0, index - radius);
-  const end = Math.min(text.length, index + radius);
-  let ctx = text.slice(start, end).replace(/\n/g, ' ');
-  if (start > 0) ctx = '...' + ctx;
-  if (end < text.length) ctx = ctx + '...';
-  return ctx;
-}
-
-function collectTimeline() {
-  const scans = gs(); const events = [];
-  scans.forEach(s => {
-    const res = extractResults(s);
-    const base = s.createdAt || s.scanDate || now();
-    events.push({ timestamp: base, type: 'scan', category: 'System', description: 'Scan started on ' + (s.hostname||'unknown'), severity: 'info', scanLabel: s.sessionId });
-    const fs = res.fileSystem || {};
-    Object.keys(fs).forEach(cat => { (fs[cat]||[]).forEach(item => { if (item.timestamp) events.push({ timestamp: item.timestamp, type: 'file', category: 'File System - ' + cat, description: (item.path||'Unknown'), severity: 'info', scanLabel: s.sessionId }); }); });
-    const reg = res.registry || {};
-    Object.keys(reg).forEach(cat => { (reg[cat]||[]).forEach(item => { if (item.timestamp) events.push({ timestamp: item.timestamp, type: 'registry', category: 'Registry - ' + cat, description: (item.key||item.path||'Unknown'), severity: 'info', scanLabel: s.sessionId }); }); });
-    (res.processes||[]).forEach(p => { if (p.timestamp) events.push({ timestamp: p.timestamp, type: 'process', category: 'Process', description: (p.name||p.process||'Unknown'), severity: p.exitCode && p.exitCode !== '0' ? 'warning' : 'info', scanLabel: s.sessionId }); });
-    const el = res.eventLogs || {};
-    Object.keys(el).forEach(logName => { (el[logName]||[]).forEach(e => { if (e.timestamp) events.push({ timestamp: e.timestamp, type: 'eventlog', category: 'Event Log - ' + logName, description: (e.source||'Unknown'), severity: (e.level||'info').toLowerCase(), scanLabel: s.sessionId }); }); });
-    (res.threatIndicators||[]).forEach(t => events.push({ timestamp: t.timestamp||base, type: 'threat', category: 'Threat', description: (t.indicator||t.name||'Unknown'), severity: (t.severity||'low').toLowerCase(), scanLabel: s.sessionId }));
-    (res.securityTools||[]).forEach(t => events.push({ timestamp: t.lastSeen||t.timestamp||base, type: 'tool', category: 'Security Tool', description: (t.name||'Unknown'), severity: 'info', scanLabel: s.sessionId }));
-  });
-  events.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-  return events;
-}
-
-function refreshDerivedData() {
-  _fsData = collectFsArtifacts();
-  _registryData = collectRegistryArtifacts();
-  _procData = collectProcesses();
-  _secToolsData = collectSecTools();
-  _artifactAnalysisData = collectArtifactAnalysis();
-  _threatData = collectThreats();
-  _eventLogData = collectEventLogs();
-  _stringData = collectStrings();
-  _timelineData = collectTimeline();
-}
-
-async function renderOverview() {
-  if (_apiAvail) await syncFromBot();
-  refreshDerivedData();
-  const s = gss(); const scans = gs(); const pins = gp();
-  const my = s.role === 'SUPER_ADMIN' ? scans : scans.filter(x => x.userId === s.userId);
-  document.getElementById('ovStatScans').textContent = my.length;
-  document.getElementById('ovStatSessions').textContent = pins.filter(p => p.status === 'active' || p.status === 'in_use').length;
-  document.getElementById('ovStatArtifacts').textContent = _artifactAnalysisData.length;
-  document.getElementById('ovStatIocs').textContent = my.reduce((a, x) => a + (x.iocsDetected || 0), 0);
-
-  const ra = document.getElementById('ovRecentScans');
-  if (!my.length) { ra.innerHTML = '<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><h4>No scans yet</h4><p>Results appear after the scanner runs</p></div>'; }
-  else {
-    ra.innerHTML = '<div style="display:flex;flex-direction:column;gap:8px">' + my.slice(0,5).map(x => '<div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid rgba(31,31,31,0.3)"><div style="width:32px;height:32px;border-radius:6px;background:var(--success-dim);display:flex;align-items:center;justify-content:center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:500">' + (x.sessionId||'N/A') + '</div><div class="text-muted" style="font-size:11px">' + (x.hostname||'') + ' � ' + (x.username||'') + ' � ' + (x.iocsDetected||0) + ' IOCs' + (x.schemaVersion ? ' � v' + x.schemaVersion : '') + '</div></div><span class="text-muted" style="font-size:11px">' + new Date(x.scanDate||x.createdAt).toLocaleDateString() + '</span><a style="cursor:pointer;font-size:12px;color:var(--primary)" onclick="navigate(\'detail\',\'' + x.id + '\')">Open</a></div>').join('') + '</div>';
-  }
-
-  const ds = document.getElementById('ovDetectionSummary');
-  if (!_threatData.length) { ds.innerHTML = '<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><h4>No detections</h4></div>'; }
-  else {
-    const critical = _threatData.filter(t => (t.severity||'').toUpperCase() === 'CRITICAL').length;
-    const high = _threatData.filter(t => (t.severity||'').toUpperCase() === 'HIGH').length;
-    const medium = _threatData.filter(t => (t.severity||'').toUpperCase() === 'MEDIUM').length;
-    const low = _threatData.filter(t => (t.severity||'').toUpperCase() === 'LOW').length;
-    ds.innerHTML = '<div style="display:flex;flex-direction:column;gap:12px">' +
-      '<div><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span><span class="severity-indicator critical"></span>Critical</span><span>' + critical + '</span></div><div class="risk-bar"><div class="bar critical" style="width:' + (critical/Math.max(1,_threatData.length)*100) + '%"></div></div></div>' +
-      '<div><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span><span class="severity-indicator high"></span>High</span><span>' + high + '</span></div><div class="risk-bar"><div class="bar high" style="width:' + (high/Math.max(1,_threatData.length)*100) + '%"></div></div></div>' +
-      '<div><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span><span class="severity-indicator medium"></span>Medium</span><span>' + medium + '</span></div><div class="risk-bar"><div class="bar medium" style="width:' + (medium/Math.max(1,_threatData.length)*100) + '%"></div></div></div>' +
-      '<div><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span><span class="severity-indicator low"></span>Low</span><span>' + low + '</span></div><div class="risk-bar"><div class="bar low" style="width:' + (low/Math.max(1,_threatData.length)*100) + '%"></div></div></div>' +
-      '<div style="margin-top:8px"><span class="text-muted text-sm">Total: ' + _threatData.length + ' indicators</span></div></div>';
-  }
-
-  const td = document.getElementById('ovToolsDetected');
-  if (!_secToolsData.length) { td.innerHTML = '<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><h4>No tools detected</h4></div>'; }
-  else {
-    td.innerHTML = '<div style="display:flex;flex-direction:column;gap:8px">' + _secToolsData.slice(0,8).map(t => '<div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid rgba(31,31,31,0.3)"><div style="width:28px;height:28px;border-radius:6px;background:var(--info-dim);display:flex;align-items:center;justify-content:center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--info)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><div style="flex:1;font-size:13px">' + (t.name||'Unknown') + '</div><span class="text-muted" style="font-size:11px">v' + (t.version||'?') + '</span></div>').join('') + '</div>';
-  }
-
-  const rd = document.getElementById('ovRiskDist');
-  if (!my.length) { rd.innerHTML = '<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><h4>No data</h4></div>'; }
-  else {
-    const withIocs = my.filter(x => (x.iocsDetected||0) > 0).length;
-    const highIoc = my.filter(x => (x.iocsDetected||0) >= 20).length;
-    const medIoc = my.filter(x => (x.iocsDetected||0) >= 5 && (x.iocsDetected||0) < 20).length;
-    const lowIoc = my.filter(x => (x.iocsDetected||0) > 0 && (x.iocsDetected||0) < 5).length;
-    rd.innerHTML = '<div style="display:flex;flex-direction:column;gap:12px">' +
-      '<div style="display:flex;align-items:center;justify-content:space-between;font-size:13px"><span>Scans with IOCs</span><span style="font-weight:700">' + withIocs + '/' + my.length + '</span></div>' +
-      '<div style="display:flex;align-items:center;justify-content:space-between;font-size:13px"><span><span class="severity-indicator high"></span>High IOC (20+)</span><span>' + highIoc + '</span></div>' +
-      '<div style="display:flex;align-items:center;justify-content:space-between;font-size:13px"><span><span class="severity-indicator medium"></span>Medium IOC (5-20)</span><span>' + medIoc + '</span></div>' +
-      '<div style="display:flex;align-items:center;justify-content:space-between;font-size:13px"><span><span class="severity-indicator low"></span>Low IOC (1-5)</span><span>' + lowIoc + '</span></div></div>';
-  }
-}
-
-function renderSessions() {
-  const pins = gp();
-  const search = document.getElementById('sessionSearch').value.toLowerCase();
-  const filter = document.getElementById('sessionFilter').value;
-  const f = pins.filter(x => {
-    if (search && !(x.sessionId||'').toLowerCase().includes(search) && !(x.pin||'').toLowerCase().includes(search)) return false;
-    if (filter && x.status !== filter) return false;
-    return true;
-  });
-  const tb = document.getElementById('sessionsTable'); const em = document.getElementById('sessionsEmpty');
-  if (!f.length) { tb.innerHTML = ''; em.style.display = 'block'; } else { em.style.display = 'none'; }
-  tb.innerHTML = f.map(x => '<tr><td style="font-family:monospace">' + (x.sessionId||'\u2014') + '</td><td style="font-family:monospace;font-weight:600;font-size:16px">' + x.pin + '</td><td><span class="badge ' + badgeClass(x.status) + '">' + x.status + '</span></td><td class="text-muted text-sm">' + new Date(x.createdAt).toLocaleDateString() + '</td><td class="text-muted text-sm">' + (x.usedAt ? new Date(x.usedAt).toLocaleDateString() : '\u2014') + '</td><td style="font-size:12px;max-width:120px;overflow:hidden;text-overflow:ellipsis">' + (x.notes||'\u2014') + '</td><td><div class="gap-2">' + (x.status==='active' ? '<button class="btn btn-sm btn-secondary" onclick="togglePin(\'' + x.pin + '\')">Deactivate</button>' : '') + '<button class="btn btn-sm btn-ghost" style="color:var(--danger)" onclick="deletePin(\'' + x.pin + '\')">Delete</button></div></td></tr>').join('');
-}
-
-async function renderScans() {
-  if (_apiAvail) await syncFromBot();
-  refreshDerivedData();
-  const s = gss(); const scans = gs();
-  const filtered = (s.role === 'SUPER_ADMIN' ? scans : scans.filter(x => x.userId === s.userId));
-  const search = document.getElementById('scanSearch').value.toLowerCase();
-  const filter = document.getElementById('scanFilter').value;
-  const iocFilter = document.getElementById('scanIocFilter').value;
-  const f = filtered.filter(x => {
-    if (search && !(x.sessionId||'').toLowerCase().includes(search) && !(x.pin||'').toLowerCase().includes(search) && !(x.hostname||'').toLowerCase().includes(search)) return false;
-    if (filter && x.status !== filter) return false;
-    const ioc = x.iocsDetected || 0;
-    if (iocFilter === '0' && ioc !== 0) return false;
-    if (iocFilter === '1-5' && (ioc < 1 || ioc > 5)) return false;
-    if (iocFilter === '5-20' && (ioc < 5 || ioc > 20)) return false;
-    if (iocFilter === '20+' && ioc < 20) return false;
-    return true;
-  });
-  const tb = document.getElementById('scansTable'); const em = document.getElementById('scansEmpty');
-  if (!f.length) { tb.innerHTML = ''; em.style.display = 'block'; } else { em.style.display = 'none'; }
-  tb.innerHTML = f.map(x => '<tr><td style="font-family:monospace;font-size:12px">' + (x.sessionId||'\u2014') + '</td><td style="font-family:monospace">' + x.pin + '</td><td>' + (x.hostname||'\u2014') + '</td><td>' + (x.username||'\u2014') + '</td><td class="text-muted text-sm">' + new Date(x.scanDate||x.createdAt).toLocaleDateString() + '</td><td class="text-muted text-sm">' + (x.duration ? x.duration + 's' : '\u2014') + '</td><td><span class="badge badge-purple">v' + (x.schemaVersion||'1.0') + '</span></td><td><span class="badge ' + badgeClass(x.status||'completed') + '">' + (x.status||'completed') + '</span></td><td><span class="badge ' + ((x.iocsDetected||0) >= 20 ? 'badge-HIGH' : (x.iocsDetected||0) >= 5 ? 'badge-MEDIUM' : 'badge-LOW') + '">' + (x.iocsDetected||0) + '</span></td><td>' + (x.evidenceCount||0) + '</td><td><a style="cursor:pointer;font-size:12px;color:var(--primary)" onclick="navigate(\'detail\',\'' + x.id + '\')">Open \u2192</a></td></tr>').join('');
-}
-
-function renderTimeline() {
-  refreshDerivedData();
-  const search = document.getElementById('tlSearch').value.toLowerCase();
-  const catFilter = document.getElementById('tlCategory').value;
-  const sevFilter = document.getElementById('tlSeverity').value;
-  const f = _timelineData.filter(x => {
-    if (search && !(x.description||'').toLowerCase().includes(search) && !(x.category||'').toLowerCase().includes(search)) return false;
-    if (catFilter && x.type !== catFilter && !(x.category||'').toLowerCase().includes(catFilter.toLowerCase())) return false;
-    if (sevFilter && x.severity !== sevFilter) return false;
-    return true;
-  });
-  const container = document.getElementById('timelineContainer');
-  if (!f.length) { container.innerHTML = '<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><h4>No timeline events</h4><p>Run scans to populate the timeline</p></div>'; return; }
-  container.innerHTML = '<div style="margin-bottom:8px"><span class="text-muted text-sm">' + f.length + ' events</span></div>' + f.slice(0,200).map(e => {
-    const dotColor = { critical:'var(--danger)', warning:'var(--warning)', info:'var(--info)', threat:'var(--danger)', file:'var(--success)', registry:'var(--info)', process:'var(--warning)', eventlog:'var(--info)', tool:'var(--purple)', scan:'var(--success)' };
-    const t = new Date(e.timestamp);
-    const timeStr = isNaN(t.getTime()) ? e.timestamp : t.toLocaleString();
-    return '<div class="tl-line"><div class="tl-time">' + timeStr + '</div><div class="tl-dot" style="background:' + (dotColor[e.type]||dotColor[e.severity]||'var(--text3)') + '"></div><div class="tl-content"><div class="tl-category">' + (e.category||e.type||'Event') + '</div><div class="tl-desc">' + (e.description||'') + '</div><div class="tl-detail">' + (e.scanLabel ? 'Scan: ' + e.scanLabel : '') + '</div></div></div>';
-  }).join('');
-}
-
-function renderProfile() {
-  const s = gss(); if (!s) return; const u = gu().find(x => x.id === s.userId); if (!u) return;
-  document.getElementById('profileFields').innerHTML = [
-    { i: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>', l: 'Username', v: u.username },
-    { i: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>', l: 'Email', v: u.email },
-    { i: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>', l: 'Role', v: u.role },
-  ].map(f => '<div style="display:flex;align-items:center;gap:12px"><div style="width:36px;height:36px;border-radius:8px;background:var(--bg4);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--text2)">' + f.i + '</div><div><div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;font-weight:600">' + f.l + '</div><div style="font-size:14px;font-weight:500">' + f.v + '</div></div></div>').join('');
-}
-
-function renderFilesystem() {
-  refreshDerivedData();
-  const search = document.getElementById('fsSearch').value.toLowerCase();
-  const filter = document.getElementById('fsFilter').value;
-  const f = _fsData.filter(x => {
-    if (search && !(x.path||'').toLowerCase().includes(search) && !(x.sha256||x.hash||'').toLowerCase().includes(search)) return false;
-    if (filter && x.category !== filter) return false;
-    return true;
-  });
-  const tb = document.getElementById('fsTable'); const em = document.getElementById('fsEmpty');
-  if (!f.length) { tb.innerHTML = ''; em.style.display = 'block'; } else { em.style.display = 'none'; }
-  tb.innerHTML = f.map(x => '<tr><td class="path-cell" title="' + (x.path||'') + '">' + (x.path||'\u2014') + '</td><td><span class="badge badge-info">' + (x.category||'\u2014') + '</span></td><td class="timestamp-cell">' + (x.timestamp||x.lastModified||'\u2014') + '</td><td class="hash-cell">' + ((x.sha256||x.hash||'').slice(0,16)||'\u2014') + '...</td><td class="text-muted">' + (x.size||'\u2014') + '</td><td>' + ((x.sha256||x.hash) ? '<button class="btn btn-sm btn-ghost" style="color:var(--info);font-size:11px" onclick="lookupVt(\'' + (x.sha256||x.hash) + '\')">VT</button>' : '\u2014') + '</td><td class="text-muted text-sm">' + (x.scanLabel||'\u2014') + '</td></tr>').join('');
-}
-
-function switchRegTab(tab) {
-  _activeRegTab = tab;
-  document.querySelectorAll('#pageRegistry .tab').forEach(t => t.classList.remove('active'));
-  document.querySelector('#pageRegistry .tab[data-tab="' + tab + '"]').classList.add('active');
-  renderRegistry(tab);
-}function renderRegistry(tab) {
-  refreshDerivedData();
-  const search = document.getElementById('regSearch').value.toLowerCase();
-  let f = _registryData.filter(x => x.category === tab);
-  if (search) f = f.filter(x => (x.key||x.path||'').toLowerCase().includes(search) || (x.value||'').toLowerCase().includes(search));
-  const tb = document.getElementById('registryTable'); const em = document.getElementById('registryEmpty');
-  if (!f.length) { tb.innerHTML = ''; em.style.display = 'block'; } else { em.style.display = 'none'; }
-  tb.innerHTML = f.map(x => '<tr><td class="key-cell" title="' + (x.key||x.path||'') + '">' + (x.key||x.path||'\u2014') + '</td><td style="font-family:monospace;font-size:12px">' + (x.value||'\u2014') + '</td><td class="timestamp-cell">' + (x.timestamp||'\u2014') + '</td><td class="text-muted text-sm">' + (x.user||'\u2014') + '</td></tr>').join('');
-}
-
-function renderEventLogs() {
-  refreshDerivedData();
-  const logFilter = document.getElementById('elLog').value;
-  const levelFilter = document.getElementById('elLevel').value;
-  const search = document.getElementById('elSearch').value.toLowerCase();
-  const f = _eventLogData.filter(x => {
-    if (logFilter && (x.logName||'').toLowerCase() !== logFilter) return false;
-    if (levelFilter && (x.level||'').toLowerCase() !== levelFilter) return false;
-    if (search && !(x.message||x.msg||'').toLowerCase().includes(search) && !(x.source||'').toLowerCase().includes(search)) return false;
-    return true;
-  });
-  const tb = document.getElementById('eventLogsTable'); const em = document.getElementById('eventLogsEmpty');
-  if (!f.length) { tb.innerHTML = ''; em.style.display = 'block'; } else { em.style.display = 'none'; }
-  tb.innerHTML = f.map(x => '<tr><td><span class="badge ' + badgeClass((x.level||'info').toUpperCase()) + '">' + (x.level||'INFO') + '</span></td><td>' + (x.logName||'\u2014') + '</td><td class="text-muted text-sm">' + (x.eventId||'\u2014') + '</td><td class="text-muted">' + (x.source||'\u2014') + '</td><td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + (x.message||x.msg||'\u2014') + '</td><td class="timestamp-cell">' + (x.timestamp||'\u2014') + '</td></tr>').join('');
-}
-
-function renderProcesses() {
-  refreshDerivedData();
-  const search = document.getElementById('procSearch').value.toLowerCase();
-  const f = _procData.filter(x => {
-    if (search && !(x.name||x.process||'').toLowerCase().includes(search) && !(x.commandLine||'').toLowerCase().includes(search)) return false;
-    return true;
-  });
-  const tb = document.getElementById('processesTable'); const em = document.getElementById('processesEmpty');
-  if (!f.length) { tb.innerHTML = ''; em.style.display = 'block'; } else { em.style.display = 'none'; }
-  tb.innerHTML = f.map(x => '<tr><td style="font-family:monospace;font-weight:500">' + (x.name||x.process||'\u2014') + '</td><td class="text-muted">' + (x.pid||'\u2014') + '</td><td class="text-muted">' + (x.user||'\u2014') + '</td><td style="max-width:250px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:monospace;font-size:12px">' + (x.commandLine||'\u2014') + '</td><td class="text-muted">' + (x.exitCode||'\u2014') + '</td><td class="timestamp-cell">' + (x.timestamp||'\u2014') + '</td><td class="text-muted text-sm">' + (x.scanLabel||'\u2014') + '</td></tr>').join('');
-}
-
-function switchStringTab(tab) {
-  _activeStringTab = tab;
-  document.querySelectorAll('#pageStrings .tab').forEach(t => t.classList.remove('active'));
-  document.querySelector('#pageStrings .tab[data-tab="' + tab + '"]').classList.add('active');
-  renderStrings(tab);
-}
-
-function renderStrings(tab) {
-  refreshDerivedData();
-  const f = tab === 'all' ? _stringData : _stringData.filter(x => x.category === tab);
-  const tb = document.getElementById('stringsTable'); const em = document.getElementById('stringsEmpty');
-  if (!f.length) { tb.innerHTML = ''; em.style.display = 'block'; } else { em.style.display = 'none'; }
-  tb.innerHTML = f.map(x => '<tr><td><span class="badge badge-blue">' + (x.type||x.category||'\u2014') + '</span></td><td class="string-match" title="' + (x.value||'') + '">' + (x.value||'\u2014') + '</td><td class="text-muted text-sm" style="max-width:250px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + (x.context||'\u2014') + '</td><td class="text-muted text-sm">' + (x.scanLabel||'\u2014') + '</td></tr>').join('');
-}
-
-function renderSecTools() {
-  refreshDerivedData();
-  const tb = document.getElementById('secToolsTable'); const em = document.getElementById('secToolsEmpty');
-  if (!_secToolsData.length) { tb.innerHTML = ''; em.style.display = 'block'; } else { em.style.display = 'none'; }
-  tb.innerHTML = _secToolsData.map(x => '<tr><td style="font-weight:500">' + (x.name||'\u2014') + '</td><td><span class="badge badge-blue">' + (x.category||'Security') + '</span></td><td class="text-muted">' + (x.version||'\u2014') + '</td><td class="path-cell" title="' + (x.path||'') + '">' + (x.path||'\u2014') + '</td><td><span class="badge ' + badgeClass(x.status||'installed') + '">' + (x.status||'installed') + '</span></td><td class="timestamp-cell">' + (x.lastSeen||'\u2014') + '</td><td class="text-muted text-sm">' + (x.scanLabel||'\u2014') + '</td></tr>').join('');
-}
-
-function switchArtifactTab(tab) {
-  document.querySelectorAll('#pageArtifacts .tab').forEach(t => t.classList.remove('active'));
-  document.querySelector('#pageArtifacts .tab[data-tab="' + tab + '"]').classList.add('active');
-  renderArtifactAnalysis(tab);
-}
-
-function renderArtifactAnalysis(tab) {
-  refreshDerivedData();
-  const f = _artifactAnalysisData.filter(x => x.category === tab);
-  const tb = document.getElementById('artifactsAnalysisTable'); const em = document.getElementById('artifactsAnalysisEmpty');
-  if (!f.length) { tb.innerHTML = ''; em.style.display = 'block'; } else { em.style.display = 'none'; }
-  tb.innerHTML = f.map(x => '<tr><td><span class="badge badge-info">' + (x.category||'\u2014') + '</span></td><td style="font-family:monospace;font-size:12px">' + (x.value||x.name||'\u2014') + '</td><td class="text-muted text-sm">' + (x.context||'\u2014') + '</td><td>' + severityDot(x.severity||'low') + '<span class="badge ' + badgeClass((x.severity||'low').toUpperCase()) + '">' + (x.severity||'LOW') + '</span></td><td class="text-muted text-sm">' + (x.scanLabel||'\u2014') + '</td></tr>').join('');
-}
-
-function renderThreats() {
-  refreshDerivedData();
-  const severityFilter = document.getElementById('threatSeverity').value;
-  const categoryFilter = document.getElementById('threatCategory').value;
-  const search = document.getElementById('threatSearch').value.toLowerCase();
-  const f = _threatData.filter(x => {
-    if (severityFilter && (x.severity||'').toUpperCase() !== severityFilter) return false;
-    if (categoryFilter && (x.category||'').toLowerCase() !== categoryFilter) return false;
-    if (search && !(x.indicator||x.name||'').toLowerCase().includes(search) && !(x.description||'').toLowerCase().includes(search)) return false;
-    return true;
-  });
-  const tb = document.getElementById('threatsTable'); const em = document.getElementById('threatsEmpty');
-  if (!f.length) { tb.innerHTML = ''; em.style.display = 'block'; } else { em.style.display = 'none'; }
-  tb.innerHTML = f.map(x => '<tr><td>' + severityDot(x.severity||'low') + '<span class="badge ' + badgeClass((x.severity||'low').toUpperCase()) + '">' + (x.severity||'LOW') + '</span></td><td><span class="badge badge-blue">' + (x.category||'\u2014') + '</span></td><td style="font-family:monospace;font-weight:500">' + (x.indicator||x.name||'\u2014') + '</td><td class="text-muted text-sm">' + (x.description||'\u2014') + '</td><td class="text-muted">' + (x.source||'\u2014') + '</td><td class="text-muted text-sm">' + (x.scanLabel||'\u2014') + '</td></tr>').join('');
-}
-
-function showDetail(id) {
-  const s = gss(); const scan = gs().find(x => x.id === id);
-  if (!scan) { showToast('Scan not found', 'error'); navigate('scans'); return; }
-  if (s.role !== 'SUPER_ADMIN' && scan.userId !== s.userId) { showToast('Access denied', 'error'); navigate('scans'); return; }
-  _currentScanDetail = scan;
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById('pageDetail').classList.add('active');
-  document.getElementById('pageTitle').textContent = 'Scan Report';
-  document.getElementById('detailId').textContent = (scan.sessionId||'') + ' \u00b7 ' + (scan.hostname||'');
-  document.getElementById('detailSessionLabel').textContent = scan.sessionId||'';
-  const badge = document.getElementById('detailStatusBadge'); badge.className = 'badge ' + badgeClass(scan.status||'completed'); badge.textContent = scan.status||'completed';
-  const si = scan.systemInfo || {};
-  document.getElementById('detailInfo').innerHTML = [
-    { l:'Session ID', v:scan.sessionId }, { l:'PIN', v:scan.pin }, { l:'Hostname', v:si.hostname||scan.hostname }, { l:'User', v:si.username||scan.username },
-    { l:'OS', v:si.osVersion||'\u2014' }, { l:'Scanner', v:si.scannerVersion||'\u2014' }, { l:'IP', v:si.ipAddress||'\u2014' }, { l:'MAC', v:si.macAddress||'\u2014' },
-    { l:'Duration', v:scan.duration?scan.duration+'s':'\u2014' }, { l:'Schema', v:'v'+(scan.schemaVersion||'1.0') }, { l:'IOCs', v:scan.iocsDetected || 0 }, { l:'Date', v:new Date(scan.scanDate||scan.createdAt).toLocaleDateString() }
-  ].map(i => '<div class="detail-item"><label>' + i.l + '</label><span>' + i.v + '</span></div>').join('');
-  const arts = scan.artifacts||[];
-  document.getElementById('artifactsTable').innerHTML = arts.length ? arts.map(a => '<tr><td>' + a.name + '</td><td><span class="badge badge-info">' + (a.type||'\u2014') + '</span></td><td class="text-muted text-sm">' + (a.source||'\u2014') + '</td><td class="hash-cell">' + ((a.hash||'').slice(0,16)||'\u2014') + '...</td><td>' + (a.hash ? '<button class="btn btn-sm btn-ghost" style="color:var(--info);font-size:11px" onclick="lookupVt(\'' + a.hash + '\')">VT</button>' : '\u2014') + '</td></tr>').join('') : '<tr><td colspan="5" class="text-muted" style="text-align:center;padding:24px">No artifacts</td></tr>';
-  const iocs = scan.iocs||[];
-  document.getElementById('iocTable').innerHTML = iocs.length ? iocs.map(i => '<tr><td>' + i.name + '</td><td style="font-family:monospace;font-size:12px">' + i.value + '</td><td><span class="badge badge-info">' + (i.type||'\u2014') + '</span></td><td>' + severityDot(i.riskLevel||'low') + '<span class="badge ' + badgeClass((i.riskLevel||'low').toUpperCase()) + '">' + (i.riskLevel||'\u2014') + '</span></td></tr>').join('') : '<tr><td colspan="4" class="text-muted" style="text-align:center;padding:24px">No IOCs</td></tr>';
-  const evs = scan.evidence||[];
-  document.getElementById('evidenceTable').innerHTML = evs.length ? evs.map(e => '<tr><td>' + e.name + '</td><td class="text-muted text-sm">' + (e.description||'') + '</td><td>' + (e.source||'\u2014') + '</td><td>' + (e.size||'\u2014') + '</td></tr>').join('') : '<tr><td colspan="4" class="text-muted" style="text-align:center;padding:24px">No evidence</td></tr>';
-  const logD = scan.logs||[]; const lc = document.getElementById('logsContainer');
-  if (!logD.length) { lc.innerHTML = '<div class="text-muted" style="text-align:center;padding:24px">No logs</div>'; }
-  else { lc.innerHTML = logD.map(l => { const t = new Date(l.time); return '<div class="log-line"><span class="time">[' + t.getHours().toString().padStart(2,'0') + ':' + t.getMinutes().toString().padStart(2,'0') + ':' + t.getSeconds().toString().padStart(2,'0') + ']</span><span class="level-' + l.level + '">[' + (l.level||'INFO').toUpperCase() + ']</span> ' + l.msg + '</div>'; }).join(''); }
-}
-
-function viewRawJson() {
-  if (!_currentScanDetail) return;
-  document.getElementById('jsonModalTitle').textContent = _currentScanDetail.sessionId || 'Scan';
-  document.getElementById('jsonModalContent').textContent = JSON.stringify(_currentScanDetail, null, 2);
-  document.getElementById('jsonModal').classList.add('show');
-}
-
-function closeJsonModal() { document.getElementById('jsonModal').classList.remove('show'); }
-
-function switchDetailTab(tab) {
-  document.querySelectorAll('#pageDetail .tab-content').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('#pageDetail .tab').forEach(t => t.classList.remove('active'));
-  document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('active');
-  document.querySelector('#pageDetail .tab[data-tab="' + tab + '"]').classList.add('active');
-}
-
-async function lookupVt(hash) {
-  if (!hash) { showToast('No hash to look up', 'error'); return; }
-  document.getElementById('vtModalHash').textContent = hash;
-  document.getElementById('vtModalBody').innerHTML = '<div class="empty-state"><p>Looking up hash on VirusTotal...</p></div>';
-  document.getElementById('vtModal').classList.add('show');
-  if (_vtCache[hash]) { renderVtResult(hash, _vtCache[hash]); return; }
-  const result = await apiGet('virustotal/' + hash);
-  if (!result) { document.getElementById('vtModalBody').innerHTML = '<div class="empty-state"><h4>Lookup failed</h4><p>VirusTotal API key may not be configured on the server. Set VIRUSTOTAL_API_KEY env var.</p></div>'; return; }
-  _vtCache[hash] = result;
-  renderVtResult(hash, result);
-}
-
-function renderVtResult(hash, data) {
-  if (!data.found) { document.getElementById('vtModalBody').innerHTML = '<div class="empty-state"><h4>Hash not found</h4><p>' + hash + ' was not found in VirusTotal database.</p></div>'; return; }
-  const total = data.total || 0;
-  const malPct = total > 0 ? Math.round(data.malicious / total * 100) : 0;
-  const scoreColor = data.malicious > 0 ? 'var(--danger)' : (data.suspicious > 0 ? 'var(--warning)' : 'var(--success)');
-  const verdict = data.malicious > 0 ? 'MALICIOUS' : (data.suspicious > 0 ? 'SUSPICIOUS' : 'CLEAN');
-  document.getElementById('vtModalBody').innerHTML = '<div style="display:flex;flex-direction:column;gap:16px">' +
-    '<div style="display:flex;align-items:center;gap:16px"><div style="text-align:center"><div style="font-size:36px;font-weight:700;color:' + scoreColor + '">' + malPct + '%</div><div class="text-muted text-sm">Malicious</div></div>' +
-    '<div style="flex:1"><div class="vt-score" style="margin-bottom:8px"><span class="vt-mal">\u25a0 ' + data.malicious + '</span> malicious \u00b7 <span class="vt-sus">\u25a0 ' + data.suspicious + '</span> suspicious \u00b7 <span class="vt-clean">\u25a0 ' + data.harmless + '</span> harmless</div>' +
-    '<div><span class="badge ' + (data.malicious > 0 ? 'badge-CRITICAL' : data.suspicious > 0 ? 'badge-MEDIUM' : 'badge-LOW') + '" style="font-size:13px">' + verdict + '</span></div></div></div>' +
-    (data.meaningful_name ? '<div><span class="text-muted text-sm">File: </span><span>' + data.meaningful_name + '</span></div>' : '') +
-    (data.type_description ? '<div><span class="text-muted text-sm">Type: </span><span>' + data.type_description + '</span></div>' : '') +
-    (data.tags && data.tags.length ? '<div><span class="text-muted text-sm">Tags: </span>' + data.tags.map(t => '<span class="badge badge-blue" style="margin-right:4px">' + t + '</span>').join('') + '</div>' : '') +
-    (data.last_analysis_date ? '<div><span class="text-muted text-sm">Last analysis: </span><span>' + data.last_analysis_date + '</span></div>' : '') +
-    (data.permalink ? '<div><a href="' + data.permalink + '" target="_blank" class="btn btn-sm btn-secondary" style="display:inline-flex">Open in VirusTotal \u2197</a></div>' : '') +
-    '</div>';
-}
-
-function getNextSessionId() {
-  const pins = gp();
-  let max = 0;
-  pins.forEach(p => { const m = p.sessionId && p.sessionId.match(/MCK-(\d+)/); if (m) { const n = parseInt(m[1]); if (n > max) max = n; } });
-  const scans = gs();
-  scans.forEach(s => { const m = s.sessionId && s.sessionId.match(/MCK-(\d+)/); if (m) { const n = parseInt(m[1]); if (n > max) max = n; } });
-  return 'MCK-' + String(max + 1).padStart(3, '0');
-}
-
-async function generatePin() {
-  const notes = document.getElementById('pinNotes').value.trim();
-  const r = document.getElementById('pinGenerateResult'); r.style.display = 'block';
-  if (_apiAvail) {
-    const result = await apiPost('pins', { notes });
-    if (!result || !result.pin) { r.innerHTML = '<div style="background:var(--danger-dim);border:1px solid rgba(239,68,68,0.2);border-radius:var(--radius);padding:12px 16px;color:var(--danger);font-size:13px">Failed to create PIN.</div>'; return; }
-    await syncFromBot();
-    document.getElementById('pinNotes').value = '';
-    r.innerHTML = '<div style="background:var(--success-dim);border:1px solid rgba(34,197,94,0.2);border-radius:var(--radius);padding:12px 16px"><div style="font-size:12px;color:var(--success);font-weight:600;margin-bottom:4px">PIN Created</div><div style="display:flex;gap:16px;font-size:13px"><span><span class="text-muted">PIN:</span> <strong style="font-family:monospace;font-size:18px">' + result.pin + '</strong></span><span><span class="text-muted">Session:</span> <strong style="font-family:monospace">' + result.sessionId + '</strong></span></div></div>';
-    showToast('PIN ' + result.pin + ' \u2014 Session ' + result.sessionId, 'success');
-  } else { r.innerHTML = '<div style="background:var(--warning-dim);border:1px solid rgba(245,158,11,0.2);border-radius:var(--radius);padding:12px 16px;color:var(--warning);font-size:13px">Server not connected.</div>'; }
-  renderPinsTable();
-}
-
-function switchAdminTab(tab) {
-  document.querySelectorAll('#pageAdmin .tab-content').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('#pageAdmin .tab').forEach(t => t.classList.remove('active'));
-  document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('active');
-  document.querySelector('#pageAdmin .tab[data-tab="' + tab + '"]').classList.add('active');
-  if (tab === 'pins') renderPinsTable();
-}
-
-function renderPinsTable() {
-  const pins = gp(); const tb = document.getElementById('pinsTable'); const em = document.getElementById('pinsEmpty');
-  document.getElementById('pinCount').textContent = pins.length + ' total';
-  if (!pins.length) { tb.innerHTML = ''; em.style.display = 'block'; return; }
-  em.style.display = 'none';
-  tb.innerHTML = pins.map(p => '<tr><td style="font-family:monospace;font-weight:600;font-size:16px">' + p.pin + '</td><td style="font-family:monospace">' + p.sessionId + '</td><td><span class="badge ' + badgeClass(p.status) + '">' + p.status + '</span></td><td class="text-sm">' + new Date(p.createdAt).toLocaleDateString() + '</td><td style="font-size:12px;max-width:120px;overflow:hidden;text-overflow:ellipsis">' + (p.notes||'\u2014') + '</td><td><div class="gap-2">' + (p.status==='active' ? '<button class="btn btn-sm btn-secondary" onclick="togglePin(\'' + p.pin + '\')">Deactivate</button>' : '') + '<button class="btn btn-sm btn-ghost" style="color:var(--danger)" onclick="deletePin(\'' + p.pin + '\')">Delete</button></div></td></tr>').join('');
-}
-
-async function togglePin(pin) {
-  if (_apiAvail) { const result = await apiPut('pins/status', { pin, status: 'deactivated' }); if (result) { await syncFromBot(); showToast('PIN ' + pin + ' deactivated', 'success'); } else { showToast('Failed', 'error'); } }
-  else { showToast('Server not connected.', 'error'); }
-  renderPinsTable();
-}
-
-async function deletePin(pin) {
-  if (!confirm('Deactivate PIN ' + pin + '?')) return;
-  if (_apiAvail) { const result = await apiDelete('pins/' + pin); if (result) { await syncFromBot(); showToast('PIN ' + pin + ' deactivated', 'success'); } else { showToast('Failed', 'error'); } }
-  else { showToast('Server not connected.', 'error'); }
-  renderPinsTable();
-}
-
-function exportJSON(type) {
-  let json, filename;
-  const pins = gp(); const scans = gs();
-  if (type === 'report') {
-    let report = '# ForensicAnalyzer Report\n\n';
-    report += '## Overview\n';
-    report += '- Total Scans: ' + scans.length + '\n';
-    report += '- Active Sessions: ' + pins.filter(p => p.status === 'active').length + '\n';
-    report += '- Total IOCs: ' + scans.reduce((a, s) => a + (s.iocsDetected || 0), 0) + '\n';
-    report += '- Total Artifacts: ' + _artifactAnalysisData.length + '\n';
-    report += '- Schema Version: ' + (scans.find(s => s.schemaVersion)?.schemaVersion || '1.0') + '\n\n';
-    report += '## Recent Scans\n';
-    scans.slice(-5).reverse().forEach(s => { report += '- ' + (s.sessionId||'N/A') + ' | ' + (s.hostname||'') + ' | ' + (s.iocsDetected||0) + ' IOCs | v' + (s.schemaVersion||'1.0') + ' | ' + new Date(s.scanDate||s.createdAt).toLocaleDateString() + '\n'; });
-    report += '\n## Threat Indicators\n';
-    _threatData.forEach(t => { report += '- [' + (t.severity||'LOW') + '] ' + (t.indicator||t.name||'') + ': ' + (t.description||'') + '\n'; });
-    report += '\n## String Analysis\n';
-    _stringData.slice(0,30).forEach(s => { report += '- [' + (s.type||'unknown') + '] ' + s.value + '\n'; });
-    report += '\n## Timeline Events\n';
-    _timelineData.slice(0,30).forEach(e => { report += '- [' + e.timestamp + '] ' + (e.category||'') + ': ' + (e.description||'') + '\n'; });
-    const blob = new Blob([report], { type: 'text/markdown' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a'); a.href = url; a.download = 'forensic-report.md'; a.click();
-    URL.revokeObjectURL(url);
-    showToast('Report generated', 'success');
-    return;
-  }
-  if (type === 'timeline') {
-    json = JSON.stringify({ timeline: _timelineData.slice(0,500) }, null, 2);
-    filename = 'timeline.json';
-  }
-  if (type === 'pins') { json = JSON.stringify({ pins: pins.map(p => ({ pin: p.pin, sessionId: p.sessionId, status: p.status, createdBy: p.createdBy || 'tonch', createdAt: p.createdAt.split('T')[0] })) }, null, 2); filename = 'pins.json'; }
-  if (type === 'scans') { json = JSON.stringify({ scans: scans.map(s => ({ sessionId: s.sessionId, pin: s.pin, hostname: s.hostname, username: s.username, scanDate: s.scanDate || s.createdAt, iocsDetected: s.iocsDetected || 0, evidenceCount: s.evidenceCount || 0, status: s.status || 'completed', duration: s.duration || 0, schemaVersion: s.schemaVersion || '1.0' })) }, null, 2); filename = 'scans.json'; }
-  if (!json) return;
-  const blob = new Blob([json], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a'); a.href = url; a.download = filename; a.click();
-  URL.revokeObjectURL(url);
-  document.getElementById('exportCode').textContent = json.slice(0, 2000) + '\n\n... (truncated)';
-  document.getElementById('exportPreview').style.display = 'block';
-  showToast('Downloaded ' + filename, 'success');
-}
-
-function handleImportFile(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = function(e) { document.getElementById('importJsonInput').value = e.target.result; showToast('File loaded', 'success'); };
-  reader.readAsText(file);
-  event.target.value = '';
-}
-
-async function importScan() {
-  const raw = document.getElementById('importJsonInput').value.trim();
-  if (!raw) { showToast('Paste JSON first', 'error'); return; }
-  let data;
-  try { data = JSON.parse(raw); } catch(e) { showToast('Invalid JSON', 'error'); return; }
-  const r = document.getElementById('importResult'); r.style.display = 'block';
-  const scanArr = Array.isArray(data) ? data : (data.scans ? data.scans : [data]);
-  let imported = 0;
-  for (const s of scanArr) {
-    if (!s.sessionId && !s.pin) continue;
-    const payload = { sessionId: s.sessionId || 'UNKNOWN', pin: s.pin || '????', hostname: s.hostname || '', username: s.username || '', scanDate: s.scanDate || now(), status: s.status || 'completed', iocsDetected: s.iocsDetected || 0, evidenceCount: s.evidenceCount || 0, duration: s.duration || 0, artifacts: s.artifacts || [], iocs: s.iocs || [], evidence: s.evidence || [], schemaVersion: s.schemaVersion || '2.0' };
-    if (_apiAvail) { const result = await apiPost('upload-scan', payload); if (result && result.success) imported++; }
-    else { const scans = gs(); scans.push({ id: uid(), ...payload, userId: gss() ? gss().userId : null, logs: [], results: {}, systemInfo: {} }); ss(scans); imported++; }
-  }
-  if (_apiAvail) await syncFromBot();
-  r.innerHTML = '<div style="background:var(--success-dim);border:1px solid rgba(34,197,94,0.2);border-radius:var(--radius);padding:12px 16px"><div style="font-size:13px;font-weight:600;color:var(--success)">\u2713 Imported ' + imported + ' scan(s)</div></div>';
-  document.getElementById('importJsonInput').value = '';
-  showToast('Imported ' + imported + ' scan(s)', 'success');
-}
-
-document.addEventListener('click', function(e) {
-  if (e.target.classList.contains('modal-overlay')) closeJsonModal();
-});
-
-console.log('ForensicAnalyzer DFIR Console v2.0 \u2014 mickyac.netlify.app');
+</div>
+
+<div class="modal-overlay" id="rawModal">
+  <div class="modal" style="max-width:1100px">
+    <div class="modal-header"><h3>Raw JSON</h3><button class="modal-close" onclick="closeModal('rawModal')">?</button></div>
+    <div class="modal-body" id="rawModalBody">
+      <div class="gap-2 mb-4"><button class="btn btn-secondary btn-sm" onclick="copyRawJson()">Copy</button><button class="btn btn-secondary btn-sm" onclick="downloadRawJson()">Download</button></div>
+      <pre class="code-block" id="rawJsonPre"></pre>
+    </div>
+  </div>
+</div>
+
+<script>const API = '/api';
+let forensicData = [];
+let authPins = JSON.parse(localStorage.getItem('authPins') || '{}');
+let loggedInUser = JSON.parse(localStorage.getItem('loggedInUser') || 'null');
+let dashboardCache = null;
+let liveScanRunning = false;
+let currentPage = 'overview';
+let rawJsonForCopy = '';
+
+function toast(msg, type = 'info'){const t=document.getElementById('toast');const icon=t.querySelector('#toastIcon');const text=t.querySelector('#toastMsg');t.className='toast '+type;icon.innerHTML={success:'<svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"20 6 9 17 4 12\"/></svg>',error:'<svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><circle cx=\"12\" cy=\"12\" r=\"10\"/><line x1=\"15\" y1=\"9\" x2=\"9\" y2=\"15\"/><line x1=\"9\" y1=\"9\" x2=\"15\" y2=\"15\"/></svg>',info:'<svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><circle cx=\"12\" cy=\"12\" r=\"10\"/><line x1=\"12\" y1=\"16\" x2=\"12\" y2=\"12\"/><line x1=\"12\" y1=\"8\" x2=\"12.01\" y2=\"8\"/></svg>'}[type]||'';text.textContent=msg;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),3500)}
+
+function showLogin(){document.getElementById('loginForm').style.display='block';document.getElementById('registerForm').style.display='none';document.getElementById('authError').classList.remove('show')}
+function showRegister(){document.getElementById('loginForm').style.display='none';document.getElementById('registerForm').style.display='block';document.getElementById('authError').classList.remove('show')}
+
+function updateUserBadge(){if(loggedInUser){const u=loggedInUser;document.getElementById('userName').textContent=u.username||'user';document.getElementById('userAvatar').textContent=(u.username||'U')[0].toUpperCase();document.getElementById('setUsername').textContent=u.username||'—';document.getElementById('setPin').textContent=u.pin||'—';document.getElementById('setRole').textContent=u.role||'analyst'}}
+
+function attemptLogin(){const pin=document.getElementById('loginPin').value.trim();const err=document.getElementById('authError');if(!pin){err.textContent='Please enter a PIN';err.classList.add('show');return}
+fetch(API+'/validate-pin',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pin})}).then(r=>{if(!r.ok){if(r.status===404)throw new Error('PIN not found. Please register.');throw new Error('Server error '+r.status)}return r.json()}).then(data=>{let users=authPins;if(data&&data.username){users[pin]=data}localStorage.setItem('authPins',JSON.stringify(users));loggedInUser=users[pin];loggedInUser.pin=pin;localStorage.setItem('loggedInUser',JSON.stringify(loggedInUser));initApp()}).catch(e=>{err.textContent=e.message;err.classList.add('show')})}
+
+function attemptRegister(){const user=document.getElementById('regUser').value.trim();const p1=document.getElementById('regPin').value;const p2=document.getElementById('regPin2').value;const err=document.getElementById('authError');if(!user||!p1){err.textContent='Please fill in all fields';err.classList.add('show');return}if(p1!==p2){err.textContent='PINs do not match';err.classList.add('show');return}if(p1.length<6){err.textContent='PIN must be at least 6 characters';err.classList.add('show');return}
+let users=authPins;if(users[p1]){err.textContent='PIN already registered. Try logging in.';err.classList.add('show');return}
+const userData={username:user,role:'analyst',created:new Date().toISOString(),lastLogin:new Date().toISOString()};users[p1]=userData;localStorage.setItem('authPins',JSON.stringify(users));loggedInUser=userData;loggedInUser.pin=p1;localStorage.setItem('loggedInUser',JSON.stringify(loggedInUser));toast('Registration successful','success');initApp()}
+
+function handleLogout(){loggedInUser=null;localStorage.removeItem('loggedInUser');document.getElementById('appLayout').classList.remove('active');document.getElementById('authScreen').style.display='flex';document.getElementById('loginPin').value='';document.getElementById('authError').classList.remove('show');showLogin()}
+
+function navigate(page){currentPage=page;document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById('page-'+page)?.classList.add('active');document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));document.querySelector(`.nav-item[data-page="${page}"]`)?.classList.add('active');const titles={overview:'Dashboard Overview',scans:'Scan Results',live:'Live Scanner',timeline:'Forensic Timeline',registry:'Windows Registry Forensics',artifacts:'Forensic Artifacts',strings:'String Analysis',virustotal:'VirusTotal Intelligence',admin:'Administration Panel',settings:'Settings'};document.getElementById('pageTitle').textContent=titles[page]||page;document.querySelector('.search-bar').style.display=page==='scans'?'block':'none';if(page==='overview')renderOverview();if(page==='scans')renderScans();if(page==='live')renderLive();if(page==='timeline')renderTimeline();if(page==='registry')renderRegistry();if(page==='artifacts')renderArtifacts();if(page==='admin')renderAdmin()}
+
+function closeModal(id){document.getElementById(id).classList.remove('show')}
+
+function renderLive(){const el=document.getElementById('liveStats');if(!el)return;const total=forensicData.length;const regTotal=forensicData.reduce((a,s)=>a+(s.registry?.length||0),0);const artTotal=forensicData.reduce((a,s)=>a+(s.artifacts?.length||0),0);const strTotal=forensicData.reduce((a,s)=>a+(s.strings?.length||0),0);el.innerHTML='<div class="stat-card"><div class="stat-icon" style="background:var(--primary-dim);color:var(--primary)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div><div class="stat-label">Scans in DB</div><div class="stat-value">'+total+'</div><div class="stat-sub">submitted via API</div></div><div class="stat-card"><div class="stat-icon" style="background:var(--info-dim);color:var(--info)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><div class="stat-label">Registry</div><div class="stat-value">'+regTotal+'</div><div class="stat-sub">total entries</div></div><div class="stat-card"><div class="stat-icon" style="background:var(--warning-dim);color:var(--warning)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/></svg></div><div class="stat-label">Artifacts</div><div class="stat-value">'+artTotal+'</div><div class="stat-sub">forensic objects</div></div><div class="stat-card"><div class="stat-icon" style="background:var(--success-dim);color:var(--success)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg></div><div class="stat-label">Strings</div><div class="stat-value">'+strTotal+'</div><div class="stat-sub">extracted IOCs</div></div>'}
+
+function toggleMobileSidebar(){document.getElementById('sidebar').classList.toggle('mobile-open');document.getElementById('sidebarOverlay').classList.toggle('show')}function syncFromServer(){toast('Syncing from server...','info');fetch(API+'/dashboard').then(r=>r.json()).then(d=>{dashboardCache=d;if(d.scans)forensicData=d.scans;localStorage.setItem('forensicCache',JSON.stringify(forensicData));localStorage.setItem('dashboardCache',JSON.stringify(d));toast('Sync complete: '+forensicData.length+' scans','success');renderOverview();renderAdmin()}).catch(e=>{toast('Sync failed: '+e.message,'error')})}
+
+function syncFromBot(data){if(!data||!data.scans)return;forensicData=data.scans;dashboardCache=data;localStorage.setItem('forensicCache',JSON.stringify(forensicData));localStorage.setItem('dashboardCache',JSON.stringify(data));if(currentPage==='overview')renderOverview()}
+
+function getScanSeverity(scan){if(scan.severity)return scan.severity;if(scan.registry?.length>20||scan.artifacts?.length>20)return'high';if(scan.registry?.length>10||scan.artifacts?.length>10)return'medium';return'low'}
+function getScanStatus(scan){return scan.status||'completed'}
+function getHostname(scan){return scan.hostname||scan.host||'unknown'}
+function getUsername(scan){return scan.username||scan.user||'unknown'}
+function getOs(scan){return scan.os||scan.platform||'unknown'}
+
+function logAdd(containerId,msg,level='info'){const el=document.getElementById(containerId);if(!el)return;const d=new Date();const ts='['+d.toLocaleTimeString()+']';const line=document.createElement('div');line.className='log-line';line.innerHTML='<span class="time">'+ts+'</span><span class="level-'+level+'">'+level.toUpperCase()+'</span> '+msg;el.appendChild(line);el.scrollTop=el.scrollHeight}
+
+function renderOverview(){const el=document.getElementById('ovStats');if(!el)return;const regCount=forensicData.reduce((a,s)=>a+(s.registry?.length||0),0);const artCount=forensicData.reduce((a,s)=>a+(s.artifacts?.length||0),0);const strCount=forensicData.reduce((a,s)=>a+(s.strings?.length||s.extractedStrings?.length||0),0);const userCount=Object.keys(authPins).length;const critical=forensicData.filter(s=>getScanSeverity(s)==='critical'||getScanSeverity(s)==='high').length;const pending=forensicData.filter(s=>getScanStatus(s)==='pending'||getScanStatus(s)==='running').length
+el.innerHTML='<div class="stat-card"><div class="stat-icon" style="background:var(--primary-dim);color:var(--primary)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div><div class="stat-label">Total Scans</div><div class="stat-value">'+forensicData.length+'</div><div class="stat-sub">'+critical+' critical/high</div></div><div class="stat-card"><div class="stat-icon" style="background:var(--info-dim);color:var(--info)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><div class="stat-label">Registry Entries</div><div class="stat-value">'+regCount+'</div><div class="stat-sub">across all scans</div></div><div class="stat-card"><div class="stat-icon" style="background:var(--warning-dim);color:var(--warning)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/></svg></div><div class="stat-label">Artifacts</div><div class="stat-value">'+artCount+'</div><div class="stat-sub">'+strCount+' strings extracted</div></div><div class="stat-card"><div class="stat-icon" style="background:var(--success-dim);color:var(--success)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><div class="stat-label">Registered Users</div><div class="stat-value">'+userCount+'</div><div class="stat-sub">'+pending+' pending scans</div></div>'
+logAdd('ovLog','Dashboard initialized. '+forensicData.length+' scans loaded.','success')}
+
+function renderAdmin(){const users=Object.entries(authPins);document.getElementById('adminUserCount').textContent=users.length;const tbody=document.getElementById('adminUsersBody');if(!tbody)return;if(!users.length){tbody.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--text3);padding:28px">No registered users</td></tr>';return}
+tbody.innerHTML=users.map(([pin,u])=>{const created=u.created?new Date(u.created).toLocaleDateString():'—';const lastLogin=u.lastLogin?new Date(u.lastLogin).toLocaleDateString():'—';return '<tr><td><span style="font-weight:600">'+(u.username||'unknown')+'</span></td><td style="font-family:var(--font-mono);font-size:12px;color:var(--text3)">'+pin.slice(0,4)+'****</td><td><span class="badge '+(u.role==='admin'?'badge-purple':'badge-blue')+'">'+(u.role||'analyst')+'</span></td><td class="timestamp-cell">'+created+'</td><td class="timestamp-cell">'+lastLogin+'</td><td><button class="btn btn-xs btn-secondary" onclick="toast(\'Edit user: coming soon\',\'info\')">Edit</button></td></tr>'}).join('');document.getElementById('adminTotalScans').textContent=forensicData.length;document.getElementById('adminSchemaVer').textContent=dashboardCache?.schemaVersion||'—';document.getElementById('adminStorage').textContent='LocalStorage + Server'}
+
+function clearLocalData(){if(!confirm('Clear all local forensic data? This cannot be undone.'))return;localStorage.removeItem('forensicCache');localStorage.removeItem('dashboardCache');forensicData=[];dashboardCache=null;toast('Local data cleared','success');renderOverview()}
+
+function exportAllData(){rawJsonForCopy=JSON.stringify({scans:forensicData,users:authPins,pins:Object.keys(authPins),exportedAt:new Date().toISOString()},null,2);document.getElementById('rawJsonPre').textContent=rawJsonForCopy;document.getElementById('rawModal').classList.add('show')}
+
+function copyRawJson(){navigator.clipboard?.writeText(rawJsonForCopy).then(()=>toast('Copied to clipboard','success')).catch(()=>toast('Copy failed','error'))}
+function downloadRawJson(){const blob=new Blob([rawJsonForCopy],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='forensic-export-'+(new Date().toISOString().slice(0,10))+'.json';a.click();URL.revokeObjectURL(a.href);toast('Download started','success')}function renderScans(){const tbody=document.getElementById('scansBody');if(!tbody)return;if(!forensicData.length){tbody.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:40px">No scans found. Sync from server or submit a scan.</td></tr>';return}
+const filt=document.getElementById('scansFilter')?.value?.toLowerCase()||'';const sevFilt=document.getElementById('scansSeverityFilter')?.value||'';const statFilt=document.getElementById('scansStatusFilter')?.value||''
+let filtered=forensicData.filter(s=>{const sev=getScanSeverity(s);const st=getScanStatus(s);if(sevFilt&&sev!==sevFilt)return false;if(statFilt&&st!==statFilt)return false;if(filt&&!JSON.stringify(s).toLowerCase().includes(filt))return false;return true})
+filtered.sort((a,b)=>new Date(b.timestamp||b.date||0)-new Date(a.timestamp||a.date||0))
+tbody.innerHTML=filtered.map(s=>{const sev=getScanSeverity(s);const st=getScanStatus(s);const ts=s.timestamp||s.date||'—';const host=getHostname(s);const user=getUsername(s);const os=getOs(s);return '<tr><td class="timestamp-cell">'+new Date(ts).toLocaleString()+'</td><td style="font-weight:500">'+host+'</td><td>'+user+'</td><td style="color:var(--text2);font-size:12px">'+os+'</td><td><span class="severity-indicator '+sev+'"></span><span class="badge badge-'+sev.toUpperCase()+'">'+sev+'</span></td><td><span class="badge '+(st==='completed'?'badge-completed':st==='running'?'badge-running':st==='pending'?'badge-pending':'badge-failed')+'">'+st+'</span></td><td><div class="gap-2"><button class="btn btn-xs btn-primary" onclick="openScanModal('+forensicData.indexOf(s)+')">View</button><button class="btn btn-xs btn-secondary" onclick="openRawJson('+forensicData.indexOf(s)+')">JSON</button></div></td></tr>'}).join('')}
+
+function filterScansTable(){renderScans()}
+
+function openRawJson(index){const s=forensicData[index];if(!s){toast('Scan not found','error');return}
+rawJsonForCopy=JSON.stringify(s,null,2);document.getElementById('rawJsonPre').textContent=rawJsonForCopy;document.getElementById('rawModal').classList.add('show')}
+
+function openScanModal(index){const s=forensicData[index];if(!s){toast('Scan not found','error');return}
+document.getElementById('scanModalTitle').textContent='Scan: '+getHostname(s);const body=document.getElementById('scanModalBody')
+const regCount=s.registry?.length||0;const artCount=s.artifacts?.length||0;const strCount=s.strings?.length||s.extractedStrings?.length||0
+body.innerHTML='<div class="detail-grid"><div class="detail-item"><label>Hostname</label><span>'+getHostname(s)+'</span></div><div class="detail-item"><label>User</label><span>'+getUsername(s)+'</span></div><div class="detail-item"><label>OS</label><span>'+getOs(s)+'</span></div><div class="detail-item"><label>Timestamp</label><span class="timestamp-cell">'+new Date(s.timestamp||s.date||'').toLocaleString()+'</span></div><div class="detail-item"><label>Severity</label><span><span class="severity-indicator '+getScanSeverity(s)+'"></span><span class="badge badge-'+getScanSeverity(s).toUpperCase()+'">'+getScanSeverity(s)+'</span></span></div><div class="detail-item"><label>Status</label><span class="badge badge-completed">'+getScanStatus(s)+'</span></div><div class="detail-item"><label>Registry</label><span style="font-weight:600">'+regCount+' entries</span></div><div class="detail-item"><label>Artifacts</label><span style="font-weight:600">'+artCount+' items</span></div><div class="detail-item"><label>Strings</label><span style="font-weight:600">'+strCount+' matches</span></div></div>'
+if(s.registry?.length){body.innerHTML+='<div class="section-divider"></div><h4 style="margin-bottom:10px;font-size:13px;color:var(--text2)">Registry Highlights</h4><div style="max-height:120px;overflow-y:auto"><table><thead><tr><th>Key</th><th>Value</th></tr></thead><tbody>'+s.registry.slice(0,20).map(r=>'<tr><td class="key-cell">'+(r.key||r.path||r.name||'')+'</td><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px">'+(r.value||'')+'</td></tr>').join('')+'</tbody></table></div>'}
+if(s.artifacts?.length){body.innerHTML+='<div class="section-divider"></div><h4 style="margin-bottom:10px;font-size:13px;color:var(--text2)">Artifact Samples</h4><div style="max-height:120px;overflow-y:auto"><table><thead><tr><th>Type</th><th>Path</th></tr></thead><tbody>'+s.artifacts.slice(0,20).map(a=>'<tr><td><span class="badge '+(a.type==='file'?'badge-blue':a.type==='registry'?'badge-purple':'badge-info')+'">'+(a.type||'unknown')+'</span></td><td class="path-cell">'+(a.path||a.name||'')+'</td></tr>').join('')+'</tbody></table></div>'}
+document.getElementById('scanModal').classList.add('show')}
+
+function renderTimeline(){const el=document.getElementById('timelineContent');if(!el)return;const sevFilt=document.getElementById('tlSeverity')?.value||'';const catFilt=document.getElementById('tlCategory')?.value||'';const limit=parseInt(document.getElementById('tlLimit')?.value||200)
+let events=[];forensicData.forEach(scan=>{const base={ts:scan.timestamp||scan.date||new Date().toISOString(),host:getHostname(scan)};if(scan.registry)scan.registry.forEach(r=>{const sev=r.severity||'info';if(sevFilt&&sev!==sevFilt)return;if(catFilt&&catFilt!=='registry')return;events.push({ts:base.ts,host:base.host,category:'registry',severity:sev,desc:'Registry: '+(r.key||r.path||r.name||''),detail:r.value||''})});if(scan.artifacts)scan.artifacts.forEach(a=>{const sev=a.severity||'info';if(sevFilt&&sev!==sevFilt)return;const cat=a.type||'filesystem';if(catFilt&&catFilt!==cat&&catFilt!=='filesystem')return;events.push({ts:base.ts,host:base.host,category:cat,severity:sev,desc:'Artifact: '+(a.path||a.name||''),detail:a.type||''})});if(scan.strings)scan.strings.forEach(str=>{if(sevFilt&&sevFilt!=='info')return;if(catFilt&&catFilt!=='ioc')return;events.push({ts:base.ts,host:base.host,category:'ioc',severity:'info',desc:'String: '+(str.substring(0,80)||''),detail:''})})})
+if(!events.length){el.innerHTML='<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><h4>No events</h4><p>Timeline will populate after scans are submitted</p></div>';return}
+events.sort((a,b)=>new Date(b.ts)-new Date(a.ts));events=events.slice(0,limit)
+el.innerHTML='';events.forEach(e=>{const sev=e.severity||'info';const d=document.createElement('div');d.className='tl-line';d.innerHTML='<div class="tl-time">'+new Date(e.ts).toLocaleString()+'</div><div class="tl-dot" style="background:'+{critical:'var(--danger)',high:'#ff6b6b',medium:'var(--warning)',low:'var(--success)',info:'var(--info)'}[sev]+'"></div><div class="tl-content"><div class="tl-category" style="color:'+{critical:'var(--danger)',high:'#ff6b6b',medium:'var(--warning)',low:'var(--success)',info:'var(--info)'}[sev]+'">['+e.category.toUpperCase()+'] '+e.host+'</div><div class="tl-desc">'+e.desc+'</div>'+(e.detail?'<div class="tl-detail">'+e.detail+'</div>':'')+'</div>';el.appendChild(d)})}
+
+function refreshTimeline(){renderTimeline();toast('Timeline refreshed','success')}function getRegCategory(r){const k=(r.key||r.path||r.name||'').toLowerCase();if(k.includes('networklist')||k.includes('network list'))return'NetworkList';if(k.includes('network')&&(k.includes('card')||k.includes('adapter')))return'NetworkCards';if(k.includes('usb')||k.includes('portable')||k.includes('device'))return'USB';if(k.includes('rdp')||k.includes('remote')||k.includes('terminal'))return'RDP';if(k.includes('shimcache')||k.includes('appcompat'))return'ShimCache';if(k.includes('prefetch'))return'Prefetch';if(k.includes('amcache')||k.includes('am_cache'))return'AmCache';if(k.includes('userassist')||k.includes('user assist'))return'UserAssist';if(k.includes('archistory')||k.includes('arc_history')||k.includes('arc history'))return'ArcHistory';if(k.includes('cidsizemru')||k.includes('cid_size'))return'CIDSizeMRU';if(k.includes('store')&&(k.includes('microsoft')||k.includes('windows')))return'Store';if(k.includes('startmenu')||k.includes('start menu'))return'StartMenuInternet';if(k.includes('hkid')||k.includes('hklm')||k.includes('hkcu')||k.includes('hkey'))return'HKIDs';return'Other'}
+
+function renderRegistry(){const el=document.getElementById('registryContent');if(!el)return;const activeTab=document.querySelector('#registryTabs .tab.active')?.getAttribute('data-tab')||'reg-NetworkList'
+const entries=[];forensicData.forEach(s=>{if(s.registry)s.registry.forEach(r=>{entries.push(r)})})
+if(!entries.length){el.innerHTML='<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><h4>No registry data</h4><p>No registry entries found in cached scans</p></div>';return}
+const categorized={};entries.forEach(r=>{const cat=getRegCategory(r);if(!categorized[cat])categorized[cat]=[];categorized[cat].push(r)})
+const cats=['NetworkList','NetworkCards','USB','RDP','ShimCache','Prefetch','AmCache','UserAssist','ArcHistory','CIDSizeMRU','Store','StartMenuInternet','HKIDs','Other']
+el.innerHTML=cats.map(cat=>{const items=categorized[cat]||[];const tabId='reg-'+cat;const isActive=tabId===activeTab;return '<div class="tab-content'+(isActive?' active':'')+'" id="tab-'+tabId+'">'+(items.length?'<div class="table-wrap"><table><thead><tr><th>Key</th><th>Value</th><th>Source</th></tr></thead><tbody>'+items.map(r=>'<tr><td class="key-cell">'+(r.key||r.path||r.name||'')+'</td><td style="max-width:250px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px">'+(r.value||'')+'</td><td class="timestamp-cell">'+(r.source||r.host||'')+'</td></tr>').join('')+'</tbody></table></div>':'<div class="empty-state" style="padding:30px"><h4>No '+cat+' entries</h4></div>')+'</div>'}).join('');setupTabs('registryTabs','tab-')}
+
+function setupTabs(containerId,prefix){const container=document.getElementById(containerId);if(!container)return;container.querySelectorAll('.tab').forEach(tab=>{tab.onclick=function(){container.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));this.classList.add('active');const tabId=this.getAttribute('data-tab');document.querySelectorAll('[id^="'+prefix+'"]').forEach(c=>c.classList.remove('active'));const target=document.getElementById(prefix+tabId);if(target)target.classList.add('active')}})}
+
+function renderArtifacts(){const el=document.getElementById('artifactContent');if(!el)return;const activeTab=document.querySelector('#artifactTabs .tab.active')?.getAttribute('data-tab')||'art-files'
+const all=[];forensicData.forEach(s=>{if(s.artifacts)s.artifacts.forEach(a=>{all.push(a)})})
+if(!all.length){el.innerHTML='<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="12 2 2 7 12 12 22 7 12 2"/></svg><h4>No artifacts</h4><p>No forensic artifacts found in cached scans</p></div>';return}
+const cats={files:[],registry:[],processes:[],strings:[],eventlog:[],unicode:[],steganography:[],minecraft:[],feather:[],alts:[],velociraptor:[],shellbags:[],evtx:[],permissions:[]}
+all.forEach(a=>{const t=(a.type||'').toLowerCase();if(t.includes('file')||t==='filesystem')cats.files.push(a);else if(t.includes('registry'))cats.registry.push(a);else if(t.includes('process'))cats.processes.push(a);else if(t.includes('string'))cats.strings.push(a);else if(t.includes('event')||t.includes('log'))cats.eventlog.push(a);else if(t.includes('unicode'))cats.unicode.push(a);else if(t.includes('steg')||t.includes('image'))cats.steganography.push(a);else if(t.includes('minecraft')||t.includes('mc'))cats.minecraft.push(a);else if(t.includes('feather'))cats.feather.push(a);else if(t.includes('alt'))cats.alts.push(a);else if(t.includes('velociraptor'))cats.velociraptor.push(a);else if(t.includes('shellbag'))cats.shellbags.push(a);else if(t.includes('evtx'))cats.evtx.push(a);else if(t.includes('perm')||t.includes('ntfs'))cats.permissions.push(a);else cats.files.push(a)})
+const artKeys=Object.keys(cats);
+el.innerHTML=artKeys.map(key=>{const items=cats[key];const tabId='art-'+key;const isActive=tabId===activeTab;return '<div class="tab-content'+(isActive?' active':'')+'" id="tab-'+tabId+'">'+(items.length?'<div class="table-wrap"><table><thead><tr><th>Type</th><th>Path / Name</th><th>Source</th></tr></thead><tbody>'+items.map(a=>'<tr><td><span class="badge '+(a.type==='file'?'badge-blue':'badge-purple')+'">'+(a.type||'unknown')+'</span></td><td class="path-cell">'+(a.path||a.name||'')+'</td><td class="timestamp-cell">'+(a.source||a.host||'')+'</td></tr>').join('')+'</tbody></table></div>':'<div class="empty-state" style="padding:30px"><h4>No '+(key.charAt(0).toUpperCase()+key.slice(1))+' artifacts</h4></div>')+'</div>'}).join('');setupTabs('artifactTabs','tab-')}function analyzeStringsLocally(text){const patterns=[{name:'emails',re:/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g},{name:'urls',re:/(https?:\/\/[^\s"'<>\]]+)/gi},{name:'domains',re:/(?:(?:[a-zA-Z][a-zA-Z0-9-]*\.)+[a-zA-Z]{2,})(?:\/\S*)?/g},{name:'ipv4',re:/\b(?:(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\b/g},{name:'ipv6',re:/(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|(?:[0-9a-fA-F]{1,4}:){1,7}:|(?:[0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|(?:[0-9a-fA-F]{1,4}:){1,5}(?::[0-9a-fA-F]{1,4}){1,2}/g},{name:'discordIds',re:/(\d{17,19})/g},{name:'usernames',re:/(?:@|u\/)([a-zA-Z0-9_-]{2,32})/g}]
+const results={};let total=0;patterns.forEach(p=>{const matches=text.match(p.re)||[];const unique=[...new Set(matches)];results[p.name]=unique;total+=unique.length});return{results,total}}
+
+function analyzeStrings(){const text=document.getElementById('stringInput')?.value?.trim();const el=document.getElementById('stringContent');if(!text){if(el)el.innerHTML='<div class="empty-state" style="padding:30px"><h4>No input</h4><p>Paste text to analyze</p></div>';return}
+const{results,total}=analyzeStringsLocally(text);const activeTab=document.querySelector('#stringTabs .tab.active')?.getAttribute('data-tab')||'str-all'
+const cats=['all','emails','urls','domains','ipv4','ipv6','discordIds','usernames']
+if(el)el.innerHTML=cats.map(cat=>{let items=cat==='all'?[]:results[cat]||[];if(cat==='all'){cats.forEach(c=>{if(c!=='all')items=items.concat(results[c]||[])})}const tabId='str-'+cat;const isActive=tabId===activeTab;return '<div class="tab-content'+(isActive?' active':'')+'" id="tab-'+tabId+'">'+(items.length?'<div style="margin-bottom:8px;color:var(--text2);font-size:12px">Found <span style="color:var(--text);font-weight:600">'+items.length+'</span> '+(cat==='all'?'total matches':cat)+'</div><div class="table-wrap"><table><thead><tr><th>#</th><th>Match</th></tr></thead><tbody>'+items.map((m,i)=>'<tr><td style="color:var(--text3);width:40px">'+(i+1)+'</td><td><span class="string-match">'+m+'</span></td></tr>').join('')+'</tbody></table></div>':'<div class="empty-state" style="padding:30px"><h4>No '+(cat==='all'?'matches':cat)+' found</h4></div>')+'</div>'}).join('');setupTabs('stringTabs','tab-');toast('Found '+total+' matches','success')}
+
+function checkVTBulk(){const input=document.getElementById('vtInput')?.value?.trim();const el=document.getElementById('vtResults');if(!input){if(el)el.querySelector('.card-body').innerHTML='<div class="empty-state"><h4>No input</h4><p>Enter hashes to check</p></div>';return}
+const hashes=input.split('\n').map(h=>h.trim()).filter(h=>h.length>0&&/^[a-fA-F0-9]{32,64}$/.test(h));if(!hashes.length){toast('No valid hashes found (MD5/SHA1/SHA256)','error');return}
+if(hashes.length>10){toast('Maximum 10 hashes at a time','error');return}
+toast('Checking '+hashes.length+' hashes...','info');Promise.all(hashes.map(h=>fetch(API+'/virustotal/'+h).then(r=>r.json()).catch(()=>({hash:h,error:'Request failed'})))).then(results=>{if(el){el.innerHTML='<div class="card-body"><div class="table-wrap"><table><thead><tr><th>Hash</th><th>Score</th><th>Malicious</th><th>Suspicious</th><th>Details</th></tr></thead><tbody>'+results.map(r=>{const mal=r.malicious||0;const sus=r.suspicious||0;const total=r.total||0;const score=total>0?(mal/total*100).toFixed(0):'—';return '<tr><td class="hash-cell">'+(r.hash||'')+'</td><td><span class="vt-score'+(mal>0?' vt-mal':mal>0?' vt-sus':' vt-clean')+'">'+score+'%</span></td><td><span style="color:'+(mal>0?'var(--danger)':'var(--text3)')+'">'+mal+'</span></td><td><span style="color:'+(sus>0?'var(--warning)':'var(--text3)')+'">'+sus+'</span></td><td>'+(r.permalink?'<a href="'+r.permalink+'" target="_blank" class="btn btn-xs btn-primary">Open VT</a>':'<span class="text-muted">'+(r.error||'No data')+'</span>')+'</td></tr>'}).join('')+'</tbody></table></div></div>'}}).catch(e=>{toast('VT check failed: '+e.message,'error')})}
+
+function startLiveScan(){if(liveScanRunning){toast('Scan already running','warning');return}
+const host=document.getElementById('liveHost')?.value||'unknown';const user=document.getElementById('liveUser')?.value||'unknown';const os=document.getElementById('liveOs')?.value||'unknown';const jsonInput=document.getElementById('liveJsonInput')?.value?.trim()
+if(!jsonInput){toast('Enter forensic data in JSON field, or load a template','error');return}
+let parsed;try{parsed=JSON.parse(jsonInput)}catch(e){toast('Invalid JSON: '+e.message,'error');return}
+if(!loggedInUser||!loggedInUser.pin){toast('You must be logged in to submit scans','error');return}
+liveScanRunning=true;document.getElementById('liveStatusBadge').textContent='Submitting';document.getElementById('liveStatusBadge').className='card-badge badge-running'
+logAdd('liveLog','Building scan payload...','info')
+const payload={pin:loggedInUser.pin,sessionId:'MCK-LIVE-'+Date.now().toString(36).toUpperCase(),hostname:host,username:user,os:os,timestamp:new Date().toISOString(),schemaVersion:'2.0',...parsed};const totalItems=(parsed.registry?.length||0)+(parsed.artifacts?.length||0)+(parsed.strings?.length||0)+(parsed.processes?.length||0);payload.totalItems=totalItems
+logAdd('liveLog','Total items: '+totalItems,'info')
+logAdd('liveLog','Submitting to POST /api/upload-scan...','warn')
+fetch(API+'/upload-scan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}).then(r=>{if(!r.ok)throw new Error('API error: '+r.status);return r.json()}).then(data=>{liveScanRunning=false;document.getElementById('liveStatusBadge').textContent='Completed';document.getElementById('liveStatusBadge').className='card-badge badge-completed';document.getElementById('liveLastScan').textContent=new Date().toLocaleTimeString();logAdd('liveLog','Scan submitted successfully. ID: '+(data.id||'?'),'success');logAdd('liveLog','Timeline events generated: '+(data.timelineEvents||'?'),'success')
+if(payload.sessionId){logAdd('liveLog','Session: '+payload.sessionId,'info')}
+showLiveResults(parsed,data,totalItems);syncFromServer();toast('Scan submitted successfully','success')}).catch(e=>{liveScanRunning=false;document.getElementById('liveStatusBadge').textContent='Failed';document.getElementById('liveStatusBadge').className='card-badge badge-failed';logAdd('liveLog','Submission failed: '+e.message,'error');toast('Submission failed: '+e.message,'error')})}
+
+function showLiveResults(parsed,apiResponse,totalItems){const el=document.getElementById('liveResults');const body=document.getElementById('liveResultsBody');if(!el||!body)return;el.style.display='block';document.getElementById('liveResultBadge').textContent=totalItems+' items'
+let html='<div class="detail-grid"><div class="detail-item"><label>Items Submitted</label><span style="font-weight:700;font-size:20px">'+totalItems+'</span></div><div class="detail-item"><label>API ID</label><span class="hash-cell">'+(apiResponse.id||'—')+'</span></div><div class="detail-item"><label>Timeline Events</label><span style="font-weight:600">'+(apiResponse.timelineEvents||'0')+'</span></div><div class="detail-item"><label>Schema Version</label><span class="badge badge-completed">'+(apiResponse.schemaVersion||'2.0')+'</span></div></div>'
+if(parsed.registry?.length){html+='<div class="info-row"><span class="info-label">Registry Entries</span><span class="info-value" style="font-weight:600">'+parsed.registry.length+'</span></div>';const cats={};parsed.registry.forEach(r=>{const cat=r.category||getRegCategory(r)||'Other';if(!cats[cat])cats[cat]=0;cats[cat]++});Object.keys(cats).forEach(c=>{html+='<div class="info-row" style="padding-left:16px"><span class="info-label" style="color:var(--text3)">'+c+'</span><span class="info-value" style="color:var(--text3)">'+cats[c]+'</span></div>'})}
+if(parsed.artifacts?.length){html+='<div class="info-row"><span class="info-label">Artifacts</span><span class="info-value" style="font-weight:600">'+parsed.artifacts.length+'</span></div>'}
+if(parsed.strings?.length){html+='<div class="info-row"><span class="info-label">Strings / IOCs</span><span class="info-value" style="font-weight:600">'+parsed.strings.length+'</span></div>'}
+if(parsed.processes?.length){html+='<div class="info-row"><span class="info-label">Processes</span><span class="info-value" style="font-weight:600">'+parsed.processes.length+'</span></div>'}
+html+='<div class="section-divider"></div><div class="gap-2"><button class="btn btn-secondary btn-sm" onclick="navigate(\'scans\')">View All Scans</button><button class="btn btn-secondary btn-sm" onclick="navigate(\'timeline\')">View Timeline</button></div>'
+body.innerHTML=html}
+
+function stopLiveScan(){if(!liveScanRunning){toast('No scan running','info');return}
+liveScanRunning=false;document.getElementById('liveStatusBadge').textContent='Cancelled';document.getElementById('liveStatusBadge').className='card-badge badge-failed';logAdd('liveLog','Submission cancelled by user','error')}
+
+function clearLiveLog(){document.getElementById('liveLog').innerHTML='<div class="log-line"><span class="time">['+new Date().toLocaleTimeString()+']</span><span class="level-info">INFO</span> Log cleared</div>';document.getElementById('liveLastScan').textContent='-';document.getElementById('liveStatusBadge').textContent='Idle';document.getElementById('liveStatusBadge').className='card-badge';document.getElementById('liveResults').style.display='none';liveScanRunning=false}
+
+function loadTemplate(type){const templates={files:{registry:[],artifacts:[{type:'file',path:'C:\\Users\\analyst\\Desktop\\suspicious.exe',name:'suspicious.exe',size:245760,sha256:'a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b',timestamp:new Date().toISOString()},{type:'file',path:'C:\\Users\\analyst\\Downloads\\document.pdf',name:'document.pdf',size:102400,sha256:'b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c',timestamp:new Date().toISOString()}],strings:['suspicious.exe','malware','C2-server.com','192.168.1.100','admin@evil.com']},registry:{registry:[{key:'HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run',value:'C:\\Users\\analyst\\AppData\\Roaming\\malware.exe',category:'Startup'},{key:'HKLM\\SYSTEM\\CurrentControlSet\\Services\\BadDriver',value:'Driver for malicious activity',category:'Services'},{key:'HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\UserAssist\\{CEBFF5CD-ACE2-4F4F-9178-9926F41749C3}\\Count\\HRZR_EHACVQY',value:'C:\\Users\\analyst\\Desktop\\tool.exe',category:'UserAssist'}],artifacts:[],strings:[]},strings:{registry:[],artifacts:[],strings:['admin@example.com','https://evil-c2.example.com','malware.example.com','192.168.1.50','2001:db8::1','12345678901234567','@bad_actor','C:\\Users\\analyst\\AppData\\Local\\Temp\\payload.dll']},full:{registry:[{key:'HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run',value:'C:\\Users\\analyst\\AppData\\Roaming\\startup.exe',category:'Run'},{key:'HKLM\\SYSTEM\\ControlSet001\\Enum\\USBSTOR\\Ven_Prod\\Device',value:'USB Device',category:'USB'},{key:'HKCU\\Software\\Microsoft\\Terminal Server Client\\Servers\\192.168.1.200',value:'RDP Connection',category:'RDP'}],artifacts:[{type:'file',path:'C:\\Users\\analyst\\Desktop\\evidence.zip',name:'evidence.zip',size:5242880,sha256:'d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4'},{type:'process',name:'svchost.exe',pid:1234,user:'SYSTEM',memory:45000},{type:'network',local:'192.168.1.100:49512',remote:'203.0.113.5:443',protocol:'TCP'}],strings:['Compromised','C2: 203.0.113.5','mimikatz','Invoke-Command','backdoor.exe'],processes:[{name:'explorer.exe',pid:1234,user:'analyst',cpu:'0.5%',memory:'45MB'},{name:'malware.exe',pid:5678,user:'analyst',cpu:'12%',memory:'128MB',severity:'high'}]}};const t=templates[type];if(!t){toast('Template not found','error');return}
+document.getElementById('liveJsonInput').value=JSON.stringify(t,null,2);toast('Loaded template: '+(type==='full'?'Full Scan':type.charAt(0).toUpperCase()+type.slice(1)),'success')}function exportScansCSV(){if(!forensicData.length){toast('No data to export','error');return}
+const headers=['Timestamp','Hostname','User','OS','Severity','Status','Registry Count','Artifact Count','Strings'];let csv=headers.join(',')+'\n';forensicData.forEach(s=>{const sev=getScanSeverity(s);const st=getScanStatus(s);const row=[s.timestamp||s.date||'',getHostname(s),getUsername(s),getOs(s),sev,st,s.registry?.length||0,s.artifacts?.length||0,s.strings?.length||s.extractedStrings?.length||0];csv+=row.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')+'\n'})
+const blob=new Blob([csv],{type:'text/csv'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='forensic-scans-'+(new Date().toISOString().slice(0,10))+'.csv';a.click();URL.revokeObjectURL(a.href);toast('CSV exported','success')}function applySettings(){const tlLimit=document.getElementById('setTlLimit')?.value;if(tlLimit){const sel=document.getElementById('tlLimit');if(sel)sel.value=tlLimit}toast('Settings saved','success')}
+
+function checkApiStatus(){fetch(API+'/health').then(r=>r.json()).then(d=>{const dot=document.getElementById('statusDot');const text=document.getElementById('statusText');const badge=document.getElementById('apiStatus');if(d&&d.status==='ok'){dot.className='status-dot online';text.textContent='Connected v'+(d.schemaVersion||'1');badge.className='status-badge active'}else{dot.className='status-dot warning';text.textContent='Degraded';badge.className='status-badge'}}).catch(()=>{const dot=document.getElementById('statusDot');dot.className='status-dot offline';document.getElementById('statusText').textContent='Offline';document.getElementById('apiStatus').className='status-badge'})}
+
+function initApp(){document.getElementById('authScreen').style.display='none';document.getElementById('appLayout').classList.add('active');updateUserBadge();const cached=localStorage.getItem('forensicCache');if(cached)try{forensicData=JSON.parse(cached)}catch(e){forensicData=[]};const dc=localStorage.getItem('dashboardCache');if(dc)try{dashboardCache=JSON.parse(dc)}catch(e){dashboardCache=null};renderOverview();renderAdmin();checkApiStatus();setInterval(checkApiStatus,30000);if(forensicData.length===0){fetch(API+'/dashboard').then(r=>r.json()).then(d=>{dashboardCache=d;if(d.scans)forensicData=d.scans;localStorage.setItem('forensicCache',JSON.stringify(forensicData));localStorage.setItem('dashboardCache',JSON.stringify(d));renderOverview();renderAdmin()}).catch(()=>{})}
+navigate('overview')}
+
+document.addEventListener('DOMContentLoaded',()=>{if(loggedInUser){initApp()}else if(Object.keys(authPins).length>0){showLogin()}const cached=localStorage.getItem('forensicCache');if(cached)try{forensicData=JSON.parse(cached)}catch(e){};const dc=localStorage.getItem('dashboardCache');if(dc)try{dashboardCache=JSON.parse(dc)}catch(e){};if(!loggedInUser&&!document.getElementById('authScreen').style.display){document.getElementById('authScreen').style.display='flex'}})
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelectorAll('.modal-overlay.show').forEach(m=>m.classList.remove('show'))}})
+document.getElementById('loginPin')?.addEventListener('keydown',e=>{if(e.key==='Enter')attemptLogin()})
 </script>
 </body>
 </html>
